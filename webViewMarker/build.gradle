@@ -25,13 +25,13 @@ ext {
 }
 
 android {
-    compileSdkVersion ANDROID_COMPILE_SDK_VERSION
+    compileSdkVersion rootProject.ext.ANDROID_COMPILE_SDK_VERSION
 
     defaultConfig {
-        minSdkVersion ANDROID_MIN_SDK
-        targetSdkVersion ANDROID_TARGET_SDK_VERSION
-        versionCode VERSION_CODE
-        versionName VERSION_NAME
+        minSdkVersion rootProject.ext.ANDROID_MIN_SDK
+        targetSdkVersion rootProject.ext.ANDROID_TARGET_SDK_VERSION
+        versionCode rootProject.ext.VERSION_CODE
+        versionName rootProject.ext.VERSION_NAME
     }
 
     buildTypes {

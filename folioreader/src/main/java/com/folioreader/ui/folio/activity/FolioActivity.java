@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2016 Pedro Paulo de Amorim
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2016 Pedro Paulo de Amorim
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.folioreader.ui.folio.activity;
 
 import android.Manifest;
@@ -132,7 +132,7 @@ public class FolioActivity
             mEpubFilePath = getIntent().getExtras()
                     .getString(FolioActivity.INTENT_EPUB_SOURCE_PATH);
         }
-        mediaControllerView = findViewById(R.id.media_controller_view);
+        mediaControllerView = (MediaControllerView) findViewById(R.id.media_controller_view);
         mediaControllerView.setListeners(this);
 
         if (ContextCompat.checkSelfPermission(FolioActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -146,7 +146,7 @@ public class FolioActivity
 
     private void initToolbar(Bundle savedInstanceState) {
 
-        toolbar = findViewById(R.id.toolbar);
+        toolbar = (FolioToolbar) findViewById(R.id.toolbar);
         toolbar.setListeners(this);
         if (savedInstanceState != null) {
             toolbar.setVisible(savedInstanceState.getBoolean(BUNDLE_TOOLBAR_IS_VISIBLE));
@@ -224,7 +224,7 @@ public class FolioActivity
 
         mFolioPageViewPager.setDirection(newDirection);
         mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                        mSpineReferenceList, bookFileName, mBookId);
+                mSpineReferenceList, bookFileName, mBookId);
         mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
         mFolioPageViewPager.setCurrentItem(mChapterPosition);
     }
@@ -341,7 +341,7 @@ public class FolioActivity
 
     private void configFolio() {
 
-        mFolioPageViewPager = findViewById(R.id.folioPageViewPager);
+        mFolioPageViewPager = (DirectionalViewpager) findViewById(R.id.folioPageViewPager);
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
             @Override
