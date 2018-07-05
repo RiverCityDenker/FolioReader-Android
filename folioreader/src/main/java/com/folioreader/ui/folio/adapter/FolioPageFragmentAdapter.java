@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.ViewGroup;
 
+import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
 
 import org.readium.r2_streamer.model.publication.link.Link;
@@ -22,14 +23,34 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
     private List<Link> mSpineReferences;
     private String mEpubFileName;
     private String mBookId;
+    private String contentKey;
+    private String userKey;
+    private String mEbookFilePath;
+    private FolioActivity.EpubSourceType mEpubSourceType;
     private ArrayList<Fragment> fragments;
 
     public FolioPageFragmentAdapter(FragmentManager fragmentManager, List<Link> spineReferences,
-                                    String epubFileName, String bookId) {
+                                    String epubFileName, String bookId, FolioActivity.EpubSourceType epubSourceType) {
         super(fragmentManager);
         this.mSpineReferences = spineReferences;
         this.mEpubFileName = epubFileName;
         this.mBookId = bookId;
+        this.mEpubSourceType = epubSourceType;
+        fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
+    }
+
+    public FolioPageFragmentAdapter(FragmentManager fm, List<Link> spineReferences,
+                                    String ebookFilePath, String bookId, String epubFileName,
+                                    String contentKey, String userKey,
+                                    FolioActivity.EpubSourceType epubSourceType) {
+        super(fm);
+        this.mSpineReferences = spineReferences;
+        this.mEbookFilePath = ebookFilePath;
+        this.mBookId = bookId;
+        this.contentKey = contentKey;
+        this.userKey = userKey;
+        this.mEpubFileName = epubFileName;
+        this.mEpubSourceType = epubSourceType;
         fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
     }
 
@@ -55,8 +76,12 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
         Fragment fragment = fragments.get(position);
         if (fragment == null) {
-            fragment = FolioPageFragment.newInstance(position,
-                    mEpubFileName, mSpineReferences.get(position), mBookId);
+            if (mEpubSourceType.equals(FolioActivity.EpubSourceType.ENCRYPTED_FILE)) {
+                fragment = FolioPageFragment.newInstance(position, mEbookFilePath, mSpineReferences.get(position), mBookId, mEpubFileName, contentKey, userKey, mEpubSourceType);
+            } else {
+                fragment = FolioPageFragment.newInstance(position,
+                        mEpubFileName, mSpineReferences.get(position), mBookId, mEpubSourceType);
+            }
             fragments.set(position, fragment);
         }
         return fragment;

@@ -37,12 +37,15 @@ import com.folioreader.R;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.event.MediaOverlayPlayPauseEvent;
+import com.folioreader.ui.custom.EpubParser;
 import com.folioreader.ui.folio.adapter.FolioPageFragmentAdapter;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
 import com.folioreader.ui.folio.presenter.MainMvpView;
 import com.folioreader.ui.folio.presenter.MainPresenter;
 import com.folioreader.util.AppUtil;
+import com.folioreader.util.DialogFactory;
 import com.folioreader.util.FileUtil;
+import com.folioreader.util.SharedPreferenceUtil;
 import com.folioreader.view.ConfigBottomSheetDialogFragment;
 import com.folioreader.view.DirectionalViewpager;
 import com.folioreader.view.FolioToolbar;
@@ -53,6 +56,7 @@ import com.folioreader.view.MediaControllerView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.readium.r2_streamer.model.container.Container;
+import org.readium.r2_streamer.model.container.DirectoryContainer;
 import org.readium.r2_streamer.model.container.EpubContainer;
 import org.readium.r2_streamer.model.publication.EpubPublication;
 import org.readium.r2_streamer.model.publication.link.Link;
@@ -62,6 +66,11 @@ import org.readium.r2_streamer.server.EpubServerSingleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+
+import de.zweidenker.rheinwerk_reader.googleanalytics.AnalyticViewName;
+import de.zweidenker.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
 import static com.folioreader.Constants.HIGHLIGHT_SELECTED;
@@ -84,11 +93,17 @@ public class FolioActivity
     public static final String EXTRA_READ_POSITION = "com.folioreader.extra.READ_POSITION";
     private static final String BUNDLE_READ_POSITION_CONFIG_CHANGE = "BUNDLE_READ_POSITION_CONFIG_CHANGE";
     private static final String BUNDLE_TOOLBAR_IS_VISIBLE = "BUNDLE_TOOLBAR_IS_VISIBLE";
+    public static final String INTENT_EBOOK_ID = "ebook_id";
+    public static final String INTENT_EBOOK_FILE_PATH = "ebook_file_path";
+    public static final String INTENT_EBOOK_CONTENT_KEY = "content_key";
+    public static final String INTENT_EBOOK_USER_KEY = "user_key";
+    public static final String INTENT_EBOOK_TITLE_NAME = "title_ebook";
 
     public enum EpubSourceType {
         RAW,
         ASSETS,
-        SD_CARD
+        SD_CARD,
+        ENCRYPTED_FILE
     }
 
     public static final int ACTION_CONTENT_HIGHLIGHT = 77;
@@ -112,6 +127,13 @@ public class FolioActivity
     private String mEpubFilePath;
     private EpubSourceType mEpubSourceType;
     int mEpubRawId = 0;
+
+    private String ebookFilePath;
+    private String contentKey;
+    private String userKey;
+    private String titleEbook;
+
+    private GoogleAnalyticManager googleAnalytic;
     private MediaControllerView mediaControllerView;
     private Config.Direction direction = Config.Direction.VERTICAL;
 
@@ -119,30 +141,49 @@ public class FolioActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setConfig(savedInstanceState);
-
         setContentView(R.layout.folio_activity);
         this.savedInstanceState = savedInstanceState;
 
-        mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
         mEpubSourceType = (EpubSourceType)
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
-        if (mEpubSourceType.equals(EpubSourceType.RAW)) {
-            mEpubRawId = getIntent().getExtras().getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH);
+
+        if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+            mBookId = String.valueOf(getIntent().getExtras().getInt(FolioActivity.INTENT_EBOOK_ID));
+            ebookFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_FILE_PATH);
+            contentKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_CONTENT_KEY);
+            userKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_USER_KEY);
+            titleEbook = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_TITLE_NAME);
+            googleAnalytic = new GoogleAnalyticManager(this);
+            SharedPreferenceUtil.putSharedPreferencesLong(this, titleEbook, FileUtil.getCurrentTimeStamp());
         } else {
-            mEpubFilePath = getIntent().getExtras()
-                    .getString(FolioActivity.INTENT_EPUB_SOURCE_PATH);
+            mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
+            if (mEpubSourceType.equals(EpubSourceType.RAW)) {
+                mEpubRawId = getIntent().getExtras().getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH);
+            } else {
+                mEpubFilePath = getIntent().getExtras()
+                        .getString(FolioActivity.INTENT_EPUB_SOURCE_PATH);
+            }
         }
+
         mediaControllerView = (MediaControllerView) findViewById(R.id.media_controller_view);
         mediaControllerView.setListeners(this);
+
+        initToolbar(savedInstanceState);
 
         if (ContextCompat.checkSelfPermission(FolioActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(FolioActivity.this, Constants.getWriteExternalStoragePerms(), Constants.WRITE_EXTERNAL_STORAGE_REQUEST);
         } else {
             setupBook();
         }
-
-        initToolbar(savedInstanceState);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        googleAnalytic.sendScreen(AnalyticViewName.Reader);
+        googleAnalytic.sendEvent(AnalyticViewName.start_eBook_reading, AnalyticViewName.reading_start, titleEbook);
+    }
+
 
     private void initToolbar(Bundle savedInstanceState) {
 
@@ -209,6 +250,26 @@ public class FolioActivity
         getEpubResource();
     }
 
+    private void addEbook(String path) {
+        if (path == null) {
+            showErrorDialog();
+            return;
+        }
+        Container epubContainer = new DirectoryContainer(path);
+        EpubParser parser = new EpubParser(epubContainer);
+        onLoadPublication(parser.parseEpubFile("/" + bookFileName));
+    }
+
+
+    private void showErrorDialog() {
+        DialogFactory.createEbookErrorDialog(getApplicationContext(), getResources().getString(R.string.ebook_error_msg), new DialogFactory.DialogCallback() {
+            @Override
+            public void exitReader() {
+                finish();
+            }
+        });
+    }
+
     private void getEpubResource() {
     }
 
@@ -223,8 +284,13 @@ public class FolioActivity
         direction = newDirection;
 
         mFolioPageViewPager.setDirection(newDirection);
-        mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                mSpineReferenceList, bookFileName, mBookId);
+        if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+            mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
+                    mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+        } else {
+            mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
+                    mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
+        }
         mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
         mFolioPageViewPager.setCurrentItem(mChapterPosition);
     }
@@ -311,6 +377,8 @@ public class FolioActivity
         if (mEpubServer != null) {
             mEpubServer.stop();
         }
+        long timeRead = TimeUnit.SECONDS.toSeconds(FileUtil.getCurrentTimeStamp() - SharedPreferenceUtil.getSharedPreferencesLong(this, titleEbook, 1526620402));
+        googleAnalytic.sendEvent(AnalyticViewName.eBook_reading_duration, AnalyticViewName.reading_duration, titleEbook, timeRead);
     }
 
     @Override
@@ -383,8 +451,13 @@ public class FolioActivity
         if (mSpineReferenceList != null) {
 
             mFolioPageViewPager.setDirection(direction);
-            mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                    mSpineReferenceList, bookFileName, mBookId);
+            if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+                mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
+                        mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+            } else {
+                mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
+                        mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
+            }
             mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
 
             ReadPosition readPosition;
@@ -512,8 +585,17 @@ public class FolioActivity
     }
 
     private void setupBook() {
-        bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType, mEpubFilePath, mEpubRawId);
-        initBook(bookFileName, mEpubRawId, mEpubFilePath, mEpubSourceType);
+        if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+            bookFileName = mBookId;
+            initBook();
+        } else {
+            bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType, mEpubFilePath, mEpubRawId);
+            initBook(bookFileName, mEpubRawId, mEpubFilePath, mEpubSourceType);
+        }
+    }
+
+    private void initBook() {
+        addEbook(ebookFilePath);
     }
 
     @Override

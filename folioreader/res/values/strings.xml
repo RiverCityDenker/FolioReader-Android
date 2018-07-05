@@ -98,4 +98,5 @@
     <string name="xhtml_mime_type" translatable="false">application/xhtml+xml</string>
     <string name="html_mime_type" translatable="false">text/html</string>
     <string name="back_compat" translatable="false">BackCompat</string>
+    <string name="ebook_error_msg">There is an error while loading ebook. Let try again !</string>
 </resources>

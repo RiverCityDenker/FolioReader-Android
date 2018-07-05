@@ -84,6 +84,8 @@ apply from: '../folioreader/bintray/installv1.gradle'
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':webViewMarker')
+    implementation project(':googleanalytics')
+    implementation project(':crypto')
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation "com.android.support:appcompat-v7:$rootProject.ext.ANDROID_LIB_VERSION"

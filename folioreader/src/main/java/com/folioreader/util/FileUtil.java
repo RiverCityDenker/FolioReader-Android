@@ -111,4 +111,8 @@ public class FileUtil {
         }
         return false;
     }
+
+    public static Long getCurrentTimeStamp() {
+        return System.currentTimeMillis()/1000;
+    }
 }

@@ -18,4 +18,5 @@
     <color name="underline">#F02814</color>
     <color name="grey_color">#a8a8a8</color>
     <color name="webview_night">#131313</color>
+    <color name="colorPrimary">#00549D</color>
 </resources>

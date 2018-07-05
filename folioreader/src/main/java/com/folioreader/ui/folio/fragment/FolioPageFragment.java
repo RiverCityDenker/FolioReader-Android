@@ -51,6 +51,7 @@ import com.folioreader.model.sqlite.HighLightTable;
 import com.folioreader.ui.base.HtmlTask;
 import com.folioreader.ui.base.HtmlTaskCallback;
 import com.folioreader.ui.base.HtmlUtil;
+import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
 import com.folioreader.ui.folio.mediaoverlay.MediaController;
 import com.folioreader.ui.folio.mediaoverlay.MediaControllerCallbacks;
@@ -74,6 +75,10 @@ import java.net.URLDecoder;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.zweidenker.rheinwerk_reader.crypto.CryptoManager;
+
+import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENCRYPTED_FILE;
 
 /**
  * Created by mahavir on 4/2/16.
@@ -105,6 +110,10 @@ public class FolioPageFragment
     private static final int ACTION_ID_HIGHLIGHT_UNDERLINE = 1011;
     private static final String KEY_TEXT_ELEMENTS = "text_elements";
     private static final String SPINE_ITEM = "spine_item";
+    private static final String KEY_SOURCE_TYPE = "source_type";
+    private static final String KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY = "content_key";
+    private static final String KEY_FRAGMENT_FOLIO_BOOK_USER_KEY = "user_key";
+    private static final String KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH = "file_path";
 
     private String mHtmlString = null;
     private boolean hasMediaOverlay = false;
@@ -141,14 +150,37 @@ public class FolioPageFragment
     private MediaController mediaController;
     private Config mConfig;
     private String mBookId;
+    private String mBookFilePath;
+    private String mContentKey;
+    private String mUserKey;
+    private String mEpubSourceType;
 
-    public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId) {
+    public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
         Bundle args = new Bundle();
         args.putInt(KEY_FRAGMENT_FOLIO_POSITION, position);
         args.putString(KEY_FRAGMENT_FOLIO_BOOK_TITLE, bookTitle);
         args.putString(FolioReader.INTENT_BOOK_ID, bookId);
+        args.putString(KEY_SOURCE_TYPE, mEpubSourceType.name());
         args.putSerializable(SPINE_ITEM, spineRef);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    public static Fragment newInstance(int position, String bookFilePath, Link spineRef,
+                                       String bookId, String bookTitle, String contentKey, String userKey,
+                                       FolioActivity.EpubSourceType mEpubSourceType) {
+        FolioPageFragment fragment = new FolioPageFragment();
+        Bundle args = new Bundle();
+        args.putInt(KEY_FRAGMENT_FOLIO_POSITION, position);
+        args.putString(KEY_FRAGMENT_FOLIO_BOOK_TITLE, bookTitle);
+        args.putString(FolioReader.INTENT_BOOK_ID, bookId);
+        args.putString(KEY_SOURCE_TYPE, mEpubSourceType.name());
+        args.putSerializable(SPINE_ITEM, spineRef);
+        args.putString(KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH, bookFilePath);
+        args.putString(KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY, contentKey);
+        args.putString(KEY_FRAGMENT_FOLIO_BOOK_USER_KEY, userKey);
         fragment.setArguments(args);
         return fragment;
     }
@@ -163,20 +195,25 @@ public class FolioPageFragment
             mActivityCallback = (FolioActivityCallback) getActivity();
 
         EventBus.getDefault().register(this);
+
+        mBookFilePath = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH);
+        mContentKey = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY);
+        mUserKey = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_USER_KEY);
+        mBookId = getArguments().getString(FolioReader.INTENT_BOOK_ID);
+        mEpubSourceType = getArguments().getString(KEY_SOURCE_TYPE);
+        spineItem = (Link) getArguments().getSerializable(SPINE_ITEM);
+
         if ((savedInstanceState != null)
                 && savedInstanceState.containsKey(KEY_FRAGMENT_FOLIO_POSITION)
                 && savedInstanceState.containsKey(KEY_FRAGMENT_FOLIO_BOOK_TITLE)) {
             mPosition = savedInstanceState.getInt(KEY_FRAGMENT_FOLIO_POSITION);
             mBookTitle = savedInstanceState.getString(KEY_FRAGMENT_FOLIO_BOOK_TITLE);
             mEpubFileName = savedInstanceState.getString(KEY_FRAGMENT_EPUB_FILE_NAME);
-            mBookId = getArguments().getString(FolioReader.INTENT_BOOK_ID);
             spineItem = (Link) savedInstanceState.getSerializable(SPINE_ITEM);
         } else {
             mPosition = getArguments().getInt(KEY_FRAGMENT_FOLIO_POSITION);
             mBookTitle = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_TITLE);
             mEpubFileName = getArguments().getString(KEY_FRAGMENT_EPUB_FILE_NAME);
-            spineItem = (Link) getArguments().getSerializable(SPINE_ITEM);
-            mBookId = getArguments().getString(FolioReader.INTENT_BOOK_ID);
         }
 
         if (spineItem != null) {
@@ -206,6 +243,10 @@ public class FolioPageFragment
 
     private String getWebviewUrl() {
         return Constants.LOCALHOST + mBookTitle + "/" + spineItem.href;
+    }
+
+    private String getFilePath() {
+        return mBookFilePath + spineItem.href;
     }
 
     /**
@@ -468,7 +509,11 @@ public class FolioPageFragment
         });
 
         mWebview.getSettings().setDefaultTextEncodingName("utf-8");
-        new HtmlTask(this).execute(getWebviewUrl());
+        if (mEpubSourceType.equals(ENCRYPTED_FILE.name())) {
+            onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+        } else {
+            new HtmlTask(this).execute(getWebviewUrl());
+        }
     }
 
     private WebViewClient webViewClient = new WebViewClient() {
