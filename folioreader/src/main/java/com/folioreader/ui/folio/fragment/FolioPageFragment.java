@@ -397,8 +397,11 @@ public class FolioPageFragment
                 mimeType = getString(R.string.html_mime_type);
             }
 
+            String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
+                    mBookFilePath : Constants.LOCALHOST + mBookTitle + "/" + path;
+
             mWebview.loadDataWithBaseURL(
-                    Constants.LOCALHOST + mBookTitle + "/" + path,
+                    baseUrl,
                     HtmlUtil.getHtmlContent(getContext(), mHtmlString, mConfig),
                     mimeType,
                     "UTF-8",
@@ -751,7 +754,7 @@ public class FolioPageFragment
             synchronized (this) {
                 boolean isHorizontal = mActivityCallback.getDirection() ==
                         Config.Direction.HORIZONTAL;
-                mWebview.loadUrl("javascript:getFirstVisibleSpan(" + isHorizontal +")");
+                mWebview.loadUrl("javascript:getFirstVisibleSpan(" + isHorizontal + ")");
 
                 wait(2000);
             }
@@ -767,7 +770,7 @@ public class FolioPageFragment
      * and then ReadPositionImpl is broadcast to {@link FolioReader#readPositionReceiver}
      *
      * @param usingId if span tag has id then true or else false
-     * @param value if usingId true then span id else span index
+     * @param value   if usingId true then span id else span index
      */
     @SuppressWarnings("unused")
     @JavascriptInterface
