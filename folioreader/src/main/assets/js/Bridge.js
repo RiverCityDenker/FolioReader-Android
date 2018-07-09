@@ -434,7 +434,7 @@ function horizontalRecheck() {
 }
 
 function initHorizontalDirection() {
-
+    console.log("-->> initHorizontalDirection")
     preInitHorizontalDirection();
     postInitHorizontalDirection();
 
@@ -515,7 +515,7 @@ function postInitHorizontalDirection() {
             + ", Something wrong in pageCount calculation");
     }
 
-    //console.log("-> scrollWidth = " + scrollWidth);
+    console.log("-> scrollWidth = " + scrollWidth);
     //console.log("-> newBodyWidth = " + newBodyWidth);
     //console.log("-> pageCount = " + pageCount);
 

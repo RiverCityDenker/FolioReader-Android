@@ -223,6 +223,7 @@ public class FolioActivity
         intent.putExtra(CHAPTER_SELECTED, mSpineReferenceList.get(mChapterPosition).href);
         intent.putExtra(FolioReader.INTENT_BOOK_ID, mBookId);
         intent.putExtra(Constants.BOOK_TITLE, bookFileName);
+        intent.putExtra(Constants.BOOK_FILE_PATH, ebookFilePath);
         startActivityForResult(intent, ACTION_CONTENT_HIGHLIGHT);
         overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
@@ -293,6 +294,8 @@ public class FolioActivity
         }
         mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
         mFolioPageViewPager.setCurrentItem(mChapterPosition);
+
+
     }
 
     @Override

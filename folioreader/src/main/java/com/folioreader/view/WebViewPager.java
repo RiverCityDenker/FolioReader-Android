@@ -150,6 +150,10 @@ public class WebViewPager extends ViewPager {
         return superReturn;
     }
 
+    public void setWebView(FolioWebView webView) {
+        this.folioWebView = webView;
+    }
+
     private class WebViewPagerAdapter extends PagerAdapter {
 
         @Override

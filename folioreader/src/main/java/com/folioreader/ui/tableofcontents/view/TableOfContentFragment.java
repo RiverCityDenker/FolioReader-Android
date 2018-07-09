@@ -25,6 +25,7 @@ import com.folioreader.util.AppUtil;
 
 import java.util.ArrayList;
 
+import static com.folioreader.Constants.BOOK_FILE_PATH;
 import static com.folioreader.Constants.BOOK_TITLE;
 import static com.folioreader.Constants.CHAPTER_SELECTED;
 import static com.folioreader.Constants.SELECTED_CHAPTER_POSITION;
@@ -37,12 +38,14 @@ public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCA
     private TextView errorView;
     private Config mConfig;
     private String mBookTitle;
+    private String mBookFilePath;
 
-    public static TableOfContentFragment newInstance(String selectedChapterHref, String bookTitle) {
+    public static TableOfContentFragment newInstance(String selectedChapterHref, String bookTitle, String bookFilePath) {
         TableOfContentFragment tableOfContentFragment = new TableOfContentFragment();
         Bundle args = new Bundle();
         args.putString(SELECTED_CHAPTER_POSITION, selectedChapterHref);
         args.putString(BOOK_TITLE, bookTitle);
+        args.putString(BOOK_FILE_PATH, bookFilePath);
         tableOfContentFragment.setArguments(args);
         return tableOfContentFragment;
     }
@@ -59,6 +62,7 @@ public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCA
         View mRootView = inflater.inflate(R.layout.fragment_contents, container, false);
         mConfig = AppUtil.getSavedConfig(getActivity());
         mBookTitle = getArguments().getString(BOOK_TITLE);
+        mBookFilePath = getArguments().getString(BOOK_FILE_PATH);
         if (mConfig.isNightMode()) {
             mRootView.findViewById(R.id.recycler_view_menu).
                     setBackgroundColor(ContextCompat.getColor(getActivity(),
@@ -75,7 +79,7 @@ public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCA
         String urlString = Constants.LOCALHOST + mBookTitle + "/manifest";
 
         configRecyclerViews();
-        presenter.getTOCContent(urlString);
+        presenter.getTOCContent(mBookFilePath, mBookTitle);
     }
 
     public void configRecyclerViews() {

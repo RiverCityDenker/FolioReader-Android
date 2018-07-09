@@ -245,6 +245,10 @@ public class FolioWebView extends WebView
         return false;
     }
 
+    public void setViewPager(WebViewPager webViewPager) {
+        this.webViewPager = webViewPager;
+    }
+
     public interface ScrollListener {
         void onScrollChange(int percent);
     }

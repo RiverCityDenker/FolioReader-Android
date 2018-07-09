@@ -114,6 +114,7 @@ public class FolioPageFragment
     private static final String KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY = "content_key";
     private static final String KEY_FRAGMENT_FOLIO_BOOK_USER_KEY = "user_key";
     private static final String KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH = "file_path";
+    private static final String TAG = FolioPageFragment.class.getSimpleName();
 
     private String mHtmlString = null;
     private boolean hasMediaOverlay = false;
@@ -398,7 +399,7 @@ public class FolioPageFragment
             }
 
             String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
-                    mBookFilePath : Constants.LOCALHOST + mBookTitle + "/" + path;
+                    mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
 
             mWebview.loadDataWithBaseURL(
                     baseUrl,
@@ -442,7 +443,8 @@ public class FolioPageFragment
         FrameLayout webViewLayout = mRootView.findViewById(R.id.webViewLayout);
         mWebview = webViewLayout.findViewById(R.id.folioWebView);
         webViewPager = webViewLayout.findViewById(R.id.webViewPager);
-
+        mWebview.setViewPager(webViewPager);
+        webViewPager.setWebView(mWebview);
         if (getActivity() instanceof FolioActivityCallback)
             mWebview.setFolioActivityCallback((FolioActivityCallback) getActivity());
 
@@ -520,6 +522,13 @@ public class FolioPageFragment
     }
 
     private WebViewClient webViewClient = new WebViewClient() {
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            Log.e(TAG, "onReceivedError: " + description);
+        }
+
         @Override
         public void onPageFinished(WebView view, String url) {
 
@@ -531,8 +540,10 @@ public class FolioPageFragment
                 if (!hasMediaOverlay)
                     mWebview.loadUrl("javascript:wrappingSentencesWithinPTags()");
 
-                if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL)
+                if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
+                    Log.e(TAG, "onPageFinished: >>>");
                     mWebview.loadUrl("javascript:initHorizontalDirection()");
+                }
 
                 view.loadUrl(String.format(getString(R.string.setmediaoverlaystyle),
                         HighlightImpl.HighlightStyle.classForStyle(

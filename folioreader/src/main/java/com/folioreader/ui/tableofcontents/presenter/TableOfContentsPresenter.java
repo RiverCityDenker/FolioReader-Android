@@ -2,8 +2,10 @@ package com.folioreader.ui.tableofcontents.presenter;
 
 import com.folioreader.model.TOCLinkWrapper;
 import com.folioreader.ui.base.ManifestCallBack;
-import com.folioreader.ui.base.ManifestTask;
+import com.folioreader.ui.custom.EpubParser;
 
+import org.readium.r2_streamer.model.container.Container;
+import org.readium.r2_streamer.model.container.DirectoryContainer;
 import org.readium.r2_streamer.model.publication.EpubPublication;
 import org.readium.r2_streamer.model.publication.link.Link;
 import org.readium.r2_streamer.model.tableofcontents.TOCLink;
@@ -23,8 +25,19 @@ public class TableOfContentsPresenter implements ManifestCallBack {
         this.tocMvpView = tocMvpView;
     }
 
-    public void getTOCContent(String url) {
-        new ManifestTask(this).execute(url);
+    //    public void getTOCContent(String url) {
+//        new ManifestTask(this).execute(url);
+//    }
+    public void getTOCContent(String bookFilePath, String bookFileName) {
+        addEpub(bookFilePath, bookFileName);
+        //new ManifestTask(this).execute(url);
+    }
+
+
+    private void addEpub(String path, String bookFileName) {
+        Container epubContainer = new DirectoryContainer(path);
+        EpubParser parser = new EpubParser(epubContainer);
+        onReceivePublication(parser.parseEpubFile("/" + bookFileName));
     }
 
     /**
