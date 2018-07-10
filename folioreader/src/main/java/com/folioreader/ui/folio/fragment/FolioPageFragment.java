@@ -399,7 +399,7 @@ public class FolioPageFragment
             }
 
             String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
-                    mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
+                    "file://"+mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
 
             mWebview.loadDataWithBaseURL(
                     baseUrl,
@@ -443,8 +443,8 @@ public class FolioPageFragment
         FrameLayout webViewLayout = mRootView.findViewById(R.id.webViewLayout);
         mWebview = webViewLayout.findViewById(R.id.folioWebView);
         webViewPager = webViewLayout.findViewById(R.id.webViewPager);
-        mWebview.setViewPager(webViewPager);
-        webViewPager.setWebView(mWebview);
+//        mWebview.setViewPager(webViewPager);
+//        webViewPager.setWebView(mWebview);
         if (getActivity() instanceof FolioActivityCallback)
             mWebview.setFolioActivityCallback((FolioActivityCallback) getActivity());
 
