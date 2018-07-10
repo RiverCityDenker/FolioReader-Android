@@ -34,15 +34,15 @@ class FolioToolbar : RelativeLayout {
         config = AppUtil.getSavedConfig(context)
         if (config.isNightMode) setNightMode() else setDayMode()
         if (!config.isShowTts) btn_speaker.visibility = View.GONE
-        initColors()
+        initColors(config.themeColor)
         initListeners()
     }
 
-    private fun initColors() {
-        UiUtil.setColorToImage(context, config.themeColor, btn_close.drawable)
-        UiUtil.setColorToImage(context, config.themeColor, btn_drawer.drawable)
-        UiUtil.setColorToImage(context, config.themeColor, btn_config.drawable)
-        UiUtil.setColorToImage(context, config.themeColor, btn_speaker.drawable)
+    private fun initColors(color : Int) {
+        UiUtil.setColorToImage(context, color, btn_close.drawable)
+        UiUtil.setColorToImage(context, color, btn_drawer.drawable)
+        UiUtil.setColorToImage(context, color, btn_config.drawable)
+        UiUtil.setColorToImage(context, color, btn_speaker.drawable)
     }
 
     private fun initListeners() {
@@ -91,6 +91,18 @@ class FolioToolbar : RelativeLayout {
     fun setDayMode() {
         toolbar_container.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
         label_center.setTextColor(ContextCompat.getColor(context, R.color.black))
+    }
+
+    fun setDayModeConfig() {
+        toolbar_container.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        label_center.setTextColor(ContextCompat.getColor(context, R.color.black))
+        initColors(R.color.black)
+    }
+
+    fun setNightModeConfig() {
+        toolbar_container.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_grey))
+        label_center.setTextColor(ContextCompat.getColor(context, R.color.grey_color))
+        initColors(R.color.grey_color)
     }
 
     fun hide() {

@@ -47,6 +47,7 @@ import com.folioreader.util.DialogFactory;
 import com.folioreader.util.FileUtil;
 import com.folioreader.util.SharedPreferenceUtil;
 import com.folioreader.view.ConfigBottomSheetDialogFragment;
+import com.folioreader.view.ConfigDialogFragment;
 import com.folioreader.view.DirectionalViewpager;
 import com.folioreader.view.FolioToolbar;
 import com.folioreader.view.FolioToolbarCallback;
@@ -300,8 +301,8 @@ public class FolioActivity
 
     @Override
     public void showConfigBottomSheetDialogFragment() {
-        new ConfigBottomSheetDialogFragment().show(getSupportFragmentManager(),
-                ConfigBottomSheetDialogFragment.class.getSimpleName());
+        new ConfigDialogFragment().show(getSupportFragmentManager(),
+                ConfigDialogFragment.class.getSimpleName());
     }
 
     @Override

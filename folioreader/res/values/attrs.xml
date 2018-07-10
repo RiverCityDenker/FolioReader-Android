@@ -10,4 +10,6 @@
             <enum name="horizontal" value="horizontal"></enum>-->
         </attr>
     </declare-styleable>
+
+    <bool name="isTablet">false</bool>
 </resources>
