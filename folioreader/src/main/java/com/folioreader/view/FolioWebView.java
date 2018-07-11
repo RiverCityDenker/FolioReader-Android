@@ -117,7 +117,7 @@ public class FolioWebView extends WebView
 
     private boolean computeHorizontalScroll(MotionEvent event) {
         //Log.v(LOG_TAG, "-> computeHorizontalScroll");
-
+        if (webViewPager == null) return true;
         webViewPager.dispatchTouchEvent(event);
         boolean gestureReturn = gestureDetector.onTouchEvent(event);
         if (gestureReturn)

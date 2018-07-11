@@ -157,6 +157,7 @@ var getAnchorOffset = function(target, horizontal) {
 }
 
 function scrollAnchor(id) {
+    console.log("LOG id === " + id)
     window.location.hash = id;
 }
 
@@ -273,12 +274,17 @@ function goToElement(element) {
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
-        //console.log("-> newScrollLeft = " + newScrollLeft);
+        console.log("-> newScrollLeft = " + newScrollLeft);
         scrollingElement.scrollLeft = newScrollLeft;
         WebViewPager.setCurrentPage(pageIndex);
     }
 
     return element;
+}
+
+function scrollToElement(id) {
+        console.log("---->>>>" + id)
+        document.getElementById(id).scrollIntoView()
 }
 
 /**
@@ -406,6 +412,7 @@ function scrollToFirst() {
 }
 
 function getCompatMode() {
+    console.log("-> getCompatMode")
     FolioWebView.setCompatMode(document.compatMode);
 }
 
@@ -945,6 +952,7 @@ function goToHighlight(highlightId){
 
 function goToAnchor(anchorId) {
     var element = document.getElementById(anchorId);
+    console.log("=====>element = " + element)
     if (element)
         goToElement(element);
 

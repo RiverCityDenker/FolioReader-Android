@@ -399,7 +399,7 @@ public class FolioPageFragment
             }
 
             String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
-                    "file://"+mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
+                    "file://" + mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
 
             mWebview.loadDataWithBaseURL(
                     baseUrl,
@@ -541,7 +541,6 @@ public class FolioPageFragment
                     mWebview.loadUrl("javascript:wrappingSentencesWithinPTags()");
 
                 if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
-                    Log.e(TAG, "onPageFinished: >>>");
                     mWebview.loadUrl("javascript:initHorizontalDirection()");
                 }
 
@@ -609,6 +608,11 @@ public class FolioPageFragment
                         loadingView.hide();
                     }
                 }
+                Log.e(TAG, "onPageFinished: >>>url + FolioActivity.anchor =====" + url + FolioActivity.anchor);
+                if (!FolioActivity.anchor.isEmpty()) {
+                    mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
+                    FolioActivity.anchor = "";
+                }
             }
         }
 
@@ -647,6 +651,7 @@ public class FolioPageFragment
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(intent);
                     }
+
                 }
             }
             return true;

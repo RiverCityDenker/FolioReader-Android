@@ -99,6 +99,7 @@ public class FolioActivity
     public static final String INTENT_EBOOK_CONTENT_KEY = "content_key";
     public static final String INTENT_EBOOK_USER_KEY = "user_key";
     public static final String INTENT_EBOOK_TITLE_NAME = "title_ebook";
+    private static final String TAG = FolioActivity.class.getSimpleName();
 
     public enum EpubSourceType {
         RAW,
@@ -315,8 +316,25 @@ public class FolioActivity
 
     }
 
+    public static String anchor = "";
+
     @Override
     public void setPagerToPosition(String href) {
+        anchor = href.substring(href.lastIndexOf("#") + 1);
+        Log.e(TAG, "setPagerToPosition: >>>" + anchor);
+        if (href.contains("#")) {
+            href = href.substring(0, href.indexOf("#"));
+        }
+
+        href = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1);
+        for (Link spine : mSpineReferenceList) {
+            if (spine.href.contains(href)) {
+                mChapterPosition = mSpineReferenceList.indexOf(spine);
+                mFolioPageViewPager.setCurrentItem(mChapterPosition);
+                toolbar.setTitle(spine.getChapterTitle());
+                break;
+            }
+        }
     }
 
     @Override
