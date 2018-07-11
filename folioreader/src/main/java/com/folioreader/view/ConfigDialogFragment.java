@@ -46,19 +46,16 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     private static final int FADE_DAY_NIGHT_MODE = 500;
     private static final String TAG = ConfigDialogFragment.class.getSimpleName();
 
-    private CoordinatorLayout.Behavior mBehavior;
     private boolean mIsNightMode = false;
 
 
     private RelativeLayout mContainer;
     private ImageView mDayButton;
     private ImageView mNightButton;
-    //    private ImageView mDayNightButton;
     private LinearLayout dayContainer;
     private LinearLayout nightContainer;
     private TextView dayText;
     private TextView nightText;
-    //    private TextView dayNightText;
     private SeekBar mFontSizeSeekBar;
     private View mDialogView;
     private ImageView smallFont;
@@ -137,15 +134,11 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mIsNightMode = mConfig.isNightMode();
         if (mIsNightMode) {
             mContainer.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.night));
-        } else {
-            mContainer.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.white));
-        }
-
-        if (mIsNightMode) {
             mDayButton.setSelected(false);
             mNightButton.setSelected(true);
             initColorNight();
         } else {
+            mContainer.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.white));
             mDayButton.setSelected(true);
             mNightButton.setSelected(false);
             initColorDay();
@@ -162,16 +155,14 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     }
 
     private void inflateView() {
-        mContainer = (RelativeLayout) mDialogView.findViewById(R.id.container);
+        mContainer = mDialogView.findViewById(R.id.container);
         mFontSizeSeekBar = mDialogView.findViewById(R.id.seekbar_font_size);
-        mDayButton = (ImageView) mDialogView.findViewById(R.id.day_button);
-        mNightButton = (ImageView) mDialogView.findViewById(R.id.night_button);
+        mDayButton = mDialogView.findViewById(R.id.day_button);
+        mNightButton = mDialogView.findViewById(R.id.night_button);
         dayContainer = mDialogView.findViewById(R.id.day_container);
         nightContainer = mDialogView.findViewById(R.id.night_container);
         dayText = mDialogView.findViewById(R.id.day_text);
         nightText = mDialogView.findViewById(R.id.night_text);
-//        mDayNightButton = mDialogView.findViewById(R.id.day_night_button);
-//        dayNightText = mDialogView.findViewById(R.id.day_night_text);
         smallFont = mDialogView.findViewById(R.id.small_font);
         bigFont = mDialogView.findViewById(R.id.big_font);
         verticalText = mDialogView.findViewById(R.id.btn_vertical_orentation);
@@ -187,12 +178,11 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mNightButton.setOnClickListener(this);
 
 
-        boolean isVerticalMode = SharedPreferenceUtil.getSharedPreferencesBoolean(getContext(), "isVerticalMode", true);
-        if (isVerticalMode) {
-            mDialogView.findViewById(R.id.btn_vertical_orentation).setSelected(isVerticalMode);
+        if (mConfig.getDirection().equals(Config.Direction.VERTICAL)) {
+            mDialogView.findViewById(R.id.btn_vertical_orentation).setSelected(true);
             googleAnalyticManager.sendEvent(AnalyticViewName.select_reading_direction, AnalyticViewName.reading_direction_select, "Vertical");
         } else {
-            mDialogView.findViewById(R.id.btn_horizontal_orentation).setSelected(!isVerticalMode);
+            mDialogView.findViewById(R.id.btn_horizontal_orentation).setSelected(false);
             googleAnalyticManager.sendEvent(AnalyticViewName.select_reading_direction, AnalyticViewName.reading_direction_select, "Horizontal");
         }
 
@@ -237,19 +227,11 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             @Override
             public void onClick(View v) {
                 activityCallback.onDirectionChange(Config.Direction.HORIZONTAL);
-//                mDialogView.findViewById(R.id.btn_horizontal_orentation).setSelected(true);
-//                mDialogView.findViewById(R.id.btn_vertical_orentation).setSelected(false);
 
                 mConfig.setDirection(Config.Direction.HORIZONTAL);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 horizontalText.setSelected(true);
                 verticalText.setSelected(false);
-//                horizontalText.setTextColor(mConfig.getThemeColor());
-//                if (mIsNightMode) {
-//                    verticalText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
-//                } else {
-//                    verticalText.setTextColor(getActivity().getResources().getColor(R.color.black));
-//                }
             }
         });
 
@@ -257,22 +239,11 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             @Override
             public void onClick(View v) {
                 activityCallback.onDirectionChange(Config.Direction.VERTICAL);
-//                mDialogView.findViewById(R.id.btn_horizontal_orentation).setSelected(false);
-//                mDialogView.findViewById(R.id.btn_vertical_orentation).setSelected(true);
 
                 mConfig.setDirection(Config.Direction.HORIZONTAL);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 horizontalText.setSelected(false);
                 verticalText.setSelected(true);
-
-//                SharedPreferenceUtil.putSharedPreferencesBoolean(getContext(), "isVerticalMode", true);
-//
-//                verticalText.setTextColor(mConfig.getThemeColor());
-//                if (mIsNightMode) {
-//                    horizontalText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
-//                } else {
-//                    horizontalText.setTextColor(getActivity().getResources().getColor(R.color.black));
-//                }
             }
         });
     }
@@ -429,8 +400,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         dayText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
         nightText.setTextColor(mConfig.getThemeColor());
 
-        boolean isVerticalMode = SharedPreferenceUtil.getSharedPreferencesBoolean(getContext(), "isVerticalMode", true);
-        if (isVerticalMode) {
+        if (mConfig.getDirection().equals(Config.Direction.VERTICAL)) {
             verticalText.setTextColor(mConfig.getThemeColor());
             horizontalText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
         } else {
@@ -455,8 +425,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         verticalText.setTextColor(getActivity().getResources().getColor(R.color.black));
         horizontalText.setTextColor(getActivity().getResources().getColor(R.color.black));
 
-        boolean isVerticalMode = SharedPreferenceUtil.getSharedPreferencesBoolean(getContext(), "isVerticalMode", true);
-        if (isVerticalMode) {
+        if (mConfig.getDirection().equals(Config.Direction.VERTICAL)) {
             verticalText.setTextColor(mConfig.getThemeColor());
             horizontalText.setTextColor(getActivity().getResources().getColor(R.color.black));
         } else {
