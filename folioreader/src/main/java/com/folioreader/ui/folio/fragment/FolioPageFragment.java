@@ -443,8 +443,6 @@ public class FolioPageFragment
         FrameLayout webViewLayout = mRootView.findViewById(R.id.webViewLayout);
         mWebview = webViewLayout.findViewById(R.id.folioWebView);
         webViewPager = webViewLayout.findViewById(R.id.webViewPager);
-//        mWebview.setViewPager(webViewPager);
-//        webViewPager.setWebView(mWebview);
         if (getActivity() instanceof FolioActivityCallback)
             mWebview.setFolioActivityCallback((FolioActivityCallback) getActivity());
 
@@ -609,7 +607,8 @@ public class FolioPageFragment
                     }
                 }
                 Log.e(TAG, "onPageFinished: >>>url + FolioActivity.anchor =====" + url + FolioActivity.anchor);
-                if (!FolioActivity.anchor.isEmpty()) {
+                if (!FolioActivity.anchor.isEmpty() && isCurrentFragment()) {
+                    Log.e(TAG, "onPageFinished: >>>will scroll to " + FolioActivity.anchor);
                     mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
                     FolioActivity.anchor = "";
                 }
@@ -644,6 +643,14 @@ public class FolioPageFragment
                 } else {
                     if (url.contains("storage")) {
                         mActivityCallback.setPagerToPosition(url);
+                        if (isCurrentFragment()) {
+                            Log.e(TAG, "shouldOverrideUrlLoading: >>> currentPosition = true");
+                            if (!FolioActivity.anchor.isEmpty()) {
+                                Log.e(TAG, "shouldOverrideUrlLoading: >>>anchor = " + FolioActivity.anchor);
+                                mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
+                                FolioActivity.anchor = "";
+                            }
+                        }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
                         mActivityCallback.goToChapter(url);
                     } else {

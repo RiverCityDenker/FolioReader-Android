@@ -261,12 +261,13 @@ function goToElement(element) {
     //console.log("-> elementTop = " + elementTop);
     //console.log("-> bottom = " + bottom);
     //console.log("-> elementBottom = " + elementBottom);
+    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection());
 
     if (FolioPageFragment.getDirection() == "VERTICAL" &&
             (elementBottom > bottom || elementTop < top)) {
 
         var newScrollTop = elementTop;
-        //console.log("-> newScrollTop = " + newScrollTop);
+        console.log("-> newScrollTop = " + newScrollTop);
         scrollingElement.scrollTop = newScrollTop;
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
@@ -274,8 +275,6 @@ function goToElement(element) {
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
-        console.log("-> newScrollLeft = " + newScrollLeft);
-        scrollingElement.scrollLeft = newScrollLeft;
         WebViewPager.setCurrentPage(pageIndex);
     }
 
@@ -283,8 +282,15 @@ function goToElement(element) {
 }
 
 function scrollToElement(id) {
-        console.log("---->>>>" + id)
-        document.getElementById(id).scrollIntoView()
+    console.log("---->>>>" + id)
+    //document.getElementById(id).scrollIntoView()
+
+    var element = document.getElementById(id);
+    console.log("---->>>>" + element)
+        if (element)
+            goToElement(element);
+
+    LoadingView.hide();
 }
 
 /**
