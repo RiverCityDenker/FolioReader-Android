@@ -52,6 +52,7 @@ import com.folioreader.view.DirectionalViewpager;
 import com.folioreader.view.FolioToolbar;
 import com.folioreader.view.FolioToolbarCallback;
 import com.folioreader.view.FolioWebView;
+import com.folioreader.view.ImageViewerFragment;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 
@@ -320,9 +321,8 @@ public class FolioActivity
 
     @Override
     public void setPagerToPosition(String href) {
-        anchor = href.substring(href.lastIndexOf("#") + 1);
-        Log.e(TAG, "setPagerToPosition: >>>" + anchor);
         if (href.contains("#")) {
+            anchor = href.substring(href.lastIndexOf("#") + 1);
             href = href.substring(0, href.indexOf("#"));
         }
 
@@ -556,6 +556,16 @@ public class FolioActivity
     public void storeLastReadPosition(ReadPosition lastReadPosition) {
         Log.v(LOG_TAG, "-> storeLastReadPosition");
         this.lastReadPosition = lastReadPosition;
+    }
+
+    @Override
+    public void viewImage(String hitResultExtra) {
+        ImageViewerFragment.startShowImage(hitResultExtra, getSupportFragmentManager());
+    }
+
+    @Override
+    public EpubSourceType getSourceType() {
+        return mEpubSourceType;
     }
 
     private void setConfig(Bundle savedInstanceState) {

@@ -641,18 +641,16 @@ public class FolioPageFragment
                         Log.d(LOG_TAG, e.getMessage());
                     }
                 } else {
-                    if (url.contains("file")) {
+                    if (url.contains("#")) {
                         mActivityCallback.setPagerToPosition(url);
                         if (isCurrentFragment()) {
-                            Log.e(TAG, "shouldOverrideUrlLoading: >>> currentPosition = true");
                             if (!FolioActivity.anchor.isEmpty()) {
-                                Log.e(TAG, "shouldOverrideUrlLoading: >>>anchor = " + FolioActivity.anchor);
                                 mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
                                 FolioActivity.anchor = "";
                             }
                         }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
-                        mActivityCallback.goToChapter(url);
+                        //mActivityCallback.goToChapter(url);
                     } else {
                         // Otherwise, give the default behavior (open in browser)
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

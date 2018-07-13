@@ -104,10 +104,31 @@ public class FolioWebView extends WebView
 
         hideOrShowToolBar(event);
 
+        showImageOverlay(event);
+
         if (folioActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
             return computeHorizontalScroll(event);
         } else {
             return computeVerticalScroll(event);
+        }
+    }
+
+    private void showImageOverlay(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                eventActionDown = MotionEvent.obtain(event);
+                break;
+            case MotionEvent.ACTION_UP:
+                if (folioActivityCallback != null &&
+                        ((Math.abs(event.getY() - eventActionDown.getY()) < touchSlop) &&
+                                (Math.abs(event.getX() - eventActionDown.getX()) < touchSlop))) {
+                    //SingleTap
+                    HitTestResult hr = getHitTestResult();
+                    if (hr.getType() == HitTestResult.IMAGE_TYPE || hr.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                        folioActivityCallback.viewImage(hr.getExtra());
+                    }
+                }
+                break;
         }
     }
 
@@ -243,10 +264,6 @@ public class FolioWebView extends WebView
     public boolean onSingleTapConfirmed(MotionEvent event) {
         //Log.v(LOG_TAG, "-> onSingleTapConfirmed -> " + event.toString());
         return false;
-    }
-
-    public void setViewPager(WebViewPager webViewPager) {
-        this.webViewPager = webViewPager;
     }
 
     public interface ScrollListener {

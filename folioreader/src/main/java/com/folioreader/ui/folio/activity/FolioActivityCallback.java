@@ -18,4 +18,8 @@ public interface FolioActivityCallback {
     void onDirectionChange(Config.Direction newDirection);
 
     void storeLastReadPosition(ReadPosition lastReadPosition);
+
+    void viewImage(String hitResultExtra);
+
+    FolioActivity.EpubSourceType getSourceType();
 }
