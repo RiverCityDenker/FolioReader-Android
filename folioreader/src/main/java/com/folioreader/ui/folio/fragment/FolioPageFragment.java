@@ -641,7 +641,7 @@ public class FolioPageFragment
                         Log.d(LOG_TAG, e.getMessage());
                     }
                 } else {
-                    if (url.contains("storage")) {
+                    if (url.contains("file")) {
                         mActivityCallback.setPagerToPosition(url);
                         if (isCurrentFragment()) {
                             Log.e(TAG, "shouldOverrideUrlLoading: >>> currentPosition = true");
