@@ -18,10 +18,14 @@ import com.folioreader.Config;
 import com.folioreader.Constants;
 import com.folioreader.R;
 import com.folioreader.model.TOCLinkWrapper;
+import com.folioreader.model.event.TOCClickedEvent;
+import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.tableofcontents.adapter.TOCAdapter;
 import com.folioreader.ui.tableofcontents.presenter.TOCMvpView;
 import com.folioreader.ui.tableofcontents.presenter.TableOfContentsPresenter;
 import com.folioreader.util.AppUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -32,6 +36,7 @@ import static com.folioreader.Constants.SELECTED_CHAPTER_POSITION;
 import static com.folioreader.Constants.TYPE;
 
 public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCAdapter.TOCCallback {
+    private static FolioActivity.ItemSelectedListener mItemSelectedListener;
     private TOCAdapter mTOCAdapter;
     private RecyclerView mTableOfContentsRecyclerView;
     private TableOfContentsPresenter presenter;
@@ -40,8 +45,9 @@ public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCA
     private String mBookTitle;
     private String mBookFilePath;
 
-    public static TableOfContentFragment newInstance(String selectedChapterHref, String bookTitle, String bookFilePath) {
+    public static TableOfContentFragment newInstance(String selectedChapterHref, String bookTitle, String bookFilePath, FolioActivity.ItemSelectedListener itemSelectedListener) {
         TableOfContentFragment tableOfContentFragment = new TableOfContentFragment();
+        mItemSelectedListener = itemSelectedListener;
         Bundle args = new Bundle();
         args.putString(SELECTED_CHAPTER_POSITION, selectedChapterHref);
         args.putString(BOOK_TITLE, bookTitle);
@@ -105,12 +111,8 @@ public class TableOfContentFragment extends Fragment implements TOCMvpView, TOCA
     @Override
     public void onTocClicked(int position) {
         TOCLinkWrapper tocLinkWrapper = (TOCLinkWrapper) mTOCAdapter.getItemAt(position);
-        Intent intent = new Intent();
-        intent.putExtra(SELECTED_CHAPTER_POSITION, tocLinkWrapper.getTocLink().href);
-        intent.putExtra(BOOK_TITLE, tocLinkWrapper.getTocLink().bookTitle);
-        intent.putExtra(TYPE, CHAPTER_SELECTED);
-        getActivity().setResult(Activity.RESULT_OK, intent);
-        getActivity().finish();
+        EventBus.getDefault().post(new TOCClickedEvent(tocLinkWrapper.getTocLink().href, tocLinkWrapper.getTocLink().bookTitle));
+        mItemSelectedListener.onItemSelected();
     }
 
     @Override

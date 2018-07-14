@@ -95,7 +95,12 @@ public class ContentHighlightActivity extends AppCompatActivity {
         findViewById(R.id.btn_highlights).setSelected(false);
         TableOfContentFragment contentFrameLayout
                 = TableOfContentFragment.newInstance(getIntent().getStringExtra(Constants.CHAPTER_SELECTED),
-                getIntent().getStringExtra(Constants.BOOK_TITLE), getIntent().getStringExtra(Constants.BOOK_FILE_PATH));
+                getIntent().getStringExtra(Constants.BOOK_TITLE), getIntent().getStringExtra(Constants.BOOK_FILE_PATH), new FolioActivity.ItemSelectedListener() {
+                    @Override
+                    public void onItemSelected() {
+                        finish();
+                    }
+                });
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.parent, contentFrameLayout);
         ft.commit();
@@ -106,7 +111,12 @@ public class ContentHighlightActivity extends AppCompatActivity {
         findViewById(R.id.btn_highlights).setSelected(true);
         String bookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
         String bookTitle= getIntent().getStringExtra(Constants.BOOK_TITLE);
-        HighlightFragment highlightFragment = HighlightFragment.newInstance(bookId, bookTitle);
+        HighlightFragment highlightFragment = HighlightFragment.newInstance(bookId, bookTitle, new FolioActivity.ItemSelectedListener() {
+            @Override
+            public void onItemSelected() {
+                finish();
+            }
+        });
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.parent, highlightFragment);
         ft.commit();

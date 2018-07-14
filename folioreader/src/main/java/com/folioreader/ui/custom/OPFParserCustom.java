@@ -70,9 +70,8 @@ public class OPFParserCustom {
         if (dateElement != null) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date modifiedDate = dateFormat.parse(dateElement.getTextContent());
-                metaData.modified = modifiedDate;
-            } catch (ParseException e) {
+                metaData.modified = dateFormat.parse(dateElement.getTextContent());
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

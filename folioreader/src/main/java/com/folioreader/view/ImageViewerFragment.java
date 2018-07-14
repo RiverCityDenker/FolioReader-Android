@@ -67,7 +67,7 @@ public class ImageViewerFragment extends DialogFragment {
         bundle.putString(ImageViewerFragment.KEY_CONTENT, contentKey);
         bundle.putString(ImageViewerFragment.KEY_USER, userKey);
         imageViewerFragment.setArguments(bundle);
-        imageViewerFragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialogStyle);
+        imageViewerFragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
         imageViewerFragment.show(supportFragmentManager, "");
     }
 

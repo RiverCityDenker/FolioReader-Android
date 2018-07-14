@@ -20,4 +20,5 @@
     <color name="webview_night">#131313</color>
     <color name="colorPrimary">#00549D</color>
     <color name="dark_grey">#292929</color>
+    <color name="color_tablayout_indicator">#FF4CD8F5</color>
 </resources>

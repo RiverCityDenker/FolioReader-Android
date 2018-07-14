@@ -23,8 +23,11 @@ import com.folioreader.Constants;
 import com.folioreader.R;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.HighlightImpl;
+import com.folioreader.model.event.HighlightClickedEvent;
+import com.folioreader.model.event.TOCClickedEvent;
 import com.folioreader.model.event.UpdateHighlightEvent;
 import com.folioreader.model.sqlite.HighLightTable;
+import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.adapter.HighlightAdapter;
 import com.folioreader.util.AppUtil;
 import com.folioreader.FolioReader;
@@ -32,15 +35,19 @@ import com.folioreader.util.HighlightUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
+import static com.folioreader.Constants.CHAPTER_SELECTED;
+
 public class HighlightFragment extends Fragment implements HighlightAdapter.HighLightAdapterCallback {
     private static final String HIGHLIGHT_ITEM = "highlight_item";
+    private static FolioActivity.ItemSelectedListener mItemSelectedListener;
     private View mRootView;
     private HighlightAdapter adapter;
     private String mBookId;
 
 
-    public static HighlightFragment newInstance(String bookId, String epubTitle) {
+    public static HighlightFragment newInstance(String bookId, String epubTitle, FolioActivity.ItemSelectedListener itemSelectedListener) {
         HighlightFragment highlightFragment = new HighlightFragment();
+        mItemSelectedListener = itemSelectedListener;
         Bundle args = new Bundle();
         args.putString(FolioReader.INTENT_BOOK_ID, bookId);
         args.putString(Constants.BOOK_TITLE, epubTitle);
@@ -81,11 +88,8 @@ public class HighlightFragment extends Fragment implements HighlightAdapter.High
 
     @Override
     public void onItemClick(HighlightImpl highlightImpl) {
-        Intent intent = new Intent();
-        intent.putExtra(HIGHLIGHT_ITEM, highlightImpl);
-        intent.putExtra(Constants.TYPE, Constants.HIGHLIGHT_SELECTED);
-        getActivity().setResult(Activity.RESULT_OK, intent);
-        getActivity().finish();
+        EventBus.getDefault().post(new HighlightClickedEvent(highlightImpl));
+        mItemSelectedListener.onItemSelected();
     }
 
     @Override

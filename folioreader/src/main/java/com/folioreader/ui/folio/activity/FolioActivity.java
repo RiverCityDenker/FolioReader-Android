@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -36,11 +37,14 @@ import com.folioreader.FolioReader;
 import com.folioreader.R;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
+import com.folioreader.model.event.HighlightClickedEvent;
 import com.folioreader.model.event.MediaOverlayPlayPauseEvent;
+import com.folioreader.model.event.TOCClickedEvent;
 import com.folioreader.ui.custom.CustomLink;
 import com.folioreader.ui.custom.EpubParser;
 import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.ui.folio.adapter.FolioPageFragmentAdapter;
+import com.folioreader.ui.folio.fragment.ContentHighlightTabletFragment;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
 import com.folioreader.ui.folio.presenter.MainMvpView;
 import com.folioreader.ui.folio.presenter.MainPresenter;
@@ -58,6 +62,8 @@ import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.readium.r2_streamer.model.container.Container;
 import org.readium.r2_streamer.model.container.DirectoryContainer;
 import org.readium.r2_streamer.model.container.EpubContainer;
@@ -74,9 +80,6 @@ import de.zweidenker.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import de.zweidenker.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
-import static com.folioreader.Constants.HIGHLIGHT_SELECTED;
-import static com.folioreader.Constants.SELECTED_CHAPTER_POSITION;
-import static com.folioreader.Constants.TYPE;
 
 public class FolioActivity
         extends AppCompatActivity
@@ -142,6 +145,7 @@ public class FolioActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
         this.savedInstanceState = savedInstanceState;
@@ -220,13 +224,51 @@ public class FolioActivity
 
     @Override
     public void startContentHighlightActivity() {
-        Intent intent = new Intent(FolioActivity.this, ContentHighlightActivity.class);
-        intent.putExtra(CHAPTER_SELECTED, mSpineReferenceList.get(mChapterPosition).href);
-        intent.putExtra(FolioReader.INTENT_BOOK_ID, mBookId);
-        intent.putExtra(Constants.BOOK_TITLE, bookFileName);
-        intent.putExtra(Constants.BOOK_FILE_PATH, ebookFilePath);
-        startActivityForResult(intent, ACTION_CONTENT_HIGHLIGHT);
-        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+        if (getResources().getBoolean(R.bool.isTablet)) {
+            Bundle bundle = new Bundle();
+            bundle.putString(CHAPTER_SELECTED, mSpineReferenceList.get(mChapterPosition).href);
+            bundle.putString(FolioReader.INTENT_BOOK_ID, mBookId);
+            bundle.putString(Constants.BOOK_TITLE, bookFileName);
+            bundle.putString(Constants.BOOK_FILE_PATH, ebookFilePath);
+            ContentHighlightTabletFragment contentHighlightTabletFragment = new ContentHighlightTabletFragment();
+            contentHighlightTabletFragment.setArguments(bundle);
+            contentHighlightTabletFragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
+            contentHighlightTabletFragment.show(getSupportFragmentManager(), "");
+        } else {
+            Intent intent = new Intent(FolioActivity.this, ContentHighlightActivity.class);
+            intent.putExtra(CHAPTER_SELECTED, mSpineReferenceList.get(mChapterPosition).href);
+            intent.putExtra(FolioReader.INTENT_BOOK_ID, mBookId);
+            intent.putExtra(Constants.BOOK_TITLE, bookFileName);
+            intent.putExtra(Constants.BOOK_FILE_PATH, ebookFilePath);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+        }
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTOCClickedEvent(TOCClickedEvent event) {
+        String selectedChapterHref = event.getHref();
+        for (Link spine : mSpineReferenceList) {
+            if (selectedChapterHref.contains(spine.href)) {
+                mChapterPosition = mSpineReferenceList.indexOf(spine);
+                mFolioPageViewPager.setCurrentItem(mChapterPosition);
+                FolioPageFragment folioPageFragment = (FolioPageFragment)
+                        mFolioPageFragmentAdapter.getItem(mChapterPosition);
+                folioPageFragment.scrollToFirst();
+                folioPageFragment.scrollToAnchorId(selectedChapterHref);
+                break;
+            }
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onHighlightClickedEvent(HighlightClickedEvent event) {
+        HighlightImpl highlightImpl = event.getHighlightImpl();
+        mFolioPageViewPager.setCurrentItem(highlightImpl.getPageNumber());
+        FolioPageFragment folioPageFragment = (FolioPageFragment)
+                mFolioPageFragmentAdapter.getItem(highlightImpl.getPageNumber());
+        folioPageFragment.scrollToHighlightId(highlightImpl.getRangy());
     }
 
     private void initBook(String mEpubFileName, int mEpubRawId, String mEpubFilePath, EpubSourceType mEpubSourceType) {
@@ -358,39 +400,11 @@ public class FolioActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ACTION_CONTENT_HIGHLIGHT && resultCode == RESULT_OK && data.hasExtra(TYPE)) {
-
-            String type = data.getStringExtra(TYPE);
-
-            if (type.equals(CHAPTER_SELECTED)) {
-                String selectedChapterHref = data.getStringExtra(SELECTED_CHAPTER_POSITION);
-                for (Link spine : mSpineReferenceList) {
-                    if (selectedChapterHref.contains(spine.href)) {
-                        mChapterPosition = mSpineReferenceList.indexOf(spine);
-                        mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                        FolioPageFragment folioPageFragment = (FolioPageFragment)
-                                mFolioPageFragmentAdapter.getItem(mChapterPosition);
-                        folioPageFragment.scrollToFirst();
-                        folioPageFragment.scrollToAnchorId(selectedChapterHref);
-                        break;
-                    }
-                }
-            } else if (type.equals(HIGHLIGHT_SELECTED)) {
-                HighlightImpl highlightImpl = data.getParcelableExtra(HIGHLIGHT_ITEM);
-                mFolioPageViewPager.setCurrentItem(highlightImpl.getPageNumber());
-                FolioPageFragment folioPageFragment = (FolioPageFragment)
-                        mFolioPageFragmentAdapter.getItem(highlightImpl.getPageNumber());
-                folioPageFragment.scrollToHighlightId(highlightImpl.getRangy());
-            }
-        }
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        EventBus.getDefault().unregister(this);
         if (outState != null)
             outState.putParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE, lastReadPosition);
 
@@ -679,5 +693,9 @@ public class FolioActivity
     @Override
     public Config.Direction getDirection() {
         return direction;
+    }
+
+    public interface ItemSelectedListener {
+        void onItemSelected();
     }
 }
