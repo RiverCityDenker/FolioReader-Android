@@ -117,8 +117,8 @@ public class FolioPageFragment
     private static final String TAG = FolioPageFragment.class.getSimpleName();
     private static final String HTML_CODE_TAG = "code";
     private static final String HTML_SPAN_TAG = "span";
-    private static final String URL_PREFIX = "file://";
-    private static final String SLASH_SIGN = "/";
+    public static final String URL_PREFIX = "file://";
+    public static final String SLASH_SIGN = "/";
 
     private String mHtmlString = null;
     private boolean hasMediaOverlay = false;
@@ -656,6 +656,7 @@ public class FolioPageFragment
                         }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
                         //mActivityCallback.goToChapter(url);
+                        mActivityCallback.showSinglePage(url);
                     } else {
                         // Otherwise, give the default behavior (open in browser)
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

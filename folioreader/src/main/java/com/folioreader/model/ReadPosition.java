@@ -3,9 +3,7 @@ package com.folioreader.model;
 import android.os.Parcelable;
 
 import com.folioreader.FolioReader;
-import com.folioreader.ui.folio.activity.FolioActivity;
-
-import org.readium.r2_streamer.model.publication.EpubPublication;
+import com.folioreader.ui.folio.presenter.MainMvpView;
 
 /**
  * Interface contract for last read position
@@ -16,7 +14,7 @@ public interface ReadPosition extends Parcelable {
 
     /**
      * Returns the bookId if sent in {@link FolioReader}'s openBook() else logic defined in
-     * {@link FolioActivity#onLoadPublication(EpubPublication)} will return the bookId.
+     * {@link MainMvpView#onLoadPublication(com.folioreader.ui.custom.EpubPublicationCustom)} will return the bookId.
      */
     String getBookId();
 

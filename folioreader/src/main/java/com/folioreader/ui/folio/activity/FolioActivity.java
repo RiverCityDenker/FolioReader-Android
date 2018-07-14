@@ -37,7 +37,9 @@ import com.folioreader.R;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.event.MediaOverlayPlayPauseEvent;
+import com.folioreader.ui.custom.CustomLink;
 import com.folioreader.ui.custom.EpubParser;
+import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.ui.folio.adapter.FolioPageFragmentAdapter;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
 import com.folioreader.ui.folio.presenter.MainMvpView;
@@ -59,7 +61,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.readium.r2_streamer.model.container.Container;
 import org.readium.r2_streamer.model.container.DirectoryContainer;
 import org.readium.r2_streamer.model.container.EpubContainer;
-import org.readium.r2_streamer.model.publication.EpubPublication;
 import org.readium.r2_streamer.model.publication.link.Link;
 import org.readium.r2_streamer.server.EpubServer;
 import org.readium.r2_streamer.server.EpubServerSingleton;
@@ -121,7 +122,7 @@ public class FolioActivity
     private Bundle outState;
     private Bundle savedInstanceState;
 
-    private List<Link> mSpineReferenceList = new ArrayList<>();
+    private List<CustomLink> mSpineReferenceList = new ArrayList<>();
     private EpubServer mEpubServer;
 
     private String mBookId;
@@ -258,7 +259,7 @@ public class FolioActivity
         }
         Container epubContainer = new DirectoryContainer(path);
         EpubParser parser = new EpubParser(epubContainer);
-        onLoadPublication(parser.parseEpubFile("/" + bookFileName));
+        onLoadPublicationCustom(parser.parseEpubFile("/" + bookFileName));
     }
 
 
@@ -406,7 +407,27 @@ public class FolioActivity
     }
 
     @Override
-    public void onLoadPublication(EpubPublication publication) {
+    public void onLoadPublication(EpubPublicationCustom publication) {
+        mSpineReferenceList.addAll(publication.spines);
+        if (publication.metadata.title != null) {
+            toolbar.setTitle(publication.metadata.title);
+        }
+
+        if (mBookId == null) {
+            if (publication.metadata.identifier != null) {
+                mBookId = publication.metadata.identifier;
+            } else {
+                if (publication.metadata.title != null) {
+                    mBookId = String.valueOf(publication.metadata.title.hashCode());
+                } else {
+                    mBookId = String.valueOf(bookFileName.hashCode());
+                }
+            }
+        }
+        configFolio();
+    }
+
+    public void onLoadPublicationCustom(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
         if (publication.metadata.title != null) {
             toolbar.setTitle(publication.metadata.title);
@@ -556,13 +577,27 @@ public class FolioActivity
     }
 
     @Override
-    public void viewImage(String hitResultExtra) {
-        ImageViewerFragment.startShowImage(hitResultExtra, getSupportFragmentManager());
+    public EpubSourceType getSourceType() {
+        return mEpubSourceType;
     }
 
     @Override
-    public EpubSourceType getSourceType() {
-        return mEpubSourceType;
+    public void showSinglePage(String href) {
+        String idref = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1, href.lastIndexOf("."));
+        Log.e(TAG, "showSinglePage: >>>" + idref);
+        for (CustomLink spine : mSpineReferenceList) {
+            if (spine.href.contains(idref) && spine.linear.equalsIgnoreCase("no")) {
+
+                String mimeType;
+                if (spine.typeLink.equalsIgnoreCase(getString(R.string.xhtml_mime_type))) {
+                    mimeType = getString(R.string.xhtml_mime_type);
+                } else {
+                    mimeType = getString(R.string.html_mime_type);
+                }
+                ImageViewerFragment.startShowImage(href, mBookId, mimeType, contentKey, userKey, getSupportFragmentManager());
+                break;
+            }
+        }
     }
 
     private void setConfig(Bundle savedInstanceState) {

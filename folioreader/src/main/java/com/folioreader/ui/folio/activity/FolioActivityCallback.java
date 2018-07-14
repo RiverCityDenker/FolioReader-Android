@@ -19,7 +19,7 @@ public interface FolioActivityCallback {
 
     void storeLastReadPosition(ReadPosition lastReadPosition);
 
-    void viewImage(String hitResultExtra);
-
     FolioActivity.EpubSourceType getSourceType();
+
+    void showSinglePage(String url);
 }

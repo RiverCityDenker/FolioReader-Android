@@ -104,7 +104,7 @@ public class FolioWebView extends WebView
 
         hideOrShowToolBar(event);
 
-        showImageOverlay(event);
+//        showImageOverlay(event);
 
         if (folioActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
             return computeHorizontalScroll(event);
@@ -125,7 +125,7 @@ public class FolioWebView extends WebView
                     //SingleTap
                     HitTestResult hr = getHitTestResult();
                     if (hr.getType() == HitTestResult.IMAGE_TYPE || hr.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
-                        folioActivityCallback.viewImage(hr.getExtra());
+                        folioActivityCallback.showSinglePage(hr.getExtra());
                     }
                 }
                 break;

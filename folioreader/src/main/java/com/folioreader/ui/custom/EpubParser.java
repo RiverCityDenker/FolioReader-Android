@@ -23,18 +23,18 @@ public class EpubParser {
     private final String TAG = "EpubParser";
 
     private Container container;        //can be either EpubContainer or DirectoryContainer
-    private EpubPublication publication;
+    private EpubPublicationCustom publication;
 
     public EpubParser(Container container) {
         this.container = container;
-        this.publication = new EpubPublication();
+        this.publication = new EpubPublicationCustom();
     }
 
-    public EpubPublication parseEpubFile(String filePath) {
+    public EpubPublicationCustom parseEpubFile(String filePath) {
         String rootFile;
         try {
             if (filePath.contains(".cbz")) {
-                CBZParser.parseCBZ(container, publication);
+                CBZParserCustom.parseCBZ(container, publication);
                 return publication;
             }
             rootFile = "/content.opf";
@@ -42,11 +42,11 @@ public class EpubParser {
             publication.internalData.put("type", "epub");
             publication.internalData.put("rootfile", rootFile);
             //Parse OPF file
-            this.publication = OPFParser.parseOpfFile(rootFile, this.publication, container);
+            this.publication = OPFParserCustom.parseOpfFile(rootFile, this.publication, container);
             // Parse Encryption
             this.publication.encryptions = EncryptionParser.parseEncryption(container);
             // Parse Media Overlay
-            MediaOverlayParser.parseMediaOverlay(this.publication, container);
+            MediaOverlayParserCustom.parseMediaOverlay(this.publication, container);
             return publication;
         } catch (EpubParserException e) {
             System.out.println(TAG + " parserEpubFile() error " + e.toString());

@@ -2,8 +2,7 @@ package com.folioreader.ui.folio.presenter;
 
 import com.folioreader.ui.base.ManifestCallBack;
 import com.folioreader.ui.base.ManifestTask;
-
-import org.readium.r2_streamer.model.publication.EpubPublication;
+import com.folioreader.ui.custom.EpubPublicationCustom;
 
 /**
  * @author gautam chibde on 8/6/17.
@@ -21,7 +20,7 @@ public class MainPresenter implements ManifestCallBack {
     }
 
     @Override
-    public void onReceivePublication(EpubPublication publication) {
+    public void onReceivePublication(EpubPublicationCustom publication) {
         mainMvpView.onLoadPublication(publication);
     }
 

@@ -4,9 +4,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.util.AppUtil;
 
-import org.readium.r2_streamer.model.publication.EpubPublication;
 import org.readium.r2_streamer.model.tableofcontents.TOCLink;
 
 import java.io.BufferedReader;
@@ -23,7 +23,7 @@ import java.net.URLConnection;
  * @author by gautam on 12/6/17.
  */
 
-public class ManifestTask extends AsyncTask<String, Void, EpubPublication> {
+public class ManifestTask extends AsyncTask<String, Void, EpubPublicationCustom> {
 
     private static final String TAG = "ManifestTask";
 
@@ -34,7 +34,7 @@ public class ManifestTask extends AsyncTask<String, Void, EpubPublication> {
     }
 
     @Override
-    protected EpubPublication doInBackground(String... urls) {
+    protected EpubPublicationCustom doInBackground(String... urls) {
         String strUrl = urls[0];
 
         try {
@@ -49,7 +49,7 @@ public class ManifestTask extends AsyncTask<String, Void, EpubPublication> {
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(stringBuilder.toString(), EpubPublication.class);
+            return objectMapper.readValue(stringBuilder.toString(), EpubPublicationCustom.class);
         } catch (IOException e) {
             Log.e(TAG, "ManifestTask failed", e);
         }
@@ -57,7 +57,7 @@ public class ManifestTask extends AsyncTask<String, Void, EpubPublication> {
     }
 
     @Override
-    protected void onPostExecute(EpubPublication publication) {
+    protected void onPostExecute(EpubPublicationCustom publication) {
         if (publication != null) {
             //TODO can be implemented in r2-streamer?
             if (publication.tableOfContents != null) {
@@ -72,7 +72,7 @@ public class ManifestTask extends AsyncTask<String, Void, EpubPublication> {
         cancel(true);
     }
 
-    private void setBookTitle(TOCLink link, EpubPublication publication) {
+    private void setBookTitle(TOCLink link, EpubPublicationCustom publication) {
         for (int i = 0; i < publication.spines.size(); i++) {
             if (publication.spines.get(i).href.equals(link.href)) {
                 publication.spines.get(i).bookTitle = link.bookTitle;

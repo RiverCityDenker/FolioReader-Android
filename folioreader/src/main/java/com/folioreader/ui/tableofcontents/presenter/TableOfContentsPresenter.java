@@ -2,11 +2,12 @@ package com.folioreader.ui.tableofcontents.presenter;
 
 import com.folioreader.model.TOCLinkWrapper;
 import com.folioreader.ui.base.ManifestCallBack;
+import com.folioreader.ui.custom.CustomLink;
 import com.folioreader.ui.custom.EpubParser;
+import com.folioreader.ui.custom.EpubPublicationCustom;
 
 import org.readium.r2_streamer.model.container.Container;
 import org.readium.r2_streamer.model.container.DirectoryContainer;
-import org.readium.r2_streamer.model.publication.EpubPublication;
 import org.readium.r2_streamer.model.publication.link.Link;
 import org.readium.r2_streamer.model.tableofcontents.TOCLink;
 
@@ -62,7 +63,7 @@ public class TableOfContentsPresenter implements ManifestCallBack {
         return tocLinkWrapper;
     }
 
-    private static ArrayList<TOCLinkWrapper> createTOCFromSpine(List<Link> spine) {
+    private static ArrayList<TOCLinkWrapper> createTOCFromSpine(List<CustomLink> spine) {
         ArrayList<TOCLinkWrapper> tocLinkWrappers = new ArrayList<>();
         for (Link link : spine) {
             TOCLink tocLink = new TOCLink();
@@ -74,7 +75,7 @@ public class TableOfContentsPresenter implements ManifestCallBack {
     }
 
     @Override
-    public void onReceivePublication(EpubPublication publication) {
+    public void onReceivePublication(EpubPublicationCustom publication) {
         if (publication != null) {
             if (publication.tableOfContents != null) {
                 ArrayList<TOCLinkWrapper> tocLinkWrappers = new ArrayList<>();
