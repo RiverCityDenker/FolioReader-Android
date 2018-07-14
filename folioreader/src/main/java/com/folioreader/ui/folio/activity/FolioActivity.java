@@ -264,7 +264,7 @@ public class FolioActivity
 
 
     private void showErrorDialog() {
-        DialogFactory.createEbookErrorDialog(getApplicationContext(), getResources().getString(R.string.ebook_error_msg), new DialogFactory.DialogCallback() {
+        DialogFactory.createEbookErrorDialog(this, getResources().getString(R.string.ebook_error_msg), new DialogFactory.DialogCallback() {
             @Override
             public void exitReader() {
                 finish();
