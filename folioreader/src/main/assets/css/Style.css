@@ -113,6 +113,10 @@ hr {
     height: 1px !important;
 }
 
+span.clisting {
+    font-family: monospace, monospace !important;
+    font-size: 1em;
+}
 
 /* Sub and Super */
 big { font-size: 1.15em !important; }

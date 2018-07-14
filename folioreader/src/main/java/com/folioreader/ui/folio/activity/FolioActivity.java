@@ -46,7 +46,6 @@ import com.folioreader.util.AppUtil;
 import com.folioreader.util.DialogFactory;
 import com.folioreader.util.FileUtil;
 import com.folioreader.util.SharedPreferenceUtil;
-import com.folioreader.view.ConfigBottomSheetDialogFragment;
 import com.folioreader.view.ConfigDialogFragment;
 import com.folioreader.view.DirectionalViewpager;
 import com.folioreader.view.FolioToolbar;
@@ -69,7 +68,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 
 import de.zweidenker.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import de.zweidenker.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
@@ -189,7 +187,6 @@ public class FolioActivity
 
 
     private void initToolbar(Bundle savedInstanceState) {
-
         toolbar = (FolioToolbar) findViewById(R.id.toolbar);
         toolbar.setListeners(this);
         if (savedInstanceState != null) {

@@ -115,6 +115,10 @@ public class FolioPageFragment
     private static final String KEY_FRAGMENT_FOLIO_BOOK_USER_KEY = "user_key";
     private static final String KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH = "file_path";
     private static final String TAG = FolioPageFragment.class.getSimpleName();
+    private static final String HTML_CODE_TAG = "code";
+    private static final String HTML_SPAN_TAG = "span";
+    private static final String URL_PREFIX = "file://";
+    private static final String SLASH_SIGN = "/";
 
     private String mHtmlString = null;
     private boolean hasMediaOverlay = false;
@@ -398,12 +402,13 @@ public class FolioPageFragment
                 mimeType = getString(R.string.html_mime_type);
             }
 
-            String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
-                    "file://" + mBookFilePath + "/" : Constants.LOCALHOST + mBookTitle + "/" + path;
+            final String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
+                    URL_PREFIX + mBookFilePath + SLASH_SIGN : Constants.LOCALHOST + mBookTitle + SLASH_SIGN + path;
+            final String newHtmlString = mHtmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG);
 
             mWebview.loadDataWithBaseURL(
                     baseUrl,
-                    HtmlUtil.getHtmlContent(getContext(), mHtmlString, mConfig),
+                    HtmlUtil.getHtmlContent(getContext(), newHtmlString, mConfig),
                     mimeType,
                     "UTF-8",
                     null);
