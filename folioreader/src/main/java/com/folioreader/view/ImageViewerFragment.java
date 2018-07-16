@@ -1,47 +1,26 @@
 package com.folioreader.view;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
-import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.folioreader.Config;
-import com.folioreader.Constants;
 import com.folioreader.R;
-import com.folioreader.model.HighlightImpl;
-import com.folioreader.model.ReadPosition;
 import com.folioreader.ui.base.HtmlUtil;
-import com.folioreader.ui.folio.activity.FolioActivity;
-import com.folioreader.ui.folio.fragment.FolioPageFragment;
 import com.folioreader.util.AppUtil;
-import com.folioreader.util.HighlightUtil;
-import com.folioreader.util.UiUtil;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.zweidenker.rheinwerk_reader.crypto.CryptoManager;
 
-import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENCRYPTED_FILE;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.SLASH_SIGN;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.URL_PREFIX;
 

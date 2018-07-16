@@ -56,9 +56,6 @@ body {
 table {
     border-collapse: collapse;
     border-spacing: 0;
-    word-break: normal;
-    table-layout: fixed;
-    width: 100%
 }
 tbody, tfoot, thead {
     vertical-align: middle !important;
@@ -96,7 +93,6 @@ p {
     line-height: 1.40em !important;
     text-indent: 1.25em;
 }
-p.tabellentext { margin: 0 !important; }
 b, strong, th {font-weight: bolder !important;}
 
 /* Forced font overrides */
@@ -111,11 +107,6 @@ hr {
     background-color: rgba(0,0,0,.1) !important;
     border: none !important;
     height: 1px !important;
-}
-
-span.clisting {
-    font-family: monospace, monospace !important;
-    font-size: 1em;
 }
 
 /* Sub and Super */
@@ -329,4 +320,38 @@ p, span, div {
         -webkit-hyphens: none !important;
         hyphens: none !important;
     }
+}
+
+// ###############################################################################
+// ### Change style of rheinwerk book ###
+
+span.clisting {
+    font-family: monospace, monospace !important;
+    font-size: 1em;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    word-break: normal;
+    table-layout: fixed;
+    width: 100%
+}
+
+table td {
+    width:100px;
+    word-wrap:break-word;
+    word-break: normal;
+    border-collapse: collapse;
+    padding:0; margin:0;
+}
+table td p {
+    word-wrap:break-word;
+    word-break: normal;
+    padding:0; margin:0;
+}
+
+p.tabellentext { margin: 0 !important; }
+p {
+    text-indent: 0;
 }
