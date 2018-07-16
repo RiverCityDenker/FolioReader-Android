@@ -404,7 +404,7 @@ public class FolioPageFragment
 
             final String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
                     URL_PREFIX + mBookFilePath + SLASH_SIGN : Constants.LOCALHOST + mBookTitle + SLASH_SIGN + path;
-            final String newHtmlString = mHtmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG);
+            final String newHtmlString = mHtmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG).replace("../", "");
 
             mWebview.loadDataWithBaseURL(
                     baseUrl,
@@ -655,8 +655,11 @@ public class FolioPageFragment
                             }
                         }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
-                        //mActivityCallback.goToChapter(url);
-                        mActivityCallback.showSinglePage(url);
+                        if (url.contains("img")) {
+                            mActivityCallback.showSinglePage(url);
+                        } else {
+                            mActivityCallback.goToChapter(url);
+                        }
                     } else {
                         // Otherwise, give the default behavior (open in browser)
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
