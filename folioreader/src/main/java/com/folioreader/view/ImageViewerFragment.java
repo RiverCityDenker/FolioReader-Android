@@ -18,6 +18,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
@@ -57,6 +58,7 @@ public class ImageViewerFragment extends DialogFragment {
     private String mUserKey;
     private String mMimeType;
     private String mBookName;
+    private TextView tvClose;
 
     public static void startShowImage(String extra, String bookName, String mimeType, String contentKey, String userKey, FragmentManager supportFragmentManager) {
         ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
@@ -90,6 +92,13 @@ public class ImageViewerFragment extends DialogFragment {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         View view = inflater.inflate(R.layout.layout_image_viewer, container, false);
         imageWebView = view.findViewById(R.id.imageWebView);
+        tvClose = view.findViewById(R.id.tv_close);
+        tvClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
         final String filePath = (imagePath.contains("file")) ? imagePath.replace("file://", "") : imagePath;
         final String baseFilePath = filePath.substring(0, filePath.indexOf(mBookName + "/") + mBookName.length() + 1);
         Log.e(TAG, "onCreateView: >>>" + filePath);
