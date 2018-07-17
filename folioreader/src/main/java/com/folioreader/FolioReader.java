@@ -6,12 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.folioreader.model.HighLight;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.sqlite.DbAdapter;
+import com.folioreader.model.sqlite.ReadPositionTable;
 import com.folioreader.ui.base.OnSaveHighlight;
+import com.folioreader.ui.base.OnSaveReadPosition;
+import com.folioreader.ui.base.SaveReadPositionTask;
 import com.folioreader.ui.base.SaveReceivedHighlightTask;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
@@ -25,6 +29,7 @@ import java.util.List;
 
 public class FolioReader {
 
+    private static final String TAG = FolioReader.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
     private static FolioReader singleton = null;
     public static final String INTENT_BOOK_ID = "book_id";
@@ -155,6 +160,7 @@ public class FolioReader {
         intent.putExtra(FolioActivity.INTENT_EBOOK_FILE_PATH, filePath);
         intent.putExtra(FolioActivity.INTENT_EBOOK_TITLE_NAME, title);
         intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.ENCRYPTED_FILE);
+        intent.putExtra(FolioActivity.EXTRA_READ_POSITION, readPosition);
         return intent;
     }
 
@@ -210,6 +216,20 @@ public class FolioReader {
 
     public void saveReceivedHighLights(List<HighLight> highlights, OnSaveHighlight onSaveHighlight) {
         new SaveReceivedHighlightTask(onSaveHighlight, highlights).execute();
+    }
+
+    public void saveReadPosition(ReadPosition readPosition, OnSaveReadPosition onSaveReadPosition) {
+        new SaveReadPositionTask(readPosition, onSaveReadPosition).execute();
+    }
+
+    public ReadPosition getReadPosition(String bookId) {
+        final ReadPosition readPosition = ReadPositionTable.getReadPositionById(bookId);
+        if (readPosition != null) {
+            Log.e(TAG, "getReadPosition: >>>readPosition = " + readPosition.toJson());
+        } else {
+            Log.e(TAG, "getReadPosition: >>>readPosition = null");
+        }
+        return readPosition;
     }
 
     /**

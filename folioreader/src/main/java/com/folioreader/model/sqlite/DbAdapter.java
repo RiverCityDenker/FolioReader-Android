@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.folioreader.model.ReadPosition;
+
 public class DbAdapter {
     private static final String TAG = "DBAdapter";
 
@@ -97,5 +99,17 @@ public class DbAdapter {
 
     public static Cursor getHighlightsForId(int id) {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
+    }
+
+    public static long saveReadPosition(ContentValues readPositionContentValues) {
+        return mDatabase.insert(ReadPositionTable.TABLE_NAME, null, readPositionContentValues);
+    }
+
+    public static boolean updateReadPosition(ContentValues readPositionContentValues, String id) {
+        return mDatabase.update(ReadPositionTable.TABLE_NAME, readPositionContentValues, ReadPositionTable.COL_BOOK_ID + " = " + id, null) > 0;
+    }
+
+    public static Cursor getReadPosition(String bookId) {
+        return mDatabase.rawQuery("SELECT * FROM " + ReadPositionTable.TABLE_NAME + " WHERE " + ReadPositionTable.COL_BOOK_ID + " = '" + bookId + "'", null);
     }
 }

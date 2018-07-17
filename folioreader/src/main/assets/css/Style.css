@@ -331,15 +331,14 @@ span.clisting {
 }
 
 table {
+    table-layout: auto;
     border-collapse: collapse;
     border-spacing: 0;
     word-break: normal;
-    table-layout: fixed;
     width: 100%
 }
 
 table td {
-    width:100px;
     word-wrap:break-word;
     word-break: normal;
     border-collapse: collapse;
@@ -351,7 +350,10 @@ table td p {
     padding:0; margin:0;
 }
 
-p.tabellentext { margin: 0 !important; }
+table thead tr th.tablecell_last {
+      width: 100%;
+}
+
 p {
     text-indent: 0;
 }
