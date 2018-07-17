@@ -268,8 +268,8 @@ public class QuickAction extends PopupWindows implements OnDismissListener {
         int dyTop = anchorRect.top;
         int dyBottom = screenHeight - anchorRect.bottom;
 
-        boolean onTop = (dyTop > dyBottom) ? true : false;
-
+//        boolean onTop = (dyTop > dyBottom) ? true : false;
+        boolean onTop = true;
         if (onTop) {
             if (rootHeight > dyTop) {
                 yPos = 15;

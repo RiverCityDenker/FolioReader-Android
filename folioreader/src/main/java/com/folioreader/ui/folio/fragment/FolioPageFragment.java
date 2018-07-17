@@ -997,16 +997,18 @@ public class FolioPageFragment
         view.setY(y);
         final QuickAction quickAction =
                 new QuickAction(getActivity(), QuickAction.HORIZONTAL);
-        quickAction.addActionItem(new ActionItem(ACTION_ID_COPY,
-                getString(R.string.copy)));
+//  Remove Copy function in version 1.0
+//        quickAction.addActionItem(new ActionItem(ACTION_ID_COPY,
+//                getString(R.string.copy)));
         quickAction.addActionItem(new ActionItem(ACTION_ID_HIGHLIGHT,
                 getString(R.string.highlight)));
         if (!mSelectedText.trim().contains(" ")) {
             quickAction.addActionItem(new ActionItem(ACTION_ID_DEFINE,
                     getString(R.string.define)));
         }
-        quickAction.addActionItem(new ActionItem(ACTION_ID_SHARE,
-                getString(R.string.share)));
+//  Remove Share function in version 1.0
+//        quickAction.addActionItem(new ActionItem(ACTION_ID_SHARE,
+//                getString(R.string.share)));
         quickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
             @Override
             public void onItemClick(QuickAction source, int pos, int actionId) {
@@ -1068,8 +1070,9 @@ public class FolioPageFragment
                 getResources().getDrawable(R.drawable.colors_marker)));
         quickAction.addActionItem(new ActionItem(ACTION_ID_DELETE,
                 getResources().getDrawable(R.drawable.ic_action_discard)));
-        quickAction.addActionItem(new ActionItem(ACTION_ID_SHARE,
-                getResources().getDrawable(R.drawable.ic_action_share)));
+//  Remove Share function in version 1.0
+//        quickAction.addActionItem(new ActionItem(ACTION_ID_SHARE,
+//                getResources().getDrawable(R.drawable.ic_action_share)));
         final ViewGroup finalRoot = root;
         quickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
             @Override
