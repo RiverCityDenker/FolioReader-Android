@@ -21,8 +21,6 @@ import com.folioreader.util.AppUtil;
 
 import de.zweidenker.rheinwerk_reader.crypto.CryptoManager;
 
-import static com.folioreader.ui.folio.fragment.FolioPageFragment.HTML_CODE_TAG;
-import static com.folioreader.ui.folio.fragment.FolioPageFragment.HTML_SPAN_TAG;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.SLASH_SIGN;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.URL_PREFIX;
 
@@ -84,9 +82,9 @@ public class ImageViewerFragment extends DialogFragment {
         final String baseFilePath = filePath.substring(0, filePath.indexOf(mBookName + "/") + mBookName.length() + 1);
         Log.e(TAG, "onCreateView: >>>" + filePath);
         final String htmlString = CryptoManager.decryptContentKey(mContentKey, mUserKey, filePath);
-        final String formatedHtml = htmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG).replace("../", "");
-        final String baseUrl = URL_PREFIX + baseFilePath + SLASH_SIGN;
         Config mConfig = AppUtil.getSavedConfig(getContext());
+        final String configedHtml = HtmlUtil.reformatHtml(getContext(), htmlString, mConfig);
+        final String baseUrl = URL_PREFIX + baseFilePath + SLASH_SIGN;
         imageWebView.getSettings().setJavaScriptEnabled(true);
         imageWebView.getSettings().setAllowFileAccess(true);
         imageWebView.getSettings().setSupportZoom(true);
@@ -97,7 +95,7 @@ public class ImageViewerFragment extends DialogFragment {
         imageWebView.setInitialScale(100);
         imageWebView.loadDataWithBaseURL(
                 baseUrl,
-                HtmlUtil.getHtmlContent(getContext(), formatedHtml, mConfig),
+                configedHtml,
                 mMimeType,
                 "UTF-8",
                 null);

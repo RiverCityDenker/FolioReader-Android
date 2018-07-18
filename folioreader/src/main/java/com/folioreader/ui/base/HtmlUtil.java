@@ -12,6 +12,9 @@ import com.folioreader.R;
 
 public final class HtmlUtil {
 
+    public static final String HTML_CODE_TAG = "code";
+    public static final String HTML_SPAN_TAG = "span";
+
     /**
      * Function modifies input html string by adding extra css,js and font information.
      *
@@ -101,5 +104,11 @@ public final class HtmlUtil {
 
         htmlContent = htmlContent.replace("<html ", "<html class=\"" + classes + "\" ");
         return htmlContent;
+    }
+
+    public static String reformatHtml(Context context, String htmlString, Config mConfig) {
+        final String formatedHtml = htmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG).replace("../", "");
+        final String reformatedHtml = formatedHtml.replace("Styles/", "../Styles/");
+        return HtmlUtil.getHtmlContent(context, reformatedHtml, mConfig);
     }
 }
