@@ -60,6 +60,8 @@ import com.folioreader.view.FolioWebView;
 import com.folioreader.view.ImageViewerFragment;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
+import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
+import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -75,9 +77,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import de.zweidenker.rheinwerk_reader.googleanalytics.AnalyticViewName;
-import de.zweidenker.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
 

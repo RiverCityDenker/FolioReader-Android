@@ -36,8 +36,8 @@ import com.folioreader.util.UiUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
-import de.zweidenker.rheinwerk_reader.googleanalytics.AnalyticViewName;
-import de.zweidenker.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
+import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 
 public class ConfigDialogFragment extends AppCompatDialogFragment implements View.OnClickListener {
 

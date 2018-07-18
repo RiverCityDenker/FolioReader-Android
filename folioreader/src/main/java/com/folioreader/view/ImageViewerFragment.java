@@ -18,8 +18,7 @@ import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.ui.base.HtmlUtil;
 import com.folioreader.util.AppUtil;
-
-import de.zweidenker.rheinwerk_reader.crypto.CryptoManager;
+import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.SLASH_SIGN;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.URL_PREFIX;

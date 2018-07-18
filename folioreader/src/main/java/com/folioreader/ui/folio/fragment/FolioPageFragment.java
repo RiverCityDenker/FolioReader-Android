@@ -64,6 +64,7 @@ import com.folioreader.view.LoadingView;
 import com.folioreader.view.MediaControllerView;
 import com.folioreader.view.VerticalSeekbar;
 import com.folioreader.view.WebViewPager;
+import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -75,8 +76,6 @@ import java.net.URLDecoder;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.zweidenker.rheinwerk_reader.crypto.CryptoManager;
 
 import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENCRYPTED_FILE;
 
