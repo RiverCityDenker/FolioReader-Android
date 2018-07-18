@@ -115,8 +115,8 @@ public class FolioPageFragment
     private static final String KEY_FRAGMENT_FOLIO_BOOK_USER_KEY = "user_key";
     private static final String KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH = "file_path";
     private static final String TAG = FolioPageFragment.class.getSimpleName();
-    private static final String HTML_CODE_TAG = "code";
-    private static final String HTML_SPAN_TAG = "span";
+    public static final String HTML_CODE_TAG = "code";
+    public static final String HTML_SPAN_TAG = "span";
     public static final String URL_PREFIX = "file://";
     public static final String SLASH_SIGN = "/";
 
@@ -655,7 +655,7 @@ public class FolioPageFragment
                             }
                         }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
-                        if (url.contains("img")) {
+                        if (url.contains("img") || url.contains("tbl")) {
                             mActivityCallback.showSinglePage(url);
                         } else {
                             mActivityCallback.goToChapter(url);
