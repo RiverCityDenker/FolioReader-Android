@@ -71,6 +71,7 @@
     <string name="getHighlightString">javascript:getHighlightString(\'%s\')</string>
     <string name="sethighlightstyle">javascript:setHighlightStyle(\'%s\');</string>
     <string name="css_tag"><![CDATA[<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\" />]]></string>
+    <string name="css_tag_inside_open"><![CDATA[<style type=\"text/css\">\n%s\n</style>]]></string>
     <string name="script_tag"><![CDATA[<script type=\"text/javascript\" src=\"%s\"></script>]]></string>
     <string name="td_tag"><![CDATA[<td>%s</td></tr>]]></string>
     <string name="tr_tag"><![CDATA[<tr><td></td><td>%s</td></tr>]]></string>

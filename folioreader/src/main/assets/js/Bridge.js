@@ -271,7 +271,44 @@ function goToElement(element) {
         scrollingElement.scrollTop = newScrollTop;
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
+        console.log(">>> Scroll Horizontal");
+        var clientWidth = document.documentElement.clientWidth;
+        var pageIndex = Math.floor(element.offsetLeft / clientWidth);
+        var newScrollLeft = clientWidth * pageIndex;
+        WebViewPager.setCurrentPage(pageIndex);
+        scrollingElement.scrollLeft = newScrollLeft;
+    }
 
+    return element;
+}
+
+/**
+ Go To Element - scrolls the webview to the requested element
+ */
+function goToImageElement(element) {
+
+    var scrollingElement = bodyOrHtml();
+    var top = scrollingElement.scrollTop;
+    var elementTop = element.offsetTop - 20;
+    var bottom = window.innerHeight + top;
+    var elementBottom = element.offsetHeight + element.offsetTop + 60;
+
+    //console.log(window);
+    //console.log("-> top = " + top);
+    //console.log("-> elementTop = " + elementTop);
+    //console.log("-> bottom = " + bottom);
+    //console.log("-> elementBottom = " + elementBottom);
+    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection());
+
+    if (FolioPageFragment.getDirection() == "VERTICAL" &&
+            (elementBottom > bottom || elementTop < top)) {
+
+        var newScrollTop = elementTop;
+        console.log("-> newScrollTop = " + newScrollTop);
+        scrollingElement.scrollTop = newScrollTop;
+
+    } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
+        console.log(">>> Scroll Horizontal");
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
@@ -288,7 +325,7 @@ function scrollToElement(id) {
     var element = document.getElementById(id);
     console.log("---->>>>" + element)
         if (element)
-            goToElement(element);
+            goToImageElement(element);
 
     LoadingView.hide();
 }
@@ -876,7 +913,7 @@ Scrolls the web page to particular span using id or index
 @param {number} value - if usingId true then span id else span index
 */
 function scrollToSpan(usingId, value) {
-
+    console.log(">>>scrollToSpan1");
     if (usingId) {
         var spanElement = document.getElementById(value);
         if (spanElement)
@@ -888,6 +925,7 @@ function scrollToSpan(usingId, value) {
             LoadingView.hide();
             return;
         }
+        console.log(">>>scrollToSpan2");
         goToElement(spanCollection[value]);
     }
 

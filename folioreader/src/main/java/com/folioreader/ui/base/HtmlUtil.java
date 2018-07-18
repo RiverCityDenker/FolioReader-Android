@@ -57,6 +57,7 @@ public final class HtmlUtil {
         jsPath = jsPath
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />";
 
+        htmlContent = htmlContent.replace(".css", "1.css");
         String toInject = "\n" + cssPath + "\n" + jsPath + "\n</head>";
         htmlContent = htmlContent.replace("</head>", toInject);
 
@@ -101,8 +102,65 @@ public final class HtmlUtil {
             default:
                 break;
         }
-
         htmlContent = htmlContent.replace("<html ", "<html class=\"" + classes + "\" ");
+
+//        int startBodyTagIndex = htmlContent.indexOf("<body");
+//        int endBodyTagIndex = -1;
+//        for (int i = startBodyTagIndex; i < htmlContent.length(); i++) {
+//            if (htmlContent.charAt(i) == '>') {
+//                endBodyTagIndex = i;
+//                break;
+//            }
+//        }
+//        String bodySubString = htmlContent.substring(startBodyTagIndex, endBodyTagIndex);
+//        if (bodySubString.contains("class")) {
+//
+//        }
+//
+//        // inside Style
+//        String cssStyle = "\n" +
+//                "@font-face {\n" +
+//                "    font-family: 'andada';\n" +
+//                "    src: url('file:///android_asset/fonts/andada/Andada-Regular.otf');\n" +
+//                "}\n" +
+//                "\n" +
+//                "@font-face {\n" +
+//                "    font-family: 'lato';\n" +
+//                "    src: url('file:///android_asset/fonts/lato/Lato-Regular.ttf');\n" +
+//                "}\n" +
+//                "\n" +
+//                "@font-face {\n" +
+//                "    font-family: 'lora';\n" +
+//                "    src: url('file:///android_asset/fonts/lora/Lora-Regular.ttf');\n" +
+//                "}\n" +
+//                "\n" +
+//                "@font-face {\n" +
+//                "    font-family: 'raleway';\n" +
+//                "    src: url('file:///android_asset/fonts/raleway/Raleway-Regular.ttf');\n" +
+//                "}\n" +
+//                "\n" +
+//                ".andada {\n" +
+//                "     font-family: \"andada\", sans-serif;\n" +
+//                " }\n" +
+//                ".lato {\n" +
+//                "     font-family: \"lato\", serif;\n" +
+//                " }\n" +
+//                ".lora {\n" +
+//                "     font-family: \"lora\", serif;\n" +
+//                " }\n" +
+//                ".raleway {\n" +
+//                "     font-family: \"raleway\", sans-serif;\n" +
+//                " }\n" +
+//                "\n" +
+//                "html.textSizeOne { font-size: 13px !important; }\n" +
+//                "html.textSizeTwo { font-size: 15px !important; }\n" +
+//                "html.textSizeThree { font-size: 17px !important; }\n" +
+//                "html.textSizeFour { font-size: 19px !important; }\n" +
+//                "html.textSizeFive { font-size: 21px !important; }\n";
+//        String cssStyleInside =
+//                String.format(context.getString(R.string.css_tag_inside_open), cssStyle);
+//        cssStyleInside = "<head>\n" + cssStyleInside;
+//        htmlContent = htmlContent.replace("<head>", cssStyleInside);
         return htmlContent;
     }
 

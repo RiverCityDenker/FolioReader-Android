@@ -610,12 +610,6 @@ public class FolioPageFragment
                         loadingView.hide();
                     }
                 }
-                Log.e(TAG, "onPageFinished: >>>url + FolioActivity.anchor =====" + url + FolioActivity.anchor);
-                if (!FolioActivity.anchor.isEmpty() && isCurrentFragment()) {
-                    Log.e(TAG, "onPageFinished: >>>will scroll to " + FolioActivity.anchor);
-                    mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
-                    FolioActivity.anchor = "";
-                }
             }
         }
 

@@ -240,7 +240,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             public void onClick(View v) {
                 activityCallback.onDirectionChange(Config.Direction.VERTICAL);
 
-                mConfig.setDirection(Config.Direction.HORIZONTAL);
+                mConfig.setDirection(Config.Direction.VERTICAL);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 horizontalText.setSelected(false);
                 verticalText.setSelected(true);
