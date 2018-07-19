@@ -213,7 +213,7 @@ body {
     background-color: transparent !important;
 }
 
-html.nightMode {
+nightMode {
     background-color: #131313 !important;
 }
 
@@ -226,11 +226,11 @@ html.nightMode {
     color: #848484 !important;
 }
 
-html.nightMode .highlight_yellow {background:rgba(255, 235, 107, 0.9)}
-html.nightMode .highlight_green {background:rgba(192, 237, 114, 0.9)}
-html.nightMode .highlight_blue {background:rgba(173, 216, 255, 0.9)}
-html.nightMode .highlight_pink {background:rgba(255, 176, 202, 0.9)}
-html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
+.nightMode .highlight_yellow {background:rgba(255, 235, 107, 0.9)}
+.nightMode .highlight_green {background:rgba(192, 237, 114, 0.9)}
+.nightMode .highlight_blue {background:rgba(173, 216, 255, 0.9)}
+.nightMode .highlight_pink {background:rgba(255, 176, 202, 0.9)}
+.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
 
 
 /*
@@ -260,23 +260,23 @@ html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 
 }
 
 .andada {
-     font-family: "andada", sans-serif;
+     font-family: "andada", sans-serif !important;
  }
 .lato {
-     font-family: "lato", serif;
+     font-family: "lato", serif !important;
  }
 .lora {
-     font-family: "lora", serif;
+     font-family: "lora", serif !important;
  }
 .raleway {
-     font-family: "raleway", sans-serif;
+     font-family: "raleway", sans-serif !important;
  }
 
-html.textSizeOne { font-size: 13px !important; }
-html.textSizeTwo { font-size: 15px !important; }
-html.textSizeThree { font-size: 17px !important; }
-html.textSizeFour { font-size: 19px !important; }
-html.textSizeFive { font-size: 21px !important; }
+.textSizeOne { font-size: 13px !important; }
+.textSizeTwo { font-size: 15px !important; }
+.textSizeThree { font-size: 17px !important; }
+.textSizeFour { font-size: 19px !important; }
+.textSizeFive { font-size: 21px !important; }
 
 h1 {
     font-size: 2em;
@@ -331,29 +331,27 @@ span.clisting {
 }
 
 table {
-    table-layout: auto;
-    border-collapse: collapse;
-    border-spacing: 0;
-    word-break: normal;
-    width: 100%
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    word-break: normal !important;
+    width: 100% !important;
 }
 
 table td {
-    word-wrap:break-word;
-    word-break: normal;
-    border-collapse: collapse;
-    padding:0; margin:0;
+    word-wrap:break-word !important;
+    word-break: normal !important;
+    border-collapse: collapse !important;
+    padding:0 !important;
+    margin:0 !important;
 }
 table td p {
-    word-wrap:break-word;
-    word-break: normal;
-    padding:0; margin:0;
-}
-
-table thead tr th.tablecell_last {
-      width: 100%;
+    word-wrap:break-word !important;
+    word-break: normal !important;
+    padding:0 !important;
+    margin:0 !important;
 }
 
 p {
-    text-indent: 0;
+    text-indent: 0 !important;
 }

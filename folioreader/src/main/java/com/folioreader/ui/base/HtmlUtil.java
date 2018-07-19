@@ -57,7 +57,7 @@ public final class HtmlUtil {
         jsPath = jsPath
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />";
 
-        htmlContent = htmlContent.replace(".css", "1.css");
+//        htmlContent = htmlContent.replace(".css", "1.css");
         String toInject = "\n" + cssPath + "\n" + jsPath + "\n</head>";
         htmlContent = htmlContent.replace("</head>", toInject);
 
@@ -104,14 +104,33 @@ public final class HtmlUtil {
         }
         htmlContent = htmlContent.replace("<html ", "<html class=\"" + classes + "\" ");
 
-//        int startBodyTagIndex = htmlContent.indexOf("<body");
-//        int endBodyTagIndex = -1;
-//        for (int i = startBodyTagIndex; i < htmlContent.length(); i++) {
-//            if (htmlContent.charAt(i) == '>') {
-//                endBodyTagIndex = i;
-//                break;
-//            }
-//        }
+        int startBodyTagIndex = htmlContent.indexOf("<body");
+        int endBodyTagIndex = -1;
+        for (int i = startBodyTagIndex; i < htmlContent.length(); i++) {
+            if (htmlContent.charAt(i) == '>') {
+                endBodyTagIndex = i;
+                break;
+            }
+        }
+        String bodyTag = htmlContent.substring(startBodyTagIndex, endBodyTagIndex+1);
+        if (bodyTag.contains(">")) {
+            System.out.println("aaaaaaaaaaaaa");
+            if (bodyTag.contains("class")) {
+                int endClassIdx = -1;
+                StringBuilder className = new StringBuilder();
+                for (int j = bodyTag.indexOf("class=") + "class=".length(); j < bodyTag.length(); j++) {
+                    if (bodyTag.charAt(j) == '"') {
+                        break;
+                    } else {
+                        className.append(bodyTag.charAt(j));
+                    }
+                }
+                System.out.println("className = " + className);
+                String bodyTag2 = bodyTag.replace(className.toString(), classes);
+                htmlContent = htmlContent.replace(bodyTag, bodyTag2);
+            }
+        }
+
 //        String bodySubString = htmlContent.substring(startBodyTagIndex, endBodyTagIndex);
 //        if (bodySubString.contains("class")) {
 //
