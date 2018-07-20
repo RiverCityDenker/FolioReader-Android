@@ -172,16 +172,16 @@ input, textarea, button, highlight, select, a {
 }
 
 /* Highlight styles */
-html .highlight_yellow {background:rgb(255, 235, 107)}
-html .highlight_green {background:#C0ED72}
-html .highlight_blue {background:#ADD8FF}
-html .highlight_pink {background:#FFB0CA}
-html .highlight_underline {
+html.highlight_yellow {background:rgb(255, 235, 107)}
+html.highlight_green {background:#C0ED72}
+html.highlight_blue {background:#ADD8FF}
+html.highlight_pink {background:#FFB0CA}
+html.highlight_underline {
     text-decoration: none;
     border-bottom: 2px solid #F02814;
 }
 
-html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highlight_pink, span.epub-media-overlay-playing {
+html.highlight_yellow, html.highlight_green, html.highlight_blue, html.highlight_pink, span.epub-media-overlay-playing {
     border-radius: 3px;
     padding: 0 2px;
     margin: 0 -2px;

@@ -57,7 +57,6 @@ public final class HtmlUtil {
         jsPath = jsPath
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />";
 
-//        htmlContent = htmlContent.replace(".css", "1.css");
         String toInject = "\n" + cssPath + "\n" + jsPath + "\n</head>";
         htmlContent = htmlContent.replace("</head>", toInject);
 
@@ -104,6 +103,11 @@ public final class HtmlUtil {
         }
         htmlContent = htmlContent.replace("<html ", "<html class=\"" + classes + "\" ");
 
+        htmlContent = getUpdatedStyle(htmlContent, classes);
+        return htmlContent;
+    }
+
+    private static String getUpdatedStyle(String htmlContent, String classes) {
         int startBodyTagIndex = htmlContent.indexOf("<body");
         int endBodyTagIndex = -1;
         for (int i = startBodyTagIndex; i < htmlContent.length(); i++) {
@@ -112,11 +116,9 @@ public final class HtmlUtil {
                 break;
             }
         }
-        String bodyTag = htmlContent.substring(startBodyTagIndex, endBodyTagIndex+1);
+        String bodyTag = htmlContent.substring(startBodyTagIndex, endBodyTagIndex + 1);
         if (bodyTag.contains(">")) {
-            System.out.println("aaaaaaaaaaaaa");
             if (bodyTag.contains("class")) {
-                int endClassIdx = -1;
                 StringBuilder className = new StringBuilder();
                 for (int j = bodyTag.indexOf("class=") + "class=".length() + 1; j < bodyTag.length(); j++) {
                     if (bodyTag.charAt(j) == '"') {
@@ -126,69 +128,19 @@ public final class HtmlUtil {
                     }
                 }
                 System.out.println("className = " + className);
-                String bodyTag2 = bodyTag.replace(className.toString(), classes);
+                String updatedClass = className.toString() + " " + classes;
+                String bodyTag2 = bodyTag.replace(className.toString(), updatedClass);
                 htmlContent = htmlContent.replace(bodyTag, bodyTag2);
             } else {
                 String bodyTag2 = bodyTag.replace(">", " class=\"" + classes + "\">");
                 htmlContent = htmlContent.replace(bodyTag, bodyTag2);
             }
         }
-
-//        String bodySubString = htmlContent.substring(startBodyTagIndex, endBodyTagIndex);
-//        if (bodySubString.contains("class")) {
-//
-//        }
-//
-//        // inside Style
-//        String cssStyle = "\n" +
-//                "@font-face {\n" +
-//                "    font-family: 'andada';\n" +
-//                "    src: url('file:///android_asset/fonts/andada/Andada-Regular.otf');\n" +
-//                "}\n" +
-//                "\n" +
-//                "@font-face {\n" +
-//                "    font-family: 'lato';\n" +
-//                "    src: url('file:///android_asset/fonts/lato/Lato-Regular.ttf');\n" +
-//                "}\n" +
-//                "\n" +
-//                "@font-face {\n" +
-//                "    font-family: 'lora';\n" +
-//                "    src: url('file:///android_asset/fonts/lora/Lora-Regular.ttf');\n" +
-//                "}\n" +
-//                "\n" +
-//                "@font-face {\n" +
-//                "    font-family: 'raleway';\n" +
-//                "    src: url('file:///android_asset/fonts/raleway/Raleway-Regular.ttf');\n" +
-//                "}\n" +
-//                "\n" +
-//                ".andada {\n" +
-//                "     font-family: \"andada\", sans-serif;\n" +
-//                " }\n" +
-//                ".lato {\n" +
-//                "     font-family: \"lato\", serif;\n" +
-//                " }\n" +
-//                ".lora {\n" +
-//                "     font-family: \"lora\", serif;\n" +
-//                " }\n" +
-//                ".raleway {\n" +
-//                "     font-family: \"raleway\", sans-serif;\n" +
-//                " }\n" +
-//                "\n" +
-//                "html.textSizeOne { font-size: 13px !important; }\n" +
-//                "html.textSizeTwo { font-size: 15px !important; }\n" +
-//                "html.textSizeThree { font-size: 17px !important; }\n" +
-//                "html.textSizeFour { font-size: 19px !important; }\n" +
-//                "html.textSizeFive { font-size: 21px !important; }\n";
-//        String cssStyleInside =
-//                String.format(context.getString(R.string.css_tag_inside_open), cssStyle);
-//        cssStyleInside = "<head>\n" + cssStyleInside;
-//        htmlContent = htmlContent.replace("<head>", cssStyleInside);
         return htmlContent;
     }
 
     public static String reformatHtml(Context context, String htmlString, Config mConfig) {
         final String formatedHtml = htmlString.replace(HTML_CODE_TAG, HTML_SPAN_TAG).replace("../", "");
-        final String reformatedHtml = formatedHtml.replace("Styles/", "../Styles/");
-        return HtmlUtil.getHtmlContent(context, reformatedHtml, mConfig);
+        return HtmlUtil.getHtmlContent(context, formatedHtml, mConfig);
     }
 }
