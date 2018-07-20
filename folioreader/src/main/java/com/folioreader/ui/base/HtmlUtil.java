@@ -118,7 +118,7 @@ public final class HtmlUtil {
             if (bodyTag.contains("class")) {
                 int endClassIdx = -1;
                 StringBuilder className = new StringBuilder();
-                for (int j = bodyTag.indexOf("class=") + "class=".length(); j < bodyTag.length(); j++) {
+                for (int j = bodyTag.indexOf("class=") + "class=".length() + 1; j < bodyTag.length(); j++) {
                     if (bodyTag.charAt(j) == '"') {
                         break;
                     } else {
@@ -127,6 +127,9 @@ public final class HtmlUtil {
                 }
                 System.out.println("className = " + className);
                 String bodyTag2 = bodyTag.replace(className.toString(), classes);
+                htmlContent = htmlContent.replace(bodyTag, bodyTag2);
+            } else {
+                String bodyTag2 = bodyTag.replace(">", " class=\"" + classes + "\">");
                 htmlContent = htmlContent.replace(bodyTag, bodyTag2);
             }
         }

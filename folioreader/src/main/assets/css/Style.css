@@ -213,7 +213,7 @@ body {
     background-color: transparent !important;
 }
 
-nightMode {
+.nightMode {
     background-color: #131313 !important;
 }
 
@@ -330,27 +330,6 @@ span.clisting {
     font-size: 1em;
 }
 
-table {
-    table-layout: auto !important;
-    border-collapse: collapse !important;
-    border-spacing: 0 !important;
-    word-break: normal !important;
-    width: 100% !important;
-}
-
-table td {
-    word-wrap:break-word !important;
-    word-break: normal !important;
-    border-collapse: collapse !important;
-    padding:0 !important;
-    margin:0 !important;
-}
-table td p {
-    word-wrap:break-word !important;
-    word-break: normal !important;
-    padding:0 !important;
-    margin:0 !important;
-}
 
 p {
     text-indent: 0 !important;
