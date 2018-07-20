@@ -8,7 +8,6 @@ import android.app.Dialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -31,7 +30,6 @@ import com.folioreader.R;
 import com.folioreader.model.event.ReloadDataEvent;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
 import com.folioreader.util.AppUtil;
-import com.folioreader.util.SharedPreferenceUtil;
 import com.folioreader.util.UiUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -66,15 +64,6 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     private FolioActivityCallback activityCallback;
     private Config mConfig;
     private GoogleAnalyticManager googleAnalyticManager;
-
-    public static ConfigDialogFragment newInstance() {
-
-        Bundle args = new Bundle();
-
-        ConfigDialogFragment fragment = new ConfigDialogFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -226,6 +215,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mDialogView.findViewById(R.id.btn_horizontal_orentation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mConfig.getDirection() == Config.Direction.HORIZONTAL) return;
                 activityCallback.onDirectionChange(Config.Direction.HORIZONTAL);
 
                 mConfig.setDirection(Config.Direction.HORIZONTAL);
@@ -238,6 +228,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mDialogView.findViewById(R.id.btn_vertical_orentation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mConfig.getDirection() == Config.Direction.VERTICAL) return;
                 activityCallback.onDirectionChange(Config.Direction.VERTICAL);
 
                 mConfig.setDirection(Config.Direction.VERTICAL);
@@ -249,6 +240,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     }
 
     private void selectFont(int selectedFont, boolean isReloadNeeded) {
+        if (mConfig.getFont() == selectedFont) return;
         if (selectedFont == Constants.FONT_ANDADA) {
             mDialogView.findViewById(R.id.btn_font_andada).setSelected(true);
             mDialogView.findViewById(R.id.btn_font_lato).setSelected(false);

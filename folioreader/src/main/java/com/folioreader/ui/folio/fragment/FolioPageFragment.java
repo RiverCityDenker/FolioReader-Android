@@ -326,11 +326,8 @@ public class FolioPageFragment
             getLastReadPosition();
 
         if (isAdded()) {
-            loadingView.updateTheme();
-            loadingView.show();
             mIsPageReloaded = true;
             setHtml(true);
-            updatePagesLeftTextBg();
         }
     }
 
@@ -778,7 +775,7 @@ public class FolioPageFragment
                         Config.Direction.HORIZONTAL;
                 mWebview.loadUrl("javascript:getFirstVisibleSpan(" + isHorizontal + ")");
 
-                wait(2000);
+                wait(1000);
             }
         } catch (InterruptedException e) {
             Log.e(LOG_TAG, "-> " + e);
