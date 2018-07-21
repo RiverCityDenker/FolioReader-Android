@@ -5,6 +5,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -43,6 +44,11 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     public static final int NIGHT_BUTTON = 31;
     private static final int FADE_DAY_NIGHT_MODE = 500;
     private static final String TAG = ConfigDialogFragment.class.getSimpleName();
+
+    private int FONT_ANDADA = 1;
+    private int FONT_LATO = 2;
+    private int FONT_LORA = 3;
+    private int FONT_RALEWAY = 4;
 
     private boolean mIsNightMode = false;
 
@@ -222,6 +228,8 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 AppUtil.saveConfig(getActivity(), mConfig);
                 horizontalText.setSelected(true);
                 verticalText.setSelected(false);
+                verticalText.setTextColor(getActivity().getResources().getColor(mIsNightMode ? R.color.app_gray : R.color.black));
+                horizontalText.setTextColor(getActivity().getResources().getColor(R.color.colorPrimary));
             }
         });
 
@@ -235,33 +243,22 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 AppUtil.saveConfig(getActivity(), mConfig);
                 horizontalText.setSelected(false);
                 verticalText.setSelected(true);
+                verticalText.setTextColor(getActivity().getResources().getColor(R.color.colorPrimary));
+                horizontalText.setTextColor(getActivity().getResources().getColor(mIsNightMode ? R.color.app_gray : R.color.black));
             }
         });
     }
 
     private void selectFont(int selectedFont, boolean isReloadNeeded) {
         if (mConfig.getFont() == selectedFont) return;
-        if (selectedFont == Constants.FONT_ANDADA) {
-            mDialogView.findViewById(R.id.btn_font_andada).setSelected(true);
-            mDialogView.findViewById(R.id.btn_font_lato).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lora).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_raleway).setSelected(false);
-        } else if (selectedFont == Constants.FONT_LATO) {
-            mDialogView.findViewById(R.id.btn_font_andada).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lato).setSelected(true);
-            mDialogView.findViewById(R.id.btn_font_lora).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_raleway).setSelected(false);
-        } else if (selectedFont == Constants.FONT_LORA) {
-            mDialogView.findViewById(R.id.btn_font_andada).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lato).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lora).setSelected(true);
-            mDialogView.findViewById(R.id.btn_font_raleway).setSelected(false);
-        } else if (selectedFont == Constants.FONT_RALEWAY) {
-            mDialogView.findViewById(R.id.btn_font_andada).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lato).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_lora).setSelected(false);
-            mDialogView.findViewById(R.id.btn_font_raleway).setSelected(true);
-        }
+
+        Resources resources = getActivity().getResources();
+        int colorUnselected = mIsNightMode ? R.color.grey_color : R.color.black;
+
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_andada)).setTextColor(resources.getColor(FONT_ANDADA == selectedFont ? R.color.colorPrimary : colorUnselected));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lato)).setTextColor(resources.getColor(FONT_LATO == selectedFont ? R.color.colorPrimary : colorUnselected));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lora)).setTextColor(resources.getColor(FONT_LORA == selectedFont ? R.color.colorPrimary : colorUnselected));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_raleway)).setTextColor(resources.getColor(FONT_RALEWAY == selectedFont ? R.color.colorPrimary : colorUnselected));
 
         mConfig.setFont(selectedFont);
         //if (mConfigDialogCallback != null) mConfigDialogCallback.onConfigChange();
@@ -318,7 +315,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
 
     private void configSeekBar() {
         Drawable thumbDrawable = ContextCompat.getDrawable(getActivity(), R.drawable.seekbar_thumb);
-        UiUtil.setColorToImage(getActivity(), mConfig.getThemeColor(), (thumbDrawable));
+        UiUtil.setColorToImage(getActivity(), R.color.colorPrimary, (thumbDrawable));
         UiUtil.setColorToImage(getActivity(), R.color.grey_color, mFontSizeSeekBar.getProgressDrawable());
         mFontSizeSeekBar.setThumb(thumbDrawable);
 
@@ -379,50 +376,50 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     }
 
     private void initColorNight() {
-        UiUtil.setColorToImage(getActivity(), mConfig.getThemeColor(), mNightButton.getDrawable());
+        Resources resources = getActivity().getResources();
+        UiUtil.setColorToImage(getActivity(), R.color.colorPrimary, mNightButton.getDrawable());
         UiUtil.setColorToImage(getActivity(), R.color.app_gray, mDayButton.getDrawable());
         UiUtil.setColorToImage(getActivity(), R.color.app_gray, smallFont.getDrawable());
         UiUtil.setColorToImage(getActivity(), R.color.app_gray, bigFont.getDrawable());
 
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_andada)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.grey_color));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lato)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.grey_color));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lora)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.grey_color));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_raleway)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.grey_color));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_andada)).setTextColor(resources.getColor(FONT_ANDADA == mConfig.getFont() ? R.color.colorPrimary : R.color.grey_color));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lato)).setTextColor(resources.getColor(FONT_LATO == mConfig.getFont() ? R.color.colorPrimary : R.color.grey_color));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lora)).setTextColor(resources.getColor(FONT_LORA == mConfig.getFont() ? R.color.colorPrimary : R.color.grey_color));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_raleway)).setTextColor(resources.getColor(FONT_RALEWAY == mConfig.getFont() ? R.color.colorPrimary : R.color.grey_color));
 
-        dayText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
-        nightText.setTextColor(mConfig.getThemeColor());
+        dayText.setTextColor(resources.getColor(R.color.grey_color));
+        nightText.setTextColor(resources.getColor(R.color.colorPrimary));
 
         if (mConfig.getDirection().equals(Config.Direction.VERTICAL)) {
-            verticalText.setTextColor(mConfig.getThemeColor());
-            horizontalText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
+            verticalText.setTextColor(resources.getColor(R.color.colorPrimary));
+            horizontalText.setTextColor(resources.getColor(R.color.app_gray));
         } else {
-            verticalText.setTextColor(getActivity().getResources().getColor(R.color.grey_color));
-            horizontalText.setTextColor(mConfig.getThemeColor());
+            verticalText.setTextColor(resources.getColor(R.color.app_gray));
+            horizontalText.setTextColor(resources.getColor(R.color.colorPrimary));
         }
     }
 
     private void initColorDay() {
+        Resources resources = getActivity().getResources();
         UiUtil.setColorToImage(getActivity(), R.color.black, mNightButton.getDrawable());
-        UiUtil.setColorToImage(getActivity(), mConfig.getThemeColor(), mDayButton.getDrawable());
+        UiUtil.setColorToImage(getActivity(), R.color.colorPrimary, mDayButton.getDrawable());
         UiUtil.setColorToImage(getActivity(), R.color.black, smallFont.getDrawable());
         UiUtil.setColorToImage(getActivity(), R.color.black, bigFont.getDrawable());
 
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_andada)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.black));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lato)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.black));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lora)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.black));
-        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_raleway)).setTextColor(UiUtil.getColorList(getActivity(), mConfig.getThemeColor(), R.color.black));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_andada)).setTextColor(resources.getColor(FONT_ANDADA == mConfig.getFont() ? R.color.colorPrimary : R.color.black));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lato)).setTextColor(resources.getColor(FONT_LATO == mConfig.getFont() ? R.color.colorPrimary : R.color.black));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_lora)).setTextColor(resources.getColor(FONT_LORA == mConfig.getFont() ? R.color.colorPrimary : R.color.black));
+        ((StyleableTextView) mDialogView.findViewById(R.id.btn_font_raleway)).setTextColor(resources.getColor(FONT_RALEWAY == mConfig.getFont() ? R.color.colorPrimary : R.color.black));
 
-        dayText.setTextColor(mConfig.getThemeColor());
-        nightText.setTextColor(getActivity().getResources().getColor(R.color.black));
-        verticalText.setTextColor(getActivity().getResources().getColor(R.color.black));
-        horizontalText.setTextColor(getActivity().getResources().getColor(R.color.black));
+        dayText.setTextColor(resources.getColor(R.color.colorPrimary));
+        nightText.setTextColor(resources.getColor(R.color.black));
 
         if (mConfig.getDirection().equals(Config.Direction.VERTICAL)) {
-            verticalText.setTextColor(mConfig.getThemeColor());
-            horizontalText.setTextColor(getActivity().getResources().getColor(R.color.black));
+            verticalText.setTextColor(resources.getColor(R.color.colorPrimary));
+            horizontalText.setTextColor(resources.getColor(R.color.black));
         } else {
-            verticalText.setTextColor(getActivity().getResources().getColor(R.color.black));
-            horizontalText.setTextColor(mConfig.getThemeColor());
+            verticalText.setTextColor(resources.getColor(R.color.black));
+            horizontalText.setTextColor(resources.getColor(R.color.colorPrimary));
         }
     }
 

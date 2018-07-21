@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.view.UnderlinedTextView;
 
@@ -91,6 +92,14 @@ public class UiUtil {
         };
         ColorStateList list = new ColorStateList(states, colors);
         return list;
+    }
+
+    public static int getColorForFont(int fontCurrent, int fontSelected, int selectedColor, int unselectedColor) {
+        if (fontCurrent == fontSelected) {
+            return selectedColor;
+        } else  {
+            return unselectedColor;
+        }
     }
 
     public static void keepScreenAwake(boolean enable, Context context) {
