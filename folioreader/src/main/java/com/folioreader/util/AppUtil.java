@@ -86,7 +86,7 @@ public class AppUtil {
         return simpleDateFormat.format(hightlightDate);
     }
 
-    public static void saveConfig(Context context, Config config) {
+    public synchronized static void saveConfig(Context context, Config config) {
         JSONObject obj = new JSONObject();
         try {
             obj.put(Config.CONFIG_FONT, config.getFont());
@@ -96,14 +96,16 @@ public class AppUtil {
             obj.put(Config.CONFIG_IS_TTS, config.isShowTts());
             obj.put(Config.CONFIG_ALLOWED_DIRECTION, config.getAllowedDirection().toString());
             obj.put(Config.CONFIG_DIRECTION, config.getDirection().toString());
+            obj.put(Config.CONFIG_DIRECTION_ENABLE, config.isEnableDirection());
             SharedPreferenceUtil.putSharedPreferencesString(context, Config.INTENT_CONFIG,
                     obj.toString());
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
+
     }
 
-    public static Config getSavedConfig(Context context) {
+    public synchronized static Config getSavedConfig(Context context) {
         String json = getSharedPreferencesString(context, Config.INTENT_CONFIG, null);
         if (json != null) {
             try {

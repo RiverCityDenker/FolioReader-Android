@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -464,9 +465,12 @@ public class FolioPageFragment
             }
         });
 
+        mWebview.clearCache(true);
+        mWebview.clearHistory();
         mWebview.getSettings().setJavaScriptEnabled(true);
-        mWebview.setVerticalScrollBarEnabled(false);
+        mWebview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebview.getSettings().setAllowFileAccess(true);
+        mWebview.setVerticalScrollBarEnabled(false);
 
         mWebview.setHorizontalScrollBarEnabled(false);
 
@@ -485,8 +489,8 @@ public class FolioPageFragment
             }
         });
 
-        mWebview.setWebViewClient(webViewClient);
         mWebview.setWebChromeClient(webChromeClient);
+        mWebview.setWebViewClient(webViewClient);
 
         mTextSelectionSupport = TextSelectionSupport.support(getActivity(), mWebview);
         mTextSelectionSupport.setSelectionListener(new TextSelectionSupport.SelectionListener() {
@@ -563,6 +567,8 @@ public class FolioPageFragment
                         } else {
                             // Make loading view invisible for all other fragments
                             loadingView.hide();
+
+                            setEnableDirectionConfig();
                         }
                     }
 
@@ -594,6 +600,8 @@ public class FolioPageFragment
                                 readPosition.isUsingId(), readPosition.getValue()));
                     } else {
                         loadingView.hide();
+
+                        setEnableDirectionConfig();
                     }
 
                 } else {
@@ -604,6 +612,12 @@ public class FolioPageFragment
                     } else {
                         // Make loading view invisible for all other fragments
                         loadingView.hide();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                setEnableDirectionConfig();
+                            }
+                        }, 1000);
                     }
                 }
             }
@@ -689,6 +703,13 @@ public class FolioPageFragment
             return null;
         }
     };
+
+    private void setEnableDirectionConfig() {
+        mConfig = AppUtil.getSavedConfig(getActivity());
+        mConfig.setEnableDirection(true);
+        AppUtil.saveConfig(getContext(), mConfig);
+        Log.e(TAG, "setEnableDirectionConfig: >>>>>>"+mConfig.isEnableDirection());
+    }
 
     private WebChromeClient webChromeClient = new WebChromeClient() {
 

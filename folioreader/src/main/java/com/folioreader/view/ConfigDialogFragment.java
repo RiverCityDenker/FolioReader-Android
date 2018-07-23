@@ -70,6 +70,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     private FolioActivityCallback activityCallback;
     private Config mConfig;
     private GoogleAnalyticManager googleAnalyticManager;
+    private Config.Direction mCurrentDirection;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -221,11 +222,15 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mDialogView.findViewById(R.id.btn_horizontal_orentation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mConfig.getDirection() == Config.Direction.HORIZONTAL) return;
-                activityCallback.onDirectionChange(Config.Direction.HORIZONTAL);
-
+                mConfig = AppUtil.getSavedConfig(getActivity());
+                if (mConfig == null
+                        || mConfig.getDirection() == Config.Direction.HORIZONTAL
+                        || !mConfig.isEnableDirection() || mCurrentDirection == Config.Direction.HORIZONTAL) return;
+                mCurrentDirection = Config.Direction.HORIZONTAL;
+                mConfig.setEnableDirection(false);
                 mConfig.setDirection(Config.Direction.HORIZONTAL);
                 AppUtil.saveConfig(getActivity(), mConfig);
+                activityCallback.onDirectionChange(Config.Direction.HORIZONTAL);
                 horizontalText.setSelected(true);
                 verticalText.setSelected(false);
                 verticalText.setTextColor(getActivity().getResources().getColor(mIsNightMode ? R.color.app_gray : R.color.black));
@@ -236,11 +241,16 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mDialogView.findViewById(R.id.btn_vertical_orentation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mConfig.getDirection() == Config.Direction.VERTICAL) return;
-                activityCallback.onDirectionChange(Config.Direction.VERTICAL);
-
+                mConfig = AppUtil.getSavedConfig(getActivity());
+                if (mConfig == null
+                        || mConfig.getDirection() == Config.Direction.VERTICAL
+                        || !mConfig.isEnableDirection() || mCurrentDirection == Config.Direction.VERTICAL) return;
+                mCurrentDirection = Config.Direction.VERTICAL;
+                mConfig.setEnableDirection(false);
                 mConfig.setDirection(Config.Direction.VERTICAL);
                 AppUtil.saveConfig(getActivity(), mConfig);
+                activityCallback.onDirectionChange(Config.Direction.VERTICAL);
+
                 horizontalText.setSelected(false);
                 verticalText.setSelected(true);
                 verticalText.setTextColor(getActivity().getResources().getColor(R.color.colorPrimary));
@@ -250,6 +260,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     }
 
     private void selectFont(int selectedFont, boolean isReloadNeeded) {
+        mConfig = AppUtil.getSavedConfig(getActivity());
         if (mConfig.getFont() == selectedFont) return;
 
         Resources resources = getActivity().getResources();
@@ -295,6 +306,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             @Override
             public void onAnimationEnd(Animator animator) {
                 mIsNightMode = !mIsNightMode;
+                mConfig = AppUtil.getSavedConfig(getActivity());
                 mConfig.setNightMode(mIsNightMode);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 EventBus.getDefault().post(new ReloadDataEvent());
@@ -322,6 +334,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         mFontSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mConfig = AppUtil.getSavedConfig(getActivity());
                 mConfig.setFontSize(progress);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 EventBus.getDefault().post(new ReloadDataEvent());
@@ -344,7 +357,6 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         switch (((Integer) v.getTag())) {
             case DAY_BUTTON:
                 if (mIsNightMode) {
-                    mIsNightMode = true;
                     toggleBlackTheme();
                     mDayButton.setSelected(true);
                     dayText.setSelected(true);
@@ -358,7 +370,6 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 break;
             case NIGHT_BUTTON:
                 if (!mIsNightMode) {
-                    mIsNightMode = false;
                     toggleBlackTheme();
                     mDayButton.setSelected(false);
                     dayText.setSelected(false);

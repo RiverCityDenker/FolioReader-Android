@@ -25,6 +25,7 @@ public class Config implements Parcelable {
     public static final String INTENT_PORT = "port";
     private static final AllowedDirection DEFAULT_ALLOWED_DIRECTION = AllowedDirection.ONLY_VERTICAL;
     private static final Direction DEFAULT_DIRECTION = Direction.VERTICAL;
+    public static final String CONFIG_DIRECTION_ENABLE = "direction_enable";
 
     private int font = 3;
     private int fontSize = 2;
@@ -33,6 +34,16 @@ public class Config implements Parcelable {
     private boolean showTts = true;
     private AllowedDirection allowedDirection = DEFAULT_ALLOWED_DIRECTION;
     private Direction direction = DEFAULT_DIRECTION;
+    private boolean mEnableDirection;
+
+    public Config setEnableDirection(boolean enableDirection) {
+        this.mEnableDirection = enableDirection;
+        return this;
+    }
+
+    public boolean isEnableDirection() {
+        return mEnableDirection;
+    }
 
     /**
      * Reading modes available
@@ -70,6 +81,7 @@ public class Config implements Parcelable {
         dest.writeInt(font);
         dest.writeInt(fontSize);
         dest.writeByte((byte) (nightMode ? 1 : 0));
+        dest.writeByte((byte) (mEnableDirection ? 1 : 0));
         dest.writeInt(themeColor);
         dest.writeByte((byte) (showTts ? 1 : 0));
         dest.writeString(allowedDirection.toString());
@@ -80,6 +92,7 @@ public class Config implements Parcelable {
         font = in.readInt();
         fontSize = in.readInt();
         nightMode = in.readByte() != 0;
+        mEnableDirection = in.readByte() != 0;
         themeColor = in.readInt();
         showTts = in.readByte() != 0;
         allowedDirection = getAllowedDirectionFromString(LOG_TAG, in.readString());
@@ -90,10 +103,11 @@ public class Config implements Parcelable {
     }
 
     public Config(int font, int fontSize, boolean nightMode, int themeColor, boolean showTts,
-                  AllowedDirection allowedDirection, Direction direction) {
+                  AllowedDirection allowedDirection, boolean enableDirection, Direction direction) {
         this.font = font;
         this.fontSize = fontSize;
         this.nightMode = nightMode;
+        this.mEnableDirection = enableDirection;
         this.themeColor = themeColor;
         this.showTts = showTts;
         setAllowedDirection(allowedDirection);
@@ -109,6 +123,7 @@ public class Config implements Parcelable {
         allowedDirection = getAllowedDirectionFromString(LOG_TAG,
                 jsonObject.optString(CONFIG_ALLOWED_DIRECTION));
         direction = getDirectionFromString(LOG_TAG, jsonObject.optString(CONFIG_DIRECTION));
+        mEnableDirection = jsonObject.optBoolean(CONFIG_DIRECTION_ENABLE);
     }
 
     public static Direction getDirectionFromString(String LOG_TAG, String directionString) {
@@ -269,6 +284,7 @@ public class Config implements Parcelable {
                 ", showTts=" + showTts +
                 ", allowedDirection=" + allowedDirection +
                 ", direction=" + direction +
+                ", enableDirection=" + mEnableDirection +
                 '}';
     }
 }
