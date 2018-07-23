@@ -262,6 +262,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     private void selectFont(int selectedFont, boolean isReloadNeeded) {
         mConfig = AppUtil.getSavedConfig(getActivity());
         if (mConfig.getFont() == selectedFont) return;
+        disableDirection();
 
         Resources resources = getActivity().getResources();
         int colorUnselected = mIsNightMode ? R.color.grey_color : R.color.black;
@@ -280,6 +281,8 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
     }
 
     private void toggleBlackTheme() {
+        mConfig = AppUtil.getSavedConfig(getActivity());
+        disableDirection();
 
         int day = getResources().getColor(R.color.white);
         int night = getResources().getColor(R.color.night);
@@ -325,6 +328,13 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
         colorAnimation.start();
     }
 
+    private void disableDirection() {
+        if (mConfig.isEnableDirection()) {
+            mConfig.setEnableDirection(false);
+            AppUtil.saveConfig(getActivity(), mConfig);
+        }
+    }
+
     private void configSeekBar() {
         Drawable thumbDrawable = ContextCompat.getDrawable(getActivity(), R.drawable.seekbar_thumb);
         UiUtil.setColorToImage(getActivity(), R.color.colorPrimary, (thumbDrawable));
@@ -336,6 +346,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mConfig = AppUtil.getSavedConfig(getActivity());
                 mConfig.setFontSize(progress);
+                mConfig.setEnableDirection(false);
                 AppUtil.saveConfig(getActivity(), mConfig);
                 EventBus.getDefault().post(new ReloadDataEvent());
                 googleAnalyticManager.sendEvent(AnalyticViewName.select_font_size, AnalyticViewName.fontsize_select, "" + progress);

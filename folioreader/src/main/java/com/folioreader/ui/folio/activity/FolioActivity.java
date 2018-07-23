@@ -102,6 +102,7 @@ public class FolioActivity
     public static final String INTENT_EBOOK_USER_KEY = "user_key";
     public static final String INTENT_EBOOK_TITLE_NAME = "title_ebook";
     private static final String TAG = FolioActivity.class.getSimpleName();
+    public static boolean mIsDirectionChanged = false;
 
     public enum EpubSourceType {
         RAW,
@@ -325,6 +326,7 @@ public class FolioActivity
         entryReadPosition = folioPageFragment.getLastReadPosition();
 
         direction = newDirection;
+        mIsDirectionChanged = true;
 
         mFolioPageViewPager.setDirection(newDirection);
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
@@ -590,8 +592,8 @@ public class FolioActivity
     }
 
     @Override
-    public EpubSourceType getSourceType() {
-        return mEpubSourceType;
+    public ReadPosition getLastReadPosition() {
+        return this.lastReadPosition;
     }
 
     @Override

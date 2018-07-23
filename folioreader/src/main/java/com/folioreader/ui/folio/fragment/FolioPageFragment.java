@@ -417,6 +417,20 @@ public class FolioPageFragment
         return mActivityCallback.getDirection().toString();
     }
 
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void hideLoading() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    loadingView.hide();
+                }
+            });
+        }
+    }
+
     public void scrollToLast() {
 
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
@@ -558,6 +572,9 @@ public class FolioPageFragment
                 if (mIsPageReloaded) {
 
                     if (isCurrentFragment()) {
+                        if (lastReadPosition == null) {
+                            lastReadPosition = mActivityCallback.getLastReadPosition();
+                        }
                         mWebview.loadUrl(String.format("javascript:scrollToSpan(%b, %s)",
                                 lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                     } else {
@@ -567,7 +584,6 @@ public class FolioPageFragment
                         } else {
                             // Make loading view invisible for all other fragments
                             loadingView.hide();
-
                             setEnableDirectionConfig();
                         }
                     }
@@ -600,7 +616,6 @@ public class FolioPageFragment
                                 readPosition.isUsingId(), readPosition.getValue()));
                     } else {
                         loadingView.hide();
-
                         setEnableDirectionConfig();
                     }
 
@@ -612,12 +627,15 @@ public class FolioPageFragment
                     } else {
                         // Make loading view invisible for all other fragments
                         loadingView.hide();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                setEnableDirectionConfig();
-                            }
-                        }, 1000);
+                        if (FolioActivity.mIsDirectionChanged) {
+                            FolioActivity.mIsDirectionChanged = false;
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setEnableDirectionConfig();
+                                }
+                            }, 1000);
+                        }
                     }
                 }
             }
@@ -705,10 +723,10 @@ public class FolioPageFragment
     };
 
     private void setEnableDirectionConfig() {
-        mConfig = AppUtil.getSavedConfig(getActivity());
-        mConfig.setEnableDirection(true);
-        AppUtil.saveConfig(getContext(), mConfig);
-        Log.e(TAG, "setEnableDirectionConfig: >>>>>>"+mConfig.isEnableDirection());
+        synchronized (FolioPageFragment.class) {
+            mConfig.setEnableDirection(true);
+            AppUtil.saveConfig(getContext(), mConfig);
+        }
     }
 
     private WebChromeClient webChromeClient = new WebChromeClient() {
@@ -1224,10 +1242,6 @@ public class FolioPageFragment
     }
 
     private boolean isCurrentFragment() {
-//        Log.d(LOG_TAG, "-> isCurrentFragment -> "
-//                + ", isAdded = " + isAdded()
-//                + ", mActivityCallback.getChapterPosition() = " + mActivityCallback.getChapterPosition()
-//                + ", mPosition = " + mPosition);
         return isAdded() && mActivityCallback.getChapterPosition() == mPosition;
     }
 

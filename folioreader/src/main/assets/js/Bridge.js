@@ -327,7 +327,9 @@ function scrollToElement(id) {
         if (element)
             goToImageElement(element);
 
-    LoadingView.hide();
+    //LoadingView.hide();
+    FolioPageFragment.hideLoading();
+
 }
 
 /**
@@ -434,7 +436,8 @@ function scrollToLast() {
         WebViewPager.setPageToLast();
     }
 
-    LoadingView.hide();
+    //LoadingView.hide();
+    FolioPageFragment.hideLoading();
 }
 
 function scrollToFirst() {
@@ -451,7 +454,8 @@ function scrollToFirst() {
         WebViewPager.setPageToFirst();
     }
 
-    LoadingView.hide();
+    //LoadingView.hide();
+        FolioPageFragment.hideLoading();
 }
 
 function getCompatMode() {
@@ -922,14 +926,16 @@ function scrollToSpan(usingId, value) {
         var spanCollection = document.getElementsByTagName("span");
         if (spanCollection.length == 0 || value < 0 || value >= spanCollection.length
             || value == null) {
-            LoadingView.hide();
+            //LoadingView.hide();
+                FolioPageFragment.hideLoading();
             return;
         }
         console.log(">>>scrollToSpan2");
         goToElement(spanCollection[value]);
     }
 
-    LoadingView.hide();
+    //LoadingView.hide();
+        FolioPageFragment.hideLoading();
 }
 
 // Class based onClick listener
@@ -991,7 +997,8 @@ function goToHighlight(highlightId){
     if (element)
         goToElement(element);
 
-    LoadingView.hide();
+    //LoadingView.hide();
+        FolioPageFragment.hideLoading();
 }
 
 function goToAnchor(anchorId) {
@@ -1000,7 +1007,8 @@ function goToAnchor(anchorId) {
     if (element)
         goToElement(element);
 
-    LoadingView.hide();
+    //LoadingView.hide();
+        FolioPageFragment.hideLoading();
 }
 
 $(function(){
