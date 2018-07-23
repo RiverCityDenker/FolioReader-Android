@@ -40,40 +40,28 @@ html {
 body {
     margin: 0 !important;
     padding: 20px 20px !important;
-    overflow: !important;
+    overflow: hidden !important;
 }
 
 /* Custom padding for tablets */
-/*
+
 @media only screen and (min-device-width: 768px){
     body {
         padding: 60px 80px !important;
     }
 }
-*/
 
 /* Table */
 table {
     border-collapse: collapse;
     border-spacing: 0;
+    word-break: normal;
 }
 tbody, tfoot, thead {
     vertical-align: middle !important;
 }
 td, th, tr {
     vertical-align: inherit !important;
-}
-table td {
-    width:100px;
-    word-wrap:break-word;
-    word-break: normal;
-    border-collapse: collapse;
-    padding:0; margin:0;
-}
-table td p {
-    word-wrap:break-word;
-    word-break: normal;
-    padding:0; margin:0;
 }
 /* List */
 dd, dir, menu, ol, ul { margin-left: 30px !important; }
@@ -330,6 +318,10 @@ span.clisting {
     font-size: 1em;
 }
 
+p.tabellentext
+{
+    margin: 0 !important;
+}
 
 p {
     text-indent: 0 !important;
