@@ -106,7 +106,8 @@ public class WebViewPager extends ViewPager {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                folioWebView.postInvalidate();
+                if (folioWebView != null)
+                    folioWebView.postInvalidate();
                 setCurrentItem(pageIndex, false);
             }
         });
@@ -119,7 +120,8 @@ public class WebViewPager extends ViewPager {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                folioWebView.postInvalidate();
+                if (folioWebView != null)
+                    folioWebView.postInvalidate();
                 setCurrentItem(horizontalPageCount - 1);
             }
         });
@@ -132,7 +134,8 @@ public class WebViewPager extends ViewPager {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                folioWebView.postInvalidate();
+                if (folioWebView != null)
+                    folioWebView.postInvalidate();
                 setCurrentItem(0);
             }
         });

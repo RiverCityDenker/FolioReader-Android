@@ -327,7 +327,7 @@ function scrollToElement(id) {
         if (element)
             goToImageElement(element);
 
-    //LoadingView.hide();
+    
     FolioPageFragment.hideLoading();
 
 }
@@ -436,7 +436,7 @@ function scrollToLast() {
         WebViewPager.setPageToLast();
     }
 
-    //LoadingView.hide();
+    
     FolioPageFragment.hideLoading();
 }
 
@@ -454,7 +454,7 @@ function scrollToFirst() {
         WebViewPager.setPageToFirst();
     }
 
-    //LoadingView.hide();
+    
         FolioPageFragment.hideLoading();
 }
 
@@ -926,7 +926,7 @@ function scrollToSpan(usingId, value) {
         var spanCollection = document.getElementsByTagName("span");
         if (spanCollection.length == 0 || value < 0 || value >= spanCollection.length
             || value == null) {
-            //LoadingView.hide();
+            
                 FolioPageFragment.hideLoading();
             return;
         }
@@ -934,7 +934,7 @@ function scrollToSpan(usingId, value) {
         goToElement(spanCollection[value]);
     }
 
-    //LoadingView.hide();
+    
         FolioPageFragment.hideLoading();
 }
 
@@ -996,9 +996,7 @@ function goToHighlight(highlightId){
     var element = document.getElementById(highlightId.toString());
     if (element)
         goToElement(element);
-
-    //LoadingView.hide();
-        FolioPageFragment.hideLoading();
+    FolioPageFragment.hideLoading();
 }
 
 function goToAnchor(anchorId) {
@@ -1006,13 +1004,11 @@ function goToAnchor(anchorId) {
     console.log("=====>element = " + element)
     if (element)
         goToElement(element);
-
-    //LoadingView.hide();
-        FolioPageFragment.hideLoading();
+    FolioPageFragment.hideLoading();
 }
 
-$(function(){
-  window.ssReader = Class({
+ $(window.document).ready(function(){
+    window.ssReader = Class({
     $singleton: true,
 
     init: function() {
@@ -1157,14 +1153,14 @@ $(function(){
     }
   });
 
-   if(typeof ssReader !== "undefined"){
-      ssReader.init();
+    if(typeof window.ssReader !== "undefined"){
+      window.ssReader.init();
     }
-
+    
     $(".verse").click(function(){
-      SSBridge.onVerseClick(ssReader.base64encode($(this).attr("verse")));
+      SSBridge.onVerseClick(window.ssReader.base64encode($(this).attr("verse")));
     });
-
+    
     $("code").each(function(i){
       var textarea = $("<textarea class='textarea'/>").attr("id", "input-"+i).on("input propertychange", function(event, isInit) {
         $(this).css({'height': 'auto', 'overflow-y': 'hidden'}).height(this.scrollHeight);
@@ -1191,7 +1187,7 @@ $(function(){
 
       $(this).after(container);
     });
-  });
+});
 
 function array_diff(array1, array2){
     var difference = $.grep(array1, function(el) { return $.inArray(el,array2) < 0});

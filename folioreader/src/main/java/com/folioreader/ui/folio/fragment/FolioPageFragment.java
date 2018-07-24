@@ -309,7 +309,7 @@ public class FolioPageFragment
                             HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.TextColor);
                     break;
             }
-            mWebview.loadUrl(String.format(getString(R.string.setmediaoverlaystyle), highlightStyle));
+            mWebview.loadPage(String.format(getString(R.string.setmediaoverlaystyle), highlightStyle));
         }
     }
 
@@ -355,7 +355,7 @@ public class FolioPageFragment
             mAnchorId = href.substring(href.lastIndexOf('#') + 1);
             if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
                 loadingView.show();
-                mWebview.loadUrl(String.format(getString(R.string.go_to_anchor), mAnchorId));
+                mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
                 mAnchorId = null;
             }
         }
@@ -365,7 +365,7 @@ public class FolioPageFragment
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void resetCurrentIndex(RewindIndexEvent resetIndex) {
         if (isCurrentFragment()) {
-            mWebview.loadUrl("javascript:rewindCurrentIndex()");
+            mWebview.loadPage("javascript:rewindCurrentIndex()");
         }
     }
 
@@ -438,7 +438,7 @@ public class FolioPageFragment
 
         if (!isPageLoading) {
             loadingView.show();
-            mWebview.loadUrl("javascript:scrollToLast()");
+            mWebview.loadPage("javascript:scrollToLast()");
         }
     }
 
@@ -449,7 +449,7 @@ public class FolioPageFragment
 
         if (!isPageLoading) {
             loadingView.show();
-            mWebview.loadUrl("javascript:scrollToFirst()");
+            mWebview.loadPage("javascript:scrollToFirst()");
         }
     }
 
@@ -518,7 +518,7 @@ public class FolioPageFragment
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mWebview.loadUrl("javascript:alert(getRectForSelectedText())");
+                        mWebview.loadPage("javascript:alert(getRectForSelectedText())");
                     }
                 });
             }
@@ -550,17 +550,17 @@ public class FolioPageFragment
 
             if (isAdded()) {
 
-                mWebview.loadUrl("javascript:getCompatMode()");
-                mWebview.loadUrl("javascript:alert(getReadingTime())");
+                mWebview.loadPage("javascript:getCompatMode()");
+                mWebview.loadPage("javascript:alert(getReadingTime())");
 
                 if (!hasMediaOverlay)
-                    mWebview.loadUrl("javascript:wrappingSentencesWithinPTags()");
+                    mWebview.loadPage("javascript:wrappingSentencesWithinPTags()");
 
                 if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
-                    mWebview.loadUrl("javascript:initHorizontalDirection()");
+                    mWebview.loadPage("javascript:initHorizontalDirection()");
                 }
 
-                view.loadUrl(String.format(getString(R.string.setmediaoverlaystyle),
+                mWebview.loadPage(String.format(getString(R.string.setmediaoverlaystyle),
                         HighlightImpl.HighlightStyle.classForStyle(
                                 HighlightImpl.HighlightStyle.Normal)));
 
@@ -575,12 +575,12 @@ public class FolioPageFragment
                         if (lastReadPosition == null) {
                             lastReadPosition = mActivityCallback.getLastReadPosition();
                         }
-                        mWebview.loadUrl(String.format("javascript:scrollToSpan(%b, %s)",
+                        mWebview.loadPage(String.format("javascript:scrollToSpan(%b, %s)",
                                 lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                     } else {
                         if (mPosition == mActivityCallback.getChapterPosition() - 1) {
                             // Scroll to last, the page before current page
-                            mWebview.loadUrl("javascript:scrollToLast()");
+                            mWebview.loadPage("javascript:scrollToLast()");
                         } else {
                             // Make loading view invisible for all other fragments
                             loadingView.hide();
@@ -591,11 +591,11 @@ public class FolioPageFragment
                     mIsPageReloaded = false;
 
                 } else if (!TextUtils.isEmpty(mAnchorId)) {
-                    mWebview.loadUrl(String.format(getString(R.string.go_to_anchor), mAnchorId));
+                    mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
                     mAnchorId = null;
 
                 } else if (!TextUtils.isEmpty(highlightId)) {
-                    mWebview.loadUrl(String.format(getString(R.string.go_to_highlight), highlightId));
+                    mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
                     highlightId = null;
 
                 } else if (isCurrentFragment()) {
@@ -612,7 +612,7 @@ public class FolioPageFragment
 
                     if (readPosition != null) {
                         Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
-                        mWebview.loadUrl(String.format("javascript:scrollToSpan(%b, %s)",
+                        mWebview.loadPage(String.format("javascript:scrollToSpan(%b, %s)",
                                 readPosition.isUsingId(), readPosition.getValue()));
                     } else {
                         loadingView.hide();
@@ -623,7 +623,7 @@ public class FolioPageFragment
 
                     if (mPosition == mActivityCallback.getChapterPosition() - 1) {
                         // Scroll to last, the page before current page
-                        mWebview.loadUrl("javascript:scrollToLast()");
+                        mWebview.loadPage("javascript:scrollToLast()");
                     } else {
                         // Make loading view invisible for all other fragments
                         loadingView.hide();
@@ -671,7 +671,7 @@ public class FolioPageFragment
                         mActivityCallback.setPagerToPosition(url);
                         if (isCurrentFragment()) {
                             if (!FolioActivity.anchor.isEmpty()) {
-                                mWebview.loadUrl("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
+                                mWebview.loadPage("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
                                 FolioActivity.anchor = "";
                             }
                         }
@@ -812,7 +812,7 @@ public class FolioPageFragment
             synchronized (this) {
                 boolean isHorizontal = mActivityCallback.getDirection() ==
                         Config.Direction.HORIZONTAL;
-                mWebview.loadUrl("javascript:getFirstVisibleSpan(" + isHorizontal + ")");
+                mWebview.loadPage("javascript:getFirstVisibleSpan(" + isHorizontal + ")");
 
                 wait(1000);
             }
@@ -854,8 +854,15 @@ public class FolioPageFragment
         mWebview.setHorizontalPageCount(horizontalPageCount);
     }
 
-    private void loadRangy(WebView view, String rangy) {
-        view.loadUrl(String.format("javascript:if(typeof ssReader !== \"undefined\"){ssReader.setHighlights('%s');}", rangy));
+    private void loadRangy(final WebView view, final String rangy) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (FolioPageFragment.this) {
+                    ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} else {console.log(\">>>>>>ssReader is undefined !\")}", rangy));
+                }
+            }
+        }, 600);
     }
 
     private void setupScrollBar() {
@@ -1001,14 +1008,14 @@ public class FolioPageFragment
 
     public void highlight(HighlightImpl.HighlightStyle style, boolean isCreated) {
         if (isCreated) {
-            mWebview.loadUrl(String.format("javascript:if(typeof ssReader !== \"undefined\"){ssReader.highlightSelection('%s');}", HighlightImpl.HighlightStyle.classForStyle(style)));
+            mWebview.loadPage(String.format("javascript:if(typeof ssReader !== \"undefined\"){ssReader.highlightSelection('%s');}", HighlightImpl.HighlightStyle.classForStyle(style)));
         } else {
-            mWebview.loadUrl(String.format("javascript:setHighlightStyle('%s')", "highlight_" + HighlightImpl.HighlightStyle.classForStyle(style)));
+            mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + HighlightImpl.HighlightStyle.classForStyle(style)));
         }
     }
 
     public void highlightRemove() {
-        mWebview.loadUrl("javascript:alert(removeThisHighlight())");
+        mWebview.loadPage("javascript:alert(removeThisHighlight())");
     }
 
     public void showTextSelectionMenu(int x, int y, final int width, final int height) {
@@ -1178,7 +1185,7 @@ public class FolioPageFragment
     @Override
     public void resetCurrentIndex() {
         if (isCurrentFragment()) {
-            mWebview.loadUrl("javascript:rewindCurrentIndex()");
+            mWebview.loadPage("javascript:rewindCurrentIndex()");
         }
     }
 
@@ -1201,12 +1208,12 @@ public class FolioPageFragment
 
     @Override
     public void highLightText(String fragmentId) {
-        mWebview.loadUrl(String.format(getString(R.string.audio_mark_id), fragmentId));
+        mWebview.loadPage(String.format(getString(R.string.audio_mark_id), fragmentId));
     }
 
     @Override
     public void highLightTTS() {
-        mWebview.loadUrl("javascript:alert(getSentenceWithIndex('epub-media-overlay-playing'))");
+        mWebview.loadPage("javascript:alert(getSentenceWithIndex('epub-media-overlay-playing'))");
     }
 
     @JavascriptInterface
@@ -1254,7 +1261,7 @@ public class FolioPageFragment
 
         if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
             loadingView.show();
-            mWebview.loadUrl(String.format(getString(R.string.go_to_highlight), highlightId));
+            mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
             this.highlightId = null;
         }
     }
