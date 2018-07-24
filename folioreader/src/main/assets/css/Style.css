@@ -43,6 +43,10 @@ body {
     overflow: hidden !important;
 }
 
+* {
+    page-break-before: initial !important; /* Reset page breaks to default */
+}
+
 /* Custom padding for tablets */
 
 @media only screen and (min-device-width: 768px){
@@ -149,7 +153,7 @@ ruby > rt, ruby > rp { -webkit-user-select: none; }
  *
  */
 
-lk {
+highlight {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
 }
@@ -323,6 +327,20 @@ p.tabellentext
     margin: 0 !important;
 }
 
+table tr {
+    vertical-align: middle !important;
+}
+
+table tr {
+    padding: 0px !important;
+}
+
+table p {
+    margin: 0px !important;
+}
+table, td, th {
+    border: 1px solid white !important;
+}
 p {
     text-indent: 0 !important;
 }
