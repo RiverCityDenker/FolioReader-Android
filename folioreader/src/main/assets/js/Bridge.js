@@ -261,7 +261,7 @@ function goToElement(element) {
     //console.log("-> elementTop = " + elementTop);
     //console.log("-> bottom = " + bottom);
     //console.log("-> elementBottom = " + elementBottom);
-    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection());
+    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection() + "element = " + element.id);
 
     if (FolioPageFragment.getDirection() == "VERTICAL" &&
             (elementBottom > bottom || elementTop < top)) {
@@ -906,6 +906,9 @@ function getFirstVisibleSpan(isHorizontal) {
     }
 
     var usingId = spanElement.id ? true : false;
+    console.log("usingId = " + usingId);
+    console.log("spanElement.id = " + spanElement.id);
+    console.log("spanIndex = " + spanIndex);
     var value = usingId ? spanElement.id : spanIndex;
     FolioPageFragment.storeFirstVisibleSpan(usingId, value);
 }
@@ -918,15 +921,26 @@ Scrolls the web page to particular span using id or index
 */
 function scrollToSpan(usingId, value) {
     console.log(">>>scrollToSpan1");
+    var usingIdType = typeof usingId;
+
+    console.log(">>>usingId type = " + usingIdType);
+    console.log(">>>usingId " + usingId);
+
+    if(usingId == "false") {
+        usingId = false;
+    }
+
     if (usingId) {
         var spanElement = document.getElementById(value);
         if (spanElement)
             goToElement(spanElement);
     } else {
         var spanCollection = document.getElementsByTagName("span");
+        console.log("spanCollection = " + spanCollection.length);
+        console.log("value = " + value);
         if (spanCollection.length == 0 || value < 0 || value >= spanCollection.length
             || value == null) {
-            
+            console.log("bug case >>>>>>>>>>");
                 FolioPageFragment.hideLoading();
             return;
         }
@@ -994,8 +1008,13 @@ function getHighlightString(style) {
 
 function goToHighlight(highlightId){
     var element = document.getElementById(highlightId.toString());
-    if (element)
+    if (element) {
+    console.log("goToHighlight : element = " + element.id);
         goToElement(element);
+    }
+
+    else
+        console.log(">>>>>> highlight element " + highlightId + " was not found !");
     FolioPageFragment.hideLoading();
 }
 

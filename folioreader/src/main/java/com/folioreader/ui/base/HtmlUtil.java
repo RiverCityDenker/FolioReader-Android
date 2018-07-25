@@ -1,6 +1,7 @@
 package com.folioreader.ui.base;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.folioreader.Config;
 import com.folioreader.Constants;
@@ -108,6 +109,9 @@ public final class HtmlUtil {
     }
 
     private static String getUpdatedStyle(String htmlContent, String classes) {
+        if (TextUtils.isEmpty(htmlContent)) {
+            return htmlContent;
+        }
         int startBodyTagIndex = htmlContent.indexOf("<body");
         int endBodyTagIndex = -1;
         for (int i = startBodyTagIndex; i < htmlContent.length(); i++) {

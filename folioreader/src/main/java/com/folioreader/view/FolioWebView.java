@@ -281,12 +281,9 @@ public class FolioWebView extends WebView
     }
 
     public void loadPage(String javaScript) {
-        String TAG = FolioWebView.class.getSimpleName();
         if (android.os.Build.VERSION.SDK_INT < 19) {
             loadUrl(javaScript);
-            Log.e(TAG, "loadPage: >>>>>>loadUrl");
         } else {
-            Log.e(TAG, "loadPage: >>>>>>evaluateJavascript");
             evaluateJavascript(javaScript,null);
         }
     }

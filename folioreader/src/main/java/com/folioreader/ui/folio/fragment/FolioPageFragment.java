@@ -568,76 +568,8 @@ public class FolioPageFragment
                 FolioPageFragment.this.rangy = rangy;
                 if (!rangy.isEmpty())
                     loadRangy(mWebview, rangy);
-
-                if (mIsPageReloaded) {
-
-                    if (isCurrentFragment()) {
-                        if (lastReadPosition == null) {
-                            lastReadPosition = mActivityCallback.getLastReadPosition();
-                        }
-                        mWebview.loadPage(String.format("javascript:scrollToSpan(%b, %s)",
-                                lastReadPosition.isUsingId(), lastReadPosition.getValue()));
-                    } else {
-                        if (mPosition == mActivityCallback.getChapterPosition() - 1) {
-                            // Scroll to last, the page before current page
-                            mWebview.loadPage("javascript:scrollToLast()");
-                        } else {
-                            // Make loading view invisible for all other fragments
-                            loadingView.hide();
-                            setEnableDirectionConfig();
-                        }
-                    }
-
-                    mIsPageReloaded = false;
-
-                } else if (!TextUtils.isEmpty(mAnchorId)) {
-                    mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
-                    mAnchorId = null;
-
-                } else if (!TextUtils.isEmpty(highlightId)) {
-                    mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
-                    highlightId = null;
-
-                } else if (isCurrentFragment()) {
-
-                    ReadPosition readPosition;
-                    if (savedInstanceState == null) {
-                        Log.v(LOG_TAG, "-> onPageFinished -> took from getEntryReadPosition");
-                        readPosition = mActivityCallback.getEntryReadPosition();
-                    } else {
-                        Log.v(LOG_TAG, "-> onPageFinished -> took from bundle");
-                        readPosition = savedInstanceState.getParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE);
-                        savedInstanceState.remove(BUNDLE_READ_POSITION_CONFIG_CHANGE);
-                    }
-
-                    if (readPosition != null) {
-                        Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
-                        mWebview.loadPage(String.format("javascript:scrollToSpan(%b, %s)",
-                                readPosition.isUsingId(), readPosition.getValue()));
-                    } else {
-                        loadingView.hide();
-                        setEnableDirectionConfig();
-                    }
-
-                } else {
-
-                    if (mPosition == mActivityCallback.getChapterPosition() - 1) {
-                        // Scroll to last, the page before current page
-                        mWebview.loadPage("javascript:scrollToLast()");
-                    } else {
-                        // Make loading view invisible for all other fragments
-                        loadingView.hide();
-                        if (FolioActivity.mIsDirectionChanged) {
-                            FolioActivity.mIsDirectionChanged = false;
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setEnableDirectionConfig();
-                                }
-                            }, 1000);
-                        }
-                    }
-                }
+                else
+                    loadContent();
             }
         }
 
@@ -721,6 +653,78 @@ public class FolioPageFragment
             return null;
         }
     };
+
+    private void loadContent() {
+        if (mIsPageReloaded) {
+
+            if (isCurrentFragment()) {
+                if (lastReadPosition == null) {
+                    lastReadPosition = mActivityCallback.getLastReadPosition();
+                }
+                mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                        lastReadPosition.isUsingId(), lastReadPosition.getValue()));
+            } else {
+                if (mPosition == mActivityCallback.getChapterPosition() - 1) {
+                    // Scroll to last, the page before current page
+                    mWebview.loadPage("javascript:scrollToLast()");
+                } else {
+                    // Make loading view invisible for all other fragments
+                    loadingView.hide();
+                    setEnableDirectionConfig();
+                }
+            }
+
+            mIsPageReloaded = false;
+
+        } else if (!TextUtils.isEmpty(mAnchorId)) {
+            mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
+            mAnchorId = null;
+
+        } else if (!TextUtils.isEmpty(highlightId)) {
+            mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
+            highlightId = null;
+
+        } else if (isCurrentFragment()) {
+
+            ReadPosition readPosition;
+            if (savedInstanceState == null) {
+                Log.v(LOG_TAG, "-> onPageFinished -> took from getEntryReadPosition");
+                readPosition = mActivityCallback.getEntryReadPosition();
+            } else {
+                Log.v(LOG_TAG, "-> onPageFinished -> took from bundle");
+                readPosition = savedInstanceState.getParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE);
+                savedInstanceState.remove(BUNDLE_READ_POSITION_CONFIG_CHANGE);
+            }
+
+            if (readPosition != null) {
+                Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
+                mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                        readPosition.isUsingId(), readPosition.getValue()));
+            } else {
+                loadingView.hide();
+                setEnableDirectionConfig();
+            }
+
+        } else {
+
+            if (mPosition == mActivityCallback.getChapterPosition() - 1) {
+                // Scroll to last, the page before current page
+                mWebview.loadPage("javascript:scrollToLast()");
+            } else {
+                // Make loading view invisible for all other fragments
+                loadingView.hide();
+                if (FolioActivity.mIsDirectionChanged) {
+                    FolioActivity.mIsDirectionChanged = false;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setEnableDirectionConfig();
+                        }
+                    }, 1000);
+                }
+            }
+        }
+    }
 
     private void setEnableDirectionConfig() {
         synchronized (FolioPageFragment.class) {
@@ -860,6 +864,7 @@ public class FolioPageFragment
             public void run() {
                 synchronized (FolioPageFragment.this) {
                     ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} else {console.log(\">>>>>>ssReader is undefined !\")}", rangy));
+                    loadContent();
                 }
             }
         }, 600);
