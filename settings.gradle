@@ -1,1 +1,1 @@
-include ':folioreader', ':sample', ':webViewMarker', ':googleanalytics', ':crypto'
+include ':folioreader', ':sample', ':webViewMarker', ':googleanalytics', ':crypto', ':downloadhelper'

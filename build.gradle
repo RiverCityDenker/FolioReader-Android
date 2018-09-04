@@ -44,6 +44,7 @@ ext {
     R2_STREAMER_VERSION = '0.1.7'
     GG_PLAY_SERVICE_VERSION = '11.4.2'
     RETROFIT_VERSION = '2.1.0'
+    EVENTBUS_VERSION = '3.1.1'
 }
 
 task clean(type: Delete) {

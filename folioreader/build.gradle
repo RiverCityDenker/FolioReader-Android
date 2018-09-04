@@ -86,25 +86,20 @@ dependencies {
     implementation project(':webViewMarker')
     implementation project(':googleanalytics')
     implementation project(':crypto')
-
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation "com.android.support:appcompat-v7:$rootProject.ext.ANDROID_LIB_VERSION"
     implementation "com.android.support:recyclerview-v7:$rootProject.ext.ANDROID_LIB_VERSION"
     implementation "com.android.support:support-v4:$rootProject.ext.ANDROID_LIB_VERSION"
     implementation "com.android.support:design:$rootProject.ext.ANDROID_LIB_VERSION"
-
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
-
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.ext.KOTLIN_VERSION"
-
     // r2-streamer
     api "org.readium:r2-fetcher:$rootProject.ext.R2_STREAMER_VERSION"
     api "org.readium:r2-parser:$rootProject.ext.R2_STREAMER_VERSION"
     api "org.readium:r2-server:$rootProject.ext.R2_STREAMER_VERSION"
-
-    implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation "org.greenrobot:eventbus:$rootProject.ext.EVENTBUS_VERSION"
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
-
+    implementation project(':downloadhelper')
 }
 apply from: '../folioreader/bintray/bintrayv1.gradle'
