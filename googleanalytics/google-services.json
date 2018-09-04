@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "308553242520",
+    "firebase_url": "https://ebook-reader-sap.firebaseio.com",
+    "project_id": "ebook-reader-sap",
+    "storage_bucket": "ebook-reader-sap.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:308553242520:android:b58616e179aebf74",
+        "android_client_info": {
+          "package_name": "com.sap_press.rheinwerk_reader.googleanalytics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "308553242520-dj8e679ok6ipv6hghasfvtrjj3n4a69m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sap_press.rheinwerk_reader",
+            "certificate_hash": "b1132495f9695e3b48370709d659f6b7c4be79d4"
+          }
+        },
+        {
+          "client_id": "308553242520-elcniseui4rjha8sdv4lcu076pm4nqtn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sap_press.rheinwerk_reader",
+            "certificate_hash": "39e69a17381975eddbc63da18381ab83b56f5e43"
+          }
+        },
+        {
+          "client_id": "308553242520-qrni320ks8cnuvocfos2po6omalsqgfs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWpngd8hNYpVAiI-I0NDsKAKlKxAEwES4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "308553242520-qrni320ks8cnuvocfos2po6omalsqgfs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
