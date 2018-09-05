@@ -4,7 +4,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.sap_press.rheinwerk_reader.download.datamanager.sqlite.EbookDbAdapter;
 import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
+
 import java.util.ArrayList;
 import java.util.List;
 

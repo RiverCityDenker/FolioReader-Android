@@ -5,14 +5,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.sap_press.rheinwerk_reader.datamanager.tables.LastReadTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.LibraryTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.SubscriptionTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.UserTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LastReadTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.SubscriptionTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.UserTable;
 
-import javax.inject.Singleton;
-
-@Singleton
 public class EbookDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "EbookDbHelper";

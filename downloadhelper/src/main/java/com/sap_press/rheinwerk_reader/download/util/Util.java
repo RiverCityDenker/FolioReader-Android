@@ -18,4 +18,8 @@ public class Util {
         }
         return false;
     }
+
+    public static long getCurrentTimeStamp() {
+        return System.currentTimeMillis();
+    }
 }

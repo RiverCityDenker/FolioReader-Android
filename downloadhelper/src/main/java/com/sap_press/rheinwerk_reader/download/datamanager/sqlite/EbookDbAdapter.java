@@ -5,10 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.sap_press.rheinwerk_reader.datamanager.tables.EbookTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.LastReadTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.SubscriptionTable;
-import com.sap_press.rheinwerk_reader.datamanager.tables.UserTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LastReadTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.SubscriptionTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.UserTable;
 
 import java.util.ArrayList;
 import java.util.List;

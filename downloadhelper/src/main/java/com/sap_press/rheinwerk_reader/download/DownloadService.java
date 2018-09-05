@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.events.DestroyDownloadServiceEvent;
@@ -60,6 +61,7 @@ public class DownloadService extends Service {
     private Object LOCK_SHUT_DOWN = new Object();
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
+    DownloadDataManager dataManager;
 
     private long progress = 0;
     private ThreadPoolExecutor executor;
@@ -78,7 +80,7 @@ public class DownloadService extends Service {
     public void onCreate() {
         super.onCreate();
         EventBus.getDefault().register(this);
-        googleAnalyticManager = new GoogleAnalyticManager();
+        googleAnalyticManager = new GoogleAnalyticManager(this);
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(mIconId)
                 .setContentTitle(getResources().getString(mTitleId))
