@@ -17,7 +17,7 @@ ext {
     siteUrl = 'https://github.com/FolioReader/FolioReader-Android'
     gitUrl = 'https://github.com/FolioReader/FolioReader-Android.git'
 
-    libraryVersion = LIBRARY_VERSION
+    libraryVersion = FOLIO_LIBRARY_VERSION
 
     developerId = 'mobisystech'
     developerName = 'Folio Reader'
@@ -30,13 +30,13 @@ ext {
 
 android {
     useLibrary 'org.apache.http.legacy'
-    compileSdkVersion rootProject.ext.ANDROID_COMPILE_SDK_VERSION
+    compileSdkVersion rootProject.ext.FOLIO_ANDROID_COMPILE_SDK_VERSION
 
     defaultConfig {
-        minSdkVersion rootProject.ext.ANDROID_MIN_SDK
-        targetSdkVersion rootProject.ext.ANDROID_TARGET_SDK_VERSION
-        versionCode rootProject.ext.VERSION_CODE
-        versionName rootProject.ext.VERSION_NAME
+        minSdkVersion rootProject.ext.FOLIO_ANDROID_MIN_SDK
+        targetSdkVersion rootProject.ext.FOLIO_ANDROID_TARGET_SDK_VERSION
+        versionCode rootProject.ext.FOLIO_VERSION_CODE
+        versionName rootProject.ext.FOLIO_VERSION_NAME
     }
 
     sourceSets {
@@ -51,8 +51,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 
     packagingOptions {
@@ -87,19 +87,20 @@ dependencies {
     implementation project(':googleanalytics')
     implementation project(':crypto')
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
-    implementation "com.android.support:appcompat-v7:$rootProject.ext.ANDROID_LIB_VERSION"
-    implementation "com.android.support:recyclerview-v7:$rootProject.ext.ANDROID_LIB_VERSION"
-    implementation "com.android.support:support-v4:$rootProject.ext.ANDROID_LIB_VERSION"
-    implementation "com.android.support:design:$rootProject.ext.ANDROID_LIB_VERSION"
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.FOLIO_ANDROID_LIB_VERSION"
+    implementation "com.android.support:recyclerview-v7:$rootProject.ext.FOLIO_ANDROID_LIB_VERSION"
+    implementation "com.android.support:support-v4:$rootProject.ext.FOLIO_ANDROID_LIB_VERSION"
+    implementation "com.android.support:design:$rootProject.ext.FOLIO_ANDROID_LIB_VERSION"
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.ext.KOTLIN_VERSION"
     // r2-streamer
-    api "org.readium:r2-fetcher:$rootProject.ext.R2_STREAMER_VERSION"
-    api "org.readium:r2-parser:$rootProject.ext.R2_STREAMER_VERSION"
-    api "org.readium:r2-server:$rootProject.ext.R2_STREAMER_VERSION"
-    implementation "org.greenrobot:eventbus:$rootProject.ext.EVENTBUS_VERSION"
+    api "org.readium:r2-fetcher:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
+    api "org.readium:r2-parser:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
+    api "org.readium:r2-server:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
+    implementation "org.greenrobot:eventbus:$rootProject.ext.FOLIO_EVENTBUS_VERSION"
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     implementation project(':downloadhelper')
+    implementation 'com.google.code.gson:gson:2.8.2'
 }
 apply from: '../folioreader/bintray/bintrayv1.gradle'
