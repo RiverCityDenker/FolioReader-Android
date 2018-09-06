@@ -9,6 +9,18 @@ import java.util.List;
 
 public class DownloadDataManager {
 
+    private static final DownloadDataManager instance = new DownloadDataManager();
+    private DownloadSharedPref mDownloadSharedPref;
+
+
+    public static DownloadDataManager getInstance() {
+        return instance;
+    }
+
+    private DownloadDataManager() {
+        mDownloadSharedPref = DownloadSharedPref.getInstance();
+    }
+
     public void updateEbook(Ebook ebook) {
         LibraryTable.updateEbook(ebook);
     }
@@ -20,15 +32,15 @@ public class DownloadDataManager {
     }
 
     public void saveTimestampDownload(String key) {
-        mSharedPrefsHelper.put(SharedPrefsHelper.PREF_KEY_TIME_STAMP_DOWNLOAD(key), Util.getCurrentTimeStamp());
+        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_TIME_STAMP_DOWNLOAD(key), Util.getCurrentTimeStamp());
     }
 
     public long getTimestampDownload(String key) {
-        return mSharedPrefsHelper.get(SharedPrefsHelper.PREF_KEY_TIME_STAMP_DOWNLOAD(key), (long) 1526620402);
+        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_TIME_STAMP_DOWNLOAD(key), (long) 1526620402);
     }
 
     public String getAccessToken() {
-        return mSharedPrefsHelper.get(SharedPrefsHelper.PREF_KEY_ACCESS_TOKEN, null);
+        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_ACCESS_TOKEN, null);
     }
 
     public void updateEbookPath(int ebookId, String filePath) {
@@ -40,11 +52,23 @@ public class DownloadDataManager {
     }
 
     public void saveNumberDownloadsEbook() {
-        mSharedPrefsHelper.put(SharedPrefsHelper.PREF_KEY_NUMBER_DOWNLOAD, getNumberDownloadsEbook() + 1);
+        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_NUMBER_DOWNLOAD, getNumberDownloadsEbook() + 1);
     }
 
     public int getNumberDownloadsEbook() {
-        return mSharedPrefsHelper.get(SharedPrefsHelper.PREF_KEY_NUMBER_DOWNLOAD, 0);
+        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_NUMBER_DOWNLOAD, 0);
+    }
+
+    public void saveAccessToken(String accessToken) {
+        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_ACCESS_TOKEN, accessToken);
+    }
+
+    public void saveApiKey(String apiKey) {
+        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_API_KEY, apiKey);
+    }
+
+    public String getApiKey() {
+        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_API_KEY, null);
     }
 
 }

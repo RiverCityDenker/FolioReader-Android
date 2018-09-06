@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.sap_press.rheinwerk_reader.download.api.ApiClient;
+import com.sap_press.rheinwerk_reader.download.api.ApiService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
@@ -68,10 +70,11 @@ public class DownloadService extends Service {
     private int currentEbookId = 0;
     private String mCurrentBookId;
     private int mIconId;
-    private int mTitleId;
+    private String mTitle;
     private String mBaseUrl;
     private String mAppVersion;
     private String mContentFileDefault;
+    private ApiService mApiService;
 
     public DownloadService() {
     }
@@ -81,12 +84,8 @@ public class DownloadService extends Service {
         super.onCreate();
         EventBus.getDefault().register(this);
         googleAnalyticManager = new GoogleAnalyticManager(this);
-        Notification notification = new NotificationCompat.Builder(this)
-                .setSmallIcon(mIconId)
-                .setContentTitle(getResources().getString(mTitleId))
-                .setContentText("Downloading...").build();
-
-        startForeground(SERVICE_FOREGROUND_ID, notification);
+        dataManager = DownloadDataManager.getInstance();
+        compositeSubscription = new CompositeDisposable();
     }
 
     @Override
@@ -95,8 +94,14 @@ public class DownloadService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public static void startDownloadService(Context context) {
+    public static void startDownloadService(Context context, int iconId, String title,
+                                            String baseUrl, String appVersion, String contentFile) {
         Intent intent = new Intent(context, DownloadService.class);
+        intent.putExtra(NOTIFICATION_ICON, iconId);
+        intent.putExtra(NOTIFICATION_TITLE, title);
+        intent.putExtra(BASE_URL_KEY, baseUrl);
+        intent.putExtra(APP_VERSION_KEY, appVersion);
+        intent.putExtra(CONTENT_FILE_PATH, contentFile);
         context.startService(intent);
     }
 
@@ -104,10 +109,17 @@ public class DownloadService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             mIconId = intent.getIntExtra(NOTIFICATION_ICON, 0);
-            mTitleId = intent.getIntExtra(NOTIFICATION_TITLE, 0);
+            mTitle = intent.getStringExtra(NOTIFICATION_TITLE);
             mBaseUrl = intent.getStringExtra(BASE_URL_KEY);
             mAppVersion = intent.getStringExtra(APP_VERSION_KEY);
             mContentFileDefault = intent.getStringExtra(CONTENT_FILE_PATH);
+            mApiService = ApiClient.getClient(this, mBaseUrl).create(ApiService.class);
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(mIconId)
+                    .setContentTitle(mTitle)
+                    .setContentText("Downloading...").build();
+
+            startForeground(SERVICE_FOREGROUND_ID, notification);
             downloadNextOrStop();
         }
         return START_STICKY;
@@ -116,6 +128,7 @@ public class DownloadService extends Service {
     @Override
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
+        compositeSubscription.dispose();
         stopForeground(true);
         this.stopSelf();
         super.onDestroy();
@@ -173,7 +186,7 @@ public class DownloadService extends Service {
         final String token = dataManager.getAccessToken();
         final String appVersion = "0";
         final String ebookId = String.valueOf(ebook.getId());
-        final Disposable subscription = ebookService.downloadEbooks(token, mContentFileDefault, appVersion, ebookId)
+        final Disposable subscription = mApiService.download(ebookId, token, appVersion, appVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(this, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
                 .observeOn(Schedulers.io())
