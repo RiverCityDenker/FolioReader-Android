@@ -58,8 +58,8 @@ public final class HtmlUtil {
         jsPath = jsPath
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />";
 
-        String toInject = "\n" + cssPath + "\n" + jsPath + "\n</head>";
-        htmlContent = htmlContent.replace("</head>", toInject);
+        String toInject = "<head>" + "\n" + cssPath + "\n" + jsPath + "\n";
+        htmlContent = htmlContent.replace("<head>", toInject);
 
         String classes = "";
         switch (config.getFont()) {

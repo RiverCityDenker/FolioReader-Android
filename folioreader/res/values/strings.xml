@@ -87,6 +87,8 @@
     <string name="please_enter_note">please enter a note</string>
     <string name="contents">Contents</string>
 
+    <string name="download_asking">You are about to read in online mode. You can always download the books and read them offline.</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="debug_start_drag">Starting drag!</string>

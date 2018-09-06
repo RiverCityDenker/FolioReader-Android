@@ -12,6 +12,7 @@ import java.util.Set;
 public class SharedPreferenceUtil {
     public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
     public static final String REGISTRATION_COMPLETE = "registrationComplete";
+    public static final String PREF_KEY_DIALOG_SKIP = "PREF_KEY_DIALOG_SKIP";
 
     public static void putSharedPreferencesInt(Context context, String key, int value) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
