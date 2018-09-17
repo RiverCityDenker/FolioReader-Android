@@ -216,9 +216,21 @@ public class DownloadService extends Service {
     }
 
     void shutdownAndAwaitTermination(ExecutorService pool) {
-        synchronized (LOCK_SHUT_DOWN) {
+        synchronized (DownloadService.class) {
             pool.shutdown(); // Disable new tasks from being submitted
-            pool.shutdownNow();
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!pool.awaitTermination(2, TimeUnit.SECONDS)) {
+                    pool.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!pool.awaitTermination(1, TimeUnit.SECONDS)) ;
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                pool.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
