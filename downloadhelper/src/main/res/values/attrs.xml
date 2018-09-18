@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DownloadingView">
+        <attr name="activeColor" format="color" />
+        <attr name="defaultColor" format="color" />
+        <attr name="backgroundColorDefault" format="color" />
+        <attr name="activeDownloadIcon" format="reference" />
+        <attr name="defaultDownloadIcon" format="reference" />
+        <attr name="removeDownloadIcon" format="reference" />
+        <attr name="sizeOfText" format="dimension" />
+        <attr name="marginTopFromText" format="dimension" />
+        <attr name="progressBarWaitingSize" format="dimension" />
+    </declare-styleable>
+</resources>

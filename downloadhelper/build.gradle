@@ -9,6 +9,7 @@ android {
         versionCode rootProject.ext.FOLIO_VERSION_CODE
         versionName rootProject.ext.FOLIO_VERSION_NAME
 
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }

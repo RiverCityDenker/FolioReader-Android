@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ProgressDownload" parent="android:Widget.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progressbar_states_blue_white</item>
+        <item name="android:scaleX">3</item>
+    </style>
+
+    <style name="StyleProgressDownload" parent="android:Widget.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progressbar_states_white_blue</item>
+        <item name="android:scaleX">10</item>
+    </style>
+</resources>
