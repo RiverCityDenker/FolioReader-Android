@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">downloadhelper</string>
+    <string name="text_delete_dialog_title">Delete Download</string>
+    <string name="text_delete_dialog_message">Do you really want to delete the file \"%1$s\" from your device?</string>
 </resources>

@@ -35,6 +35,7 @@ import com.folioreader.Config;
 import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.R;
+import com.folioreader.datamanager.FolioDataManager;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.event.HighlightClickedEvent;
@@ -62,6 +63,8 @@ import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.utils.Constant;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -79,6 +82,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
+import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createMessageDialog;
+import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class FolioActivity
         extends AppCompatActivity
@@ -102,7 +107,40 @@ public class FolioActivity
     public static final String INTENT_EBOOK_USER_KEY = "user_key";
     public static final String INTENT_EBOOK_TITLE_NAME = "title_ebook";
     private static final String TAG = FolioActivity.class.getSimpleName();
+    public static final String INTENT_EBOOK = "ebook";
     public static boolean mIsDirectionChanged = false;
+    private Ebook mEbook;
+    private FolioDataManager dataManager;
+    private MainPresenter mMainPresenter;
+
+    @Override
+    public void downloadOrDelete() {
+        boolean isDownloadEbook = dataManager.checkEbookDownload(mEbook.getId());
+        Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
+        if (dataManager.getDownloadedEbooksCount() >= Constant.MAXIMUM_DOWNLOAD_NUMBER && !isDownloadEbook) {
+            createMessageDialog(this, getString(R.string.limit_title), getString(R.string.limit_message));
+        } else if (!isOnline(this) && currentEbook.getDownloadProgress() < 0) {
+            createMessageDialog(this, getString(R.string.download_offline_title), getString(R.string.download_offline_message), getString(R.string.close));
+        } else {
+//            if (isDownloadEbook) {
+//                sendEventActionGoogleAnalytics("Selected delete book");
+//                getPresenter().deleteEbook(currentEbook, currentPosition);
+//            } else {
+//                sendEventActionGoogleAnalytics("Selected download book");
+//                downloadView.setEbook(currentEbook);
+//                getPresenter().downloadEbook(currentEbook, currentPosition);
+//            }
+        }
+    }
+
+    private MainPresenter getPresenter() {
+        return mMainPresenter;
+    }
+
+    private void sendEventActionGoogleAnalytics(String action) {
+        googleAnalytic.sendEvent(AnalyticViewName.Product_Page, action, "Screen Product");
+    }
+
 
     public enum EpubSourceType {
         RAW,
@@ -146,6 +184,8 @@ public class FolioActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+        dataManager = FolioDataManager.getInstance();
+        mMainPresenter = new MainPresenter(this);
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
         this.savedInstanceState = savedInstanceState;
@@ -154,13 +194,21 @@ public class FolioActivity
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
 
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
-            mBookId = String.valueOf(getIntent().getExtras().getInt(FolioActivity.INTENT_EBOOK_ID));
-            ebookFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_FILE_PATH);
-            contentKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_CONTENT_KEY);
-            userKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_USER_KEY);
-            titleEbook = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_TITLE_NAME);
-            googleAnalytic = new GoogleAnalyticManager(this);
+            mEbook = getIntent().getParcelableExtra(INTENT_EBOOK);
+            if (mEbook != null) {
+                mBookId = String.valueOf(mEbook.getId());
+                ebookFilePath = mEbook.getFilePath();
+                contentKey = mEbook.getContentKey();
+                titleEbook = mEbook.getTitle();
+            } else {
+                mBookId = String.valueOf(getIntent().getExtras().getInt(FolioActivity.INTENT_EBOOK_ID));
+                ebookFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_FILE_PATH);
+                contentKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_CONTENT_KEY);
+                titleEbook = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_TITLE_NAME);
+            }
             SharedPreferenceUtil.putSharedPreferencesLong(this, titleEbook, FileUtil.getCurrentTimeStamp());
+            googleAnalytic = new GoogleAnalyticManager(this);
+            userKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_USER_KEY);
         } else {
             mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
             if (mEpubSourceType.equals(EpubSourceType.RAW)) {
@@ -295,7 +343,7 @@ public class FolioActivity
             addEpub(path);
 
             String urlString = Constants.LOCALHOST + bookFileName + "/manifest";
-            new MainPresenter(this).parseManifest(urlString);
+            mMainPresenter.parseManifest(urlString);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "initBook failed", e);
@@ -454,6 +502,11 @@ public class FolioActivity
             }
         }
         configFolio();
+    }
+
+    @Override
+    public void updateUIAfterDelete(Ebook ebook) {
+
     }
 
     public void onLoadPublicationCustom(EpubPublicationCustom publication) {

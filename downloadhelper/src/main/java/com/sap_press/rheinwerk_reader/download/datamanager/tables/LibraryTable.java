@@ -2,7 +2,7 @@ package com.sap_press.rheinwerk_reader.download.datamanager.tables;
 
 import android.text.TextUtils;
 
-import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import java.util.List;
 

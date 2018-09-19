@@ -20,6 +20,7 @@ import com.folioreader.ui.base.SaveReceivedHighlightTask;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadPositionListener;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import java.util.List;
 
@@ -146,6 +147,24 @@ public class FolioReader {
         Intent intent = getIntent(bookId, contentKey, apiKey, filePath, title);
         context.startActivity(intent);
         return singleton;
+    }
+
+    public FolioReader openBook(Ebook book, String apiKey) {
+        Intent intent = getIntent(book, apiKey);
+        context.startActivity(intent);
+        return singleton;
+    }
+
+    private Intent getIntent(Ebook ebook, String apiKey) {
+        Intent intent = new Intent(context, FolioActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Config.INTENT_CONFIG, config);
+        intent.putExtra(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
+        intent.putExtra(FolioActivity.INTENT_EBOOK, ebook);
+        intent.putExtra(FolioActivity.INTENT_EBOOK_USER_KEY, apiKey);
+        intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.ENCRYPTED_FILE);
+        intent.putExtra(FolioActivity.EXTRA_READ_POSITION, readPosition);
+        return intent;
     }
 
     private Intent getIntent(int bookId, String contentKey, String apiKey, String filePath,

@@ -2,18 +2,21 @@ package com.sap_press.rheinwerk_reader.download.ui.customview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
-import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,10 +36,12 @@ public abstract class DownloadingView extends RelativeLayout {
     protected boolean mEnableUpdateProgress;
     protected int mDefaultColor;
     protected int mActiveColor;
+    protected int mTextColorDefault;
     protected int mTextSize;
     protected int mBackgroundColorDefault;
     protected int mProgressBarWaitingSize;
     protected int mTextMarginTop;
+    private int mIconSize;
     protected Drawable mActiveDownloadIcon;
     protected Drawable mDefaultDownloadIcon;
     protected Drawable mRemoveDownloadIcon;
@@ -60,6 +65,7 @@ public abstract class DownloadingView extends RelativeLayout {
                 R.styleable.DownloadingView,
                 0, 0);
         try {
+            mTextColorDefault = a.getColor(R.styleable.DownloadingView_textColorDefault, context.getResources().getColor(R.color.color_gray));
             mDefaultColor = a.getColor(R.styleable.DownloadingView_defaultColor, context.getResources().getColor(R.color.color_gray));
             mActiveColor = a.getColor(R.styleable.DownloadingView_activeColor, context.getResources().getColor(R.color.color_gray));
             mBackgroundColorDefault = a.getColor(R.styleable.DownloadingView_backgroundColorDefault, context.getResources().getColor(R.color.color_gray));
@@ -69,6 +75,7 @@ public abstract class DownloadingView extends RelativeLayout {
             mProgressBarWaitingSize = a.getDimensionPixelSize(R.styleable.DownloadingView_progressBarWaitingSize, context.getResources().getDimensionPixelSize(R.dimen.dp_12));
             mTextSize = a.getDimensionPixelSize(R.styleable.DownloadingView_sizeOfText, context.getResources().getDimensionPixelSize(R.dimen.sp_9));
             mTextMarginTop = a.getDimensionPixelSize(R.styleable.DownloadingView_marginTopFromText, context.getResources().getDimensionPixelSize(R.dimen.dp_5));
+            mIconSize = a.getDimensionPixelSize(R.styleable.DownloadingView_iconSize, context.getResources().getDimensionPixelSize(R.dimen.dp_24));
         } finally {
             a.recycle();
         }
@@ -91,7 +98,31 @@ public abstract class DownloadingView extends RelativeLayout {
     }
 
     protected void configViews() {
+        configText();
+        configIcon();
+        configProgressBar();
         configWaitingProgressBar();
+    }
+
+    private void configIcon() {
+        ViewGroup.LayoutParams layoutParams = mImageView.getLayoutParams();
+        layoutParams.width = mIconSize;
+        layoutParams.height = mIconSize;
+        mImageView.setLayoutParams(layoutParams);
+        mImageView.setColorFilter(mDefaultColor);
+    }
+
+    private void configText() {
+        tvBookSize.setTextColor(mTextColorDefault);
+    }
+
+    private void configProgressBar() {
+        LayerDrawable progressBarDrawable = (LayerDrawable) mProgressBar.getProgressDrawable();
+        Drawable backgroundDrawable = progressBarDrawable.getDrawable(0);
+        Drawable progressDrawable = progressBarDrawable.getDrawable(1);
+
+        backgroundDrawable.setColorFilter(mActiveColor, PorterDuff.Mode.SRC_IN);
+        progressDrawable.setColorFilter(mDefaultColor, PorterDuff.Mode.SRC_IN);
     }
 
     private void configWaitingProgressBar() {
@@ -132,7 +163,7 @@ public abstract class DownloadingView extends RelativeLayout {
         this.mEbook = ebook;
     }
 
-    public Ebook getEbook() {
+    protected Ebook getEbook() {
         return mEbook;
     }
 

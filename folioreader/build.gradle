@@ -102,5 +102,7 @@ dependencies {
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     implementation project(':downloadhelper')
     implementation 'com.google.code.gson:gson:2.8.2'
+    implementation project(':utility')
+    implementation project(':models')
 }
 apply from: '../folioreader/bintray/bintrayv1.gradle'

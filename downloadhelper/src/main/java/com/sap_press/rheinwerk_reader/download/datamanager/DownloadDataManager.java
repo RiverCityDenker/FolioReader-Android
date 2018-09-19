@@ -1,16 +1,21 @@
 package com.sap_press.rheinwerk_reader.download.datamanager;
 
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
-import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
-import com.sap_press.rheinwerk_reader.download.util.Util;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.utils.FileUtil;
+import com.sap_press.rheinwerk_reader.utils.Util;
 
 import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class DownloadDataManager {
 
     private static final DownloadDataManager instance = new DownloadDataManager();
     private DownloadSharedPref mDownloadSharedPref;
+    private CompositeDisposable compositeDisposable;
 
 
     public static DownloadDataManager getInstance() {
@@ -19,6 +24,7 @@ public class DownloadDataManager {
 
     private DownloadDataManager() {
         mDownloadSharedPref = DownloadSharedPref.getInstance();
+        compositeDisposable = new CompositeDisposable();
     }
 
     public void updateEbook(Ebook ebook) {
@@ -69,6 +75,22 @@ public class DownloadDataManager {
 
     public String getApiKey() {
         return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_API_KEY, null);
+    }
+
+    public Observable<Ebook> deleteEbook(Ebook ebook) {
+        return Observable.fromCallable(() -> {
+            String filePath = LibraryTable.getEbook(ebook.getId()).getFilePath();
+            ebook.setFilePath(filePath);
+            FileUtil.deleteDownloadedEbookFromExternalStorage(ebook);
+            ebook.resetInfo();
+            updateDownloadedEbook(ebook);
+            return ebook;
+        });
+    }
+
+    public void updateDownloadedEbook(Ebook ebook) {
+        ebook.resetInfo();
+        LibraryTable.updateEbook(ebook);
     }
 
 }

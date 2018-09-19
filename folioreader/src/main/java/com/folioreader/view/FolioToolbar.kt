@@ -58,6 +58,9 @@ class FolioToolbar : RelativeLayout {
         btn_speaker.setOnClickListener {
             callback.showMediaController()
         }
+        download_view.setOnClickListener {
+            callback.downloadOrDelete()
+        }
     }
 
     fun setListeners(callback: FolioToolbarCallback) {

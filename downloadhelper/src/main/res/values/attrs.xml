@@ -3,6 +3,7 @@
     <declare-styleable name="DownloadingView">
         <attr name="activeColor" format="color" />
         <attr name="defaultColor" format="color" />
+        <attr name="textColorDefault" format="color" />
         <attr name="backgroundColorDefault" format="color" />
         <attr name="activeDownloadIcon" format="reference" />
         <attr name="defaultDownloadIcon" format="reference" />
@@ -10,5 +11,6 @@
         <attr name="sizeOfText" format="dimension" />
         <attr name="marginTopFromText" format="dimension" />
         <attr name="progressBarWaitingSize" format="dimension" />
+        <attr name="iconSize" format="dimension" />
     </declare-styleable>
 </resources>

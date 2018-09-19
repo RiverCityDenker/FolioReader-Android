@@ -55,12 +55,14 @@ public class VerticalDownloadingView extends DownloadingView {
             if (progress >= 80) {
                 tvBookSize.setTextColor(mActiveColor);
             } else {
-                tvBookSize.setTextColor(mDefaultColor);
+                tvBookSize.setTextColor(mTextColorDefault);
             }
             if (progress >= 50) {
                 mImageView.setImageDrawable(mActiveDownloadIcon);
+                mImageView.setColorFilter(mActiveColor);
             } else {
                 mImageView.setImageDrawable(mDefaultDownloadIcon);
+                mImageView.setColorFilter(mDefaultColor);
             }
             tvBookSize.setText(String.format("%d%%", progress));
             showHideContent(true);
@@ -74,6 +76,7 @@ public class VerticalDownloadingView extends DownloadingView {
     protected void showViewNomal() {
         showHideContent(true);
         mImageView.setImageDrawable(mDefaultDownloadIcon);
+        mImageView.setColorFilter(mDefaultColor);
         tvBookSize.setTextColor(mDefaultColor);
         final double size = (double) mEbook.getFileSize() / FILE_SIZE_UNIT;
         tvBookSize.setText(fromDotToComma(size));
@@ -84,6 +87,7 @@ public class VerticalDownloadingView extends DownloadingView {
         final double size = (double) mEbook.getFileSize() / FILE_SIZE_UNIT;
         tvBookSize.setText(fromDotToComma(size));
         mImageView.setImageDrawable(mRemoveDownloadIcon);
+        mImageView.setColorFilter(mActiveColor);
         tvBookSize.setTextColor(mActiveColor);
         mProgressBar.setProgress(100);
         showHideContent(true);

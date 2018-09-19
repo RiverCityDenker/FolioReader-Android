@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion rootProject.ext.FOLIO_ANDROID_COMPILE_SDK_VERSION
+    buildToolsVersion rootProject.ext.FOLIO_ANDROID_BUILD_TOOLS_VERSION
 
     defaultConfig {
         minSdkVersion rootProject.ext.FOLIO_ANDROID_MIN_SDK
@@ -11,7 +12,6 @@ android {
 
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -39,8 +39,10 @@ dependencies {
     implementation project(':googleanalytics')
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.FOLIO_RETROFIT_VERSION"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.FOLIO_RETROFIT_VERSION"
-
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.FOLIO_RXJAVA_VERSION"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.ext.FOLIO_RXANDROID_VERSION"
     implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:$rootProject.ext.FOLIO_ADAPTER_RETROFIT_VERSION"
+    implementation project(':utility')
+    implementation project(':aping')
+    implementation project(':models')
 }

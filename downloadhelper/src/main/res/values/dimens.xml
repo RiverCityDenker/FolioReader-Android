@@ -4,4 +4,5 @@
     <dimen name="dp_5">5dp</dimen>
     <dimen name="sp_9">9sp</dimen>
     <dimen name="dp_15">15dp</dimen>
+    <dimen name="dp_24">24dp</dimen>
 </resources>

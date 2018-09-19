@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 
 import com.sap_press.rheinwerk_reader.download.datamanager.sqlite.EbookDbAdapter;
-import com.sap_press.rheinwerk_reader.download.models.user.User;
+import com.sap_press.rheinwerk_reader.mod.models.user.User;
 
 public class UserTable {
     public static final String USER_TABLE_NAME = "users";

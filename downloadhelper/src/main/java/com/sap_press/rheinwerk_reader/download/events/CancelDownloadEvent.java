@@ -1,6 +1,6 @@
 package com.sap_press.rheinwerk_reader.download.events;
 
-import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 public class CancelDownloadEvent {
     Ebook ebook;

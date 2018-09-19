@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.sap_press.rheinwerk_reader.download.datamanager.sqlite.EbookDbAdapter;
-import com.sap_press.rheinwerk_reader.download.models.Subscription;
+import com.sap_press.rheinwerk_reader.mod.models.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;

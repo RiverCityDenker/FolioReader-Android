@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.download.api.ApiClient;
 import com.sap_press.rheinwerk_reader.download.api.ApiService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
@@ -16,13 +17,13 @@ import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.events.DestroyDownloadServiceEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
-import com.sap_press.rheinwerk_reader.download.models.ebooks.Ebook;
-import com.sap_press.rheinwerk_reader.download.models.foliosupport.EpubBook;
-import com.sap_press.rheinwerk_reader.download.util.BookUtil;
-import com.sap_press.rheinwerk_reader.download.util.FileUtil;
-import com.sap_press.rheinwerk_reader.download.util.MemoryUtil;
+import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
+import com.sap_press.rheinwerk_reader.utils.FileUtil;
+import com.sap_press.rheinwerk_reader.utils.MemoryUtil;
+import com.sap_press.rheinwerk_reader.utils.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,8 +48,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.NOT_ENOUGH_SPACE;
-import static com.sap_press.rheinwerk_reader.download.util.BookUtil.stopDownloadServiceIfNeeded;
-import static com.sap_press.rheinwerk_reader.download.util.Constant.X_CONTENT_KEY;
+import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
+import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class DownloadService extends Service {
 
@@ -171,7 +172,7 @@ public class DownloadService extends Service {
             if (availableSize > ebook.getFileSize()) {
                 downloadEbook(ebook);
             } else {
-                stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
+                DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
             }
         } else {
             this.stopSelf();
@@ -202,12 +203,12 @@ public class DownloadService extends Service {
         if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
         mCurrentBookId = ebookId;
         String url = mBaseUrl + "ebooks/" + ebookId + "/download";
-        googleAnalyticManager.sendEvent(AnalyticViewName.download_error, url, BookUtil.getErrorCode(throwable));
+        googleAnalyticManager.sendEvent(AnalyticViewName.download_error, url, DownloadUtil.getErrorCode(throwable));
 
         if (executor != null) {
             shutdownAndAwaitTermination(executor);
         }
-        if (BookUtil.isOnline(this)) {
+        if (isOnline(this)) {
             EventBus.getDefault().post(new DownloadingErrorEvent(Integer.parseInt(ebookId)));
             downloadNextOrStop();
         }
@@ -235,7 +236,7 @@ public class DownloadService extends Service {
     }
 
     private void downloadContentSuccess(Ebook ebook, Object object, String token) {
-        long timeDownload = TimeUnit.SECONDS.toSeconds(BookUtil.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
+        long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
         googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
         final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
         ebook.setFilePath(filePath);

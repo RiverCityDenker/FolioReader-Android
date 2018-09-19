@@ -27,11 +27,11 @@ public abstract class ParallelExecutorTask<Pa, Pr, Re> extends AsyncTask<Pa, Pr,
 
     private final ThreadPoolExecutor poolExecutor;
 
-    public ParallelExecutorTask(ThreadPoolExecutor poolExecutor) {
+    ParallelExecutorTask(ThreadPoolExecutor poolExecutor) {
         this.poolExecutor = poolExecutor;
     }
 
-    public ThreadPoolExecutor getPoolExecutor() {
+    ThreadPoolExecutor getPoolExecutor() {
         return poolExecutor;
     }
 
