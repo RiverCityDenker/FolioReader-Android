@@ -13,6 +13,7 @@ import com.folioreader.Config
 import com.folioreader.R
 import com.folioreader.util.AppUtil
 import com.folioreader.util.UiUtil
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook
 import kotlinx.android.synthetic.main.folio_toolbar.view.*
 
 /**
@@ -38,7 +39,7 @@ class FolioToolbar : RelativeLayout {
         initListeners()
     }
 
-    private fun initColors(color : Int) {
+    private fun initColors(color: Int) {
         UiUtil.setColorToImage(context, color, btn_close.drawable)
         UiUtil.setColorToImage(context, color, btn_drawer.drawable)
         UiUtil.setColorToImage(context, color, btn_config.drawable)
@@ -68,7 +69,7 @@ class FolioToolbar : RelativeLayout {
     }
 
     fun setTitle(title: String?) {
-        label_center?.text = title
+        label_center?.text = title ?: label_center?.text
     }
 
     fun showOrHideIfVisible() {
@@ -109,9 +110,28 @@ class FolioToolbar : RelativeLayout {
     }
 
     fun hide() {
-        post({ this.animate().translationY((-this.height)
-                .toFloat())
-                .setInterpolator(AccelerateInterpolator(2f))
-                .start() })
+        post({
+            this.animate().translationY((-this.height)
+                    .toFloat())
+                    .setInterpolator(AccelerateInterpolator(2f))
+                    .start()
+        })
+    }
+
+    fun setEbook(ebook: Ebook) {
+        download_view.setEbook(ebook)
+    }
+
+    fun updateDownloadView(ebookId: Int, progress: Int) {
+        enableUpdateProgress(progress >= 0)
+        updateUI(ebookId, progress)
+    }
+
+    fun enableUpdateProgress(progress: Boolean) {
+        download_view.enableUpdateProgress(progress)
+    }
+
+    fun updateUI(ebookId: Int, progress: Int) {
+        download_view.updateUI(progress, ebookId)
     }
 }

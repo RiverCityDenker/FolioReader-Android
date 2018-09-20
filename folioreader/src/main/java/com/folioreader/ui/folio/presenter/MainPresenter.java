@@ -8,7 +8,9 @@ import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.sap_press.rheinwerk_reader.download.DownloadManager;
 import com.sap_press.rheinwerk_reader.download.events.UpdateBookUIEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.utils.NetworkErrorUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -55,9 +57,43 @@ public class MainPresenter implements ManifestCallBack {
         });
     }
 
+    public void downloadEbook(Context context, Ebook ebook, DownloadInfo downloadInfo) {
+        if (ebook.getDownloadProgress() < 0)
+            ebook.setDownloadProgress(0);
+        updateDownloadProgress(ebook.getId(), ebook.getDownloadProgress());
+        EventBus.getDefault().post(new UpdateBookUIEvent(downloadInfo.getmBookPosition(), ebook));
+        downloadManager.startDownload(context,
+                                        ebook,
+                                        downloadInfo.getmDownloadIcon(),
+                                        downloadInfo.getmAppVersion(),
+                                        downloadInfo.getmBaseUrl(),
+                                        this::handleDownloadError);
+    }
+
     private void updateDetailUIAfterDelete(Ebook ebook) {
         if (mainMvpView != null) {
             mainMvpView.updateUIAfterDelete(ebook);
         }
+    }
+
+    private void updateDownloadProgress(int id, int downloadProgress) {
+        if (mainMvpView != null) {
+            mainMvpView.updateDownloadProgress(id, downloadProgress);
+        }
+    }
+
+    private void handleDownloadError(Throwable throwable) {
+        try {
+            String message = NetworkErrorUtil.ConvertErrorMessageToString(throwable);
+            if (mainMvpView != null) {
+                mainMvpView.showDownloadError(message);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void downloadContent(Ebook mEbook) {
+
     }
 }

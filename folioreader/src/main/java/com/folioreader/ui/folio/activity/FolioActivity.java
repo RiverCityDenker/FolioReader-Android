@@ -63,6 +63,7 @@ import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.utils.Constant;
 
@@ -108,10 +109,22 @@ public class FolioActivity
     public static final String INTENT_EBOOK_TITLE_NAME = "title_ebook";
     private static final String TAG = FolioActivity.class.getSimpleName();
     public static final String INTENT_EBOOK = "ebook";
+    public static final String INTENT_DOWNLOAD_INFO = "download_info";
+    public static final String INTENT_READING_TYPE = "reading_type";
     public static boolean mIsDirectionChanged = false;
     private Ebook mEbook;
     private FolioDataManager dataManager;
     private MainPresenter mMainPresenter;
+    private DownloadInfo mDownloadInfo;
+    private ReadingType mReadingType;
+
+    private MainPresenter getPresenter() {
+        return mMainPresenter;
+    }
+
+    private void sendEventActionGoogleAnalytics(String action) {
+        googleAnalytic.sendEvent(AnalyticViewName.Product_Page, action, "Screen Product");
+    }
 
     @Override
     public void downloadOrDelete() {
@@ -122,25 +135,39 @@ public class FolioActivity
         } else if (!isOnline(this) && currentEbook.getDownloadProgress() < 0) {
             createMessageDialog(this, getString(R.string.download_offline_title), getString(R.string.download_offline_message), getString(R.string.close));
         } else {
-//            if (isDownloadEbook) {
-//                sendEventActionGoogleAnalytics("Selected delete book");
-//                getPresenter().deleteEbook(currentEbook, currentPosition);
-//            } else {
-//                sendEventActionGoogleAnalytics("Selected download book");
-//                downloadView.setEbook(currentEbook);
-//                getPresenter().downloadEbook(currentEbook, currentPosition);
-//            }
+            if (isDownloadEbook) {
+                sendEventActionGoogleAnalytics("Selected delete book");
+                getPresenter().deleteEbook(this, currentEbook, googleAnalytic, mDownloadInfo.getmBookPosition());
+            } else {
+                startDownloadBook(currentEbook);
+            }
         }
     }
 
-    private MainPresenter getPresenter() {
-        return mMainPresenter;
+    private void startDownloadBook(Ebook currentEbook) {
+        sendEventActionGoogleAnalytics("Selected download book");
+        toolbar.setEbook(currentEbook);
+        getPresenter().downloadEbook(this, currentEbook, mDownloadInfo);
     }
 
-    private void sendEventActionGoogleAnalytics(String action) {
-        googleAnalytic.sendEvent(AnalyticViewName.Product_Page, action, "Screen Product");
+    @Override
+    public void updateUIAfterDelete(Ebook ebook) {
+        runOnUiThread(() -> {
+            toolbar.updateDownloadView(ebook.getId(), ebook.getDownloadProgress());
+        });
     }
 
+    @Override
+    public void updateDownloadProgress(int ebookId, int progress) {
+        runOnUiThread(() -> {
+            toolbar.updateDownloadView(ebookId, progress);
+        });
+    }
+
+    @Override
+    public void showDownloadError(String message) {
+
+    }
 
     public enum EpubSourceType {
         RAW,
@@ -149,33 +176,32 @@ public class FolioActivity
         ENCRYPTED_FILE
     }
 
+    public enum ReadingType {
+        OFFLINE,
+        ONLINE
+    }
+
     public static final int ACTION_CONTENT_HIGHLIGHT = 77;
     private String bookFileName;
     private static final String HIGHLIGHT_ITEM = "highlight_item";
-
     private DirectionalViewpager mFolioPageViewPager;
     private FolioToolbar toolbar;
-
     private int mChapterPosition;
     private FolioPageFragmentAdapter mFolioPageFragmentAdapter;
     private ReadPosition entryReadPosition;
     private ReadPosition lastReadPosition;
     private Bundle outState;
     private Bundle savedInstanceState;
-
     private List<CustomLink> mSpineReferenceList = new ArrayList<>();
     private EpubServer mEpubServer;
-
     private String mBookId;
     private String mEpubFilePath;
     private EpubSourceType mEpubSourceType;
     int mEpubRawId = 0;
-
     private String ebookFilePath;
     private String contentKey;
     private String userKey;
     private String titleEbook;
-
     private GoogleAnalyticManager googleAnalytic;
     private MediaControllerView mediaControllerView;
     private Config.Direction direction = Config.Direction.VERTICAL;
@@ -189,26 +215,41 @@ public class FolioActivity
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
         this.savedInstanceState = savedInstanceState;
-
         mEpubSourceType = (EpubSourceType)
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
+        mReadingType = (ReadingType)
+                getIntent().getExtras().getSerializable(FolioActivity.INTENT_READING_TYPE);
 
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mEbook = getIntent().getParcelableExtra(INTENT_EBOOK);
-            if (mEbook != null) {
-                mBookId = String.valueOf(mEbook.getId());
-                ebookFilePath = mEbook.getFilePath();
-                contentKey = mEbook.getContentKey();
-                titleEbook = mEbook.getTitle();
+            mDownloadInfo = getIntent().getParcelableExtra(INTENT_DOWNLOAD_INFO);
+            if (mReadingType != null && mReadingType.equals(ReadingType.OFFLINE)) {
+                if (mEbook != null) {
+                    mBookId = String.valueOf(mEbook.getId());
+                    ebookFilePath = mEbook.getFilePath();
+                    contentKey = mEbook.getContentKey();
+                    titleEbook = mEbook.getTitle();
+                } else {
+                    mBookId = String.valueOf(getIntent().getExtras().getInt(FolioActivity.INTENT_EBOOK_ID));
+                    ebookFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_FILE_PATH);
+                    contentKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_CONTENT_KEY);
+                    titleEbook = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_TITLE_NAME);
+                }
             } else {
-                mBookId = String.valueOf(getIntent().getExtras().getInt(FolioActivity.INTENT_EBOOK_ID));
-                ebookFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_FILE_PATH);
-                contentKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_CONTENT_KEY);
-                titleEbook = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_TITLE_NAME);
+                // Reading ONLINE
+                initAskingDialog();
+                if (mEbook != null) {
+                    mBookId = String.valueOf(mEbook.getId());
+                    titleEbook = mEbook.getTitle();
+
+                }
+            }
+
+            if (mDownloadInfo != null) {
+                userKey = mDownloadInfo.getmApiKey();
             }
             SharedPreferenceUtil.putSharedPreferencesLong(this, titleEbook, FileUtil.getCurrentTimeStamp());
             googleAnalytic = new GoogleAnalyticManager(this);
-            userKey = getIntent().getExtras().getString(FolioActivity.INTENT_EBOOK_USER_KEY);
         } else {
             mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
             if (mEpubSourceType.equals(EpubSourceType.RAW)) {
@@ -229,8 +270,6 @@ public class FolioActivity
         } else {
             setupBook();
         }
-
-        initAskingDialog();
     }
 
     @Override
@@ -247,6 +286,8 @@ public class FolioActivity
                 SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
                 if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
                     //Handle function download here
+                    Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
+                    startDownloadBook(currentEbook);
                 }
             }
         });
@@ -277,6 +318,8 @@ public class FolioActivity
             }
             getWindow().setNavigationBarColor(color);
         }
+        toolbar.setEbook(mEbook);
+        updateDownloadProgress(mEbook.getId(), mEbook.getDownloadProgress());
     }
 
     @Override
@@ -504,11 +547,6 @@ public class FolioActivity
         configFolio();
     }
 
-    @Override
-    public void updateUIAfterDelete(Ebook ebook) {
-
-    }
-
     public void onLoadPublicationCustom(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
         if (publication.metadata.title != null) {
@@ -731,13 +769,23 @@ public class FolioActivity
     }
 
     private void setupBook() {
-        if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+        if (mReadingType != null && mReadingType.equals(ReadingType.OFFLINE)) {
+            if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
+                bookFileName = mBookId;
+                initBook();
+            } else {
+                bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType, mEpubFilePath, mEpubRawId);
+                initBook(bookFileName, mEpubRawId, mEpubFilePath, mEpubSourceType);
+            }
+        } else if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             bookFileName = mBookId;
-            initBook();
-        } else {
-            bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType, mEpubFilePath, mEpubRawId);
-            initBook(bookFileName, mEpubRawId, mEpubFilePath, mEpubSourceType);
+            // Reading ONLINE
+            downloadContent();
         }
+    }
+
+    private void downloadContent() {
+        getPresenter().downloadContent(mEbook);
     }
 
     private void initBook() {

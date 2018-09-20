@@ -80,7 +80,7 @@
             app:textColorDefault="@color/black"
             app:backgroundColorDefault="@color/white"
             app:defaultDownloadIcon="@drawable/ic_download_large_white"
-            app:removeDownloadIcon="@drawable/ic_download_small_blue"
+            app:removeDownloadIcon="@drawable/ic_download_remove_large_white"
             app:sizeOfText="@dimen/sp_9"
             app:iconSize="@dimen/dp_20"
             app:marginTopFromText="@dimen/dp_5"

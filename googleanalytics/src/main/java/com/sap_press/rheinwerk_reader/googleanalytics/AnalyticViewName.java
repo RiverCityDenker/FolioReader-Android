@@ -14,6 +14,7 @@ public class AnalyticViewName {
     public static final String Subscription_License_expired = "Subscription-License expired";
     public static final String Settings = "Settings";
     public static final String Library = "Library";
+    public static final String Search = "Search";
     public static final String Reading_List = "Reading-List";
     public static final String Product_Page = "Product-Page";
     public static final String Reader = "Reader";

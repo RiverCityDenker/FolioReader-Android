@@ -49,7 +49,7 @@ public class HorizontalDownloadingView extends DownloadingView {
         } else {
             if (progress >= 45) {
                 tvBookSize.setTextColor(mActiveColor);
-                mImageView.setImageDrawable(mActiveDownloadIcon);
+                mImageView.setImageDrawable(mDefaultDownloadIcon);
                 mImageView.setColorFilter(mActiveColor);
             } else {
                 tvBookSize.setTextColor(mDefaultColor);

@@ -34,6 +34,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.FOLIO_RETROFIT_VERSION"
+    implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:' + rootProject.ext.rxAdapterRetrofitVersion
+    implementation 'commons-io:commons-io:' + rootProject.ext.apacheCommonIOVersion
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation project(':models')
 }

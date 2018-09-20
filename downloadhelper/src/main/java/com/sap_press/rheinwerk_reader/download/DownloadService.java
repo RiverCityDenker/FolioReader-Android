@@ -185,9 +185,8 @@ public class DownloadService extends Service {
         dataManager.saveTimestampDownload(ebook.getTitle());
         currentEbookId = ebook.getId();
         final String token = dataManager.getAccessToken();
-        final String appVersion = "0";
         final String ebookId = String.valueOf(ebook.getId());
-        final Disposable subscription = mApiService.download(ebookId, token, appVersion, appVersion, mContentFileDefault)
+        final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(this, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
                 .observeOn(Schedulers.io())
@@ -241,10 +240,10 @@ public class DownloadService extends Service {
         final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
         ebook.setFilePath(filePath);
         dataManager.updateEbookPath(ebook.getId(), filePath);
-        downloadEbooks(((EpubBook) object), token, ebook);
+        downloadAllFiles(((EpubBook) object), token, ebook);
     }
 
-    private void downloadEbooks(EpubBook epubBook, String token, Ebook ebook) {
+    private void downloadAllFiles(EpubBook epubBook, String token, Ebook ebook) {
         ebook.setTotal(epubBook.manifestList.size());
         final String ebookId = String.valueOf(ebook.getId());
         ArrayList<EpubBook.Manifest> fileListForDownload = getListFileForDownload(epubBook.manifestList, ebookId);

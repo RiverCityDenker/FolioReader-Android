@@ -75,8 +75,6 @@ public class DownloadManager {
                 (long) ebook.getFileSize());
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         boolean isDownloading = ebookAfterUpdate.getDownloadProgress() > 0 && ebookAfterUpdate.getDownloadProgress() < 100;
-//        final String dialogTitle = context.getString(R.string.text_delete_dialog_title);
-//        final String dialogMesage = context.getString(R.string.text_delete_dialog_message);
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading, () -> {
                     listener.deleteEbookTriggered();
                     //update UI
