@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.download.api.ApiClient;
 import com.sap_press.rheinwerk_reader.download.api.ApiService;
@@ -48,6 +49,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.NOT_ENOUGH_SPACE;
+import static com.sap_press.rheinwerk_reader.download.util.DownloadUtil.ReadingType.OFFLINE;
+import static com.sap_press.rheinwerk_reader.download.util.DownloadUtil.ReadingType.ONLINE;
+import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
 import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
 import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
@@ -74,7 +78,7 @@ public class DownloadService extends Service {
     private String mTitle;
     private String mBaseUrl;
     private String mAppVersion;
-    private String mContentFileDefault;
+    private String mContentFileDefault = FILE_PATH_DEFAULT;
     private ApiService mApiService;
 
     public DownloadService() {
@@ -185,13 +189,17 @@ public class DownloadService extends Service {
         dataManager.saveTimestampDownload(ebook.getTitle());
         currentEbookId = ebook.getId();
         final String token = dataManager.getAccessToken();
+        downloadContent(ebook, token, mAppVersion, OFFLINE);
+    }
+
+    private void downloadContent(Ebook ebook, String token, String mAppVersion, DownloadUtil.ReadingType readingType) {
         final String ebookId = String.valueOf(ebook.getId());
         final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(this, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .subscribe(o -> downloadContentSuccess(ebook, o, token), throwable -> {
+                .subscribe(o -> downloadContentSuccess(ebook, o, token, readingType), throwable -> {
                     handleError(throwable, ebookId, null);
                 });
 
@@ -234,13 +242,20 @@ public class DownloadService extends Service {
         }
     }
 
-    private void downloadContentSuccess(Ebook ebook, Object object, String token) {
-        long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
-        googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
-        final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
-        ebook.setFilePath(filePath);
-        dataManager.updateEbookPath(ebook.getId(), filePath);
-        downloadAllFiles(((EpubBook) object), token, ebook);
+    private void downloadContentSuccess(Ebook ebook, Object object, String token, DownloadUtil.ReadingType readingType) {
+        if (readingType.equals(ONLINE)) {
+            final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
+            ebook.setFilePath(filePath);
+            dataManager.updateEbookPath(ebook.getId(), filePath);
+            EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+        } else {
+            long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
+            googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
+            final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
+            ebook.setFilePath(filePath);
+            dataManager.updateEbookPath(ebook.getId(), filePath);
+            downloadAllFiles(((EpubBook) object), token, ebook);
+        }
     }
 
     private void downloadAllFiles(EpubBook epubBook, String token, Ebook ebook) {

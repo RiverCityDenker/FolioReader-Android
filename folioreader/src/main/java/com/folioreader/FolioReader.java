@@ -20,6 +20,7 @@ import com.folioreader.ui.base.SaveReceivedHighlightTask;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadPositionListener;
+import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
@@ -150,13 +151,13 @@ public class FolioReader {
         return singleton;
     }
 
-    public FolioReader openBook(Ebook book, DownloadInfo downloadInfo, FolioActivity.ReadingType readingType) {
+    public FolioReader openBook(Ebook book, DownloadInfo downloadInfo, DownloadUtil.ReadingType readingType) {
         Intent intent = getIntent(book, downloadInfo, readingType);
         context.startActivity(intent);
         return singleton;
     }
 
-    private Intent getIntent(Ebook ebook, DownloadInfo downloadInfo, FolioActivity.ReadingType readingType) {
+    private Intent getIntent(Ebook ebook, DownloadInfo downloadInfo, DownloadUtil.ReadingType readingType) {
         Intent intent = new Intent(context, FolioActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Config.INTENT_CONFIG, config);

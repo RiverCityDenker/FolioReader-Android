@@ -22,6 +22,10 @@ import static com.sap_press.rheinwerk_reader.utils.Util.isMyServiceRunning;
 
 public class DownloadUtil {
 
+    public enum ReadingType {
+        OFFLINE,
+        ONLINE
+    }
     private static final String TAG = DownloadUtil.class.getSimpleName();
 
     public static String getErrorCode(Throwable throwable) {
