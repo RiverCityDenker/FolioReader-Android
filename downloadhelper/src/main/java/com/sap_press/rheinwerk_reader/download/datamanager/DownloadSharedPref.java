@@ -7,6 +7,7 @@ public class DownloadSharedPref {
 
 
     public static final String PREF_KEY_API_KEY = "api-key";
+    public static final String PREF_KEY_READING_TYPE_KEY = "reading_type";
     public static String PREF_KEY_ACCESS_TOKEN = "access-token";
     public static String PREF_KEY_SUBTOPIC = "sub-topic";
     public static String PREF_KEY_SUBTOPIC_ID = "SUBTOPIC_ID";

@@ -93,4 +93,12 @@ public class DownloadDataManager {
         LibraryTable.updateEbook(ebook);
     }
 
+    public void setOnlineOfflineReading(boolean isOnlineReading) {
+        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_READING_TYPE_KEY, isOnlineReading);
+    }
+
+    public boolean isOnlineReading() {
+        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_READING_TYPE_KEY, true);
+    }
+
 }

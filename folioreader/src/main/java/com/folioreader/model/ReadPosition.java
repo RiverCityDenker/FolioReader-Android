@@ -3,7 +3,7 @@ package com.folioreader.model;
 import android.os.Parcelable;
 
 import com.folioreader.FolioReader;
-import com.folioreader.ui.folio.presenter.MainMvpView;
+import com.folioreader.ui.folio.views.MainMvpView;
 
 /**
  * Interface contract for last read position

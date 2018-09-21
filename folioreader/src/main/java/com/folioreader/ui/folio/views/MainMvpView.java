@@ -1,4 +1,4 @@
-package com.folioreader.ui.folio.presenter;
+package com.folioreader.ui.folio.views;
 
 import com.folioreader.ui.base.BaseMvpView;
 import com.folioreader.ui.custom.EpubPublicationCustom;

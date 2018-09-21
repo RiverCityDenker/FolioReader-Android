@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -56,6 +57,8 @@ import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
 import com.folioreader.ui.folio.mediaoverlay.MediaController;
 import com.folioreader.ui.folio.mediaoverlay.MediaControllerCallbacks;
+import com.folioreader.ui.folio.presenter.FolioPagePresenter;
+import com.folioreader.ui.folio.views.FolioPageMvpView;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.HighlightUtil;
 import com.folioreader.util.SMILParser;
@@ -66,6 +69,7 @@ import com.folioreader.view.MediaControllerView;
 import com.folioreader.view.VerticalSeekbar;
 import com.folioreader.view.WebViewPager;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
+import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -86,7 +90,7 @@ import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENC
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class FolioPageFragment
         extends Fragment
-        implements HtmlTaskCallback, MediaControllerCallbacks, FolioWebView.SeekBarListener {
+        implements HtmlTaskCallback, MediaControllerCallbacks, FolioWebView.SeekBarListener, FolioPageMvpView {
 
     public static final String LOG_TAG = FolioPageFragment.class.getSimpleName();
     public static final String KEY_FRAGMENT_FOLIO_POSITION = "com.folioreader.ui.folio.fragment.FolioPageFragment.POSITION";
@@ -158,6 +162,8 @@ public class FolioPageFragment
     private String mUserKey;
     private String mEpubSourceType;
     private String mConfigedHtml;
+    private boolean mIsOnlineReading;
+    private FolioPagePresenter mPresenter;
 
     public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
@@ -190,6 +196,13 @@ public class FolioPageFragment
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+        mPresenter = new FolioPagePresenter(this);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -197,8 +210,6 @@ public class FolioPageFragment
 
         if (getActivity() instanceof FolioActivityCallback)
             mActivityCallback = (FolioActivityCallback) getActivity();
-
-        EventBus.getDefault().register(this);
 
         mBookFilePath = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_FILE_PATH);
         mContentKey = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY);
@@ -235,7 +246,7 @@ public class FolioPageFragment
         mMinutesLeftTextView = (TextView) mRootView.findViewById(R.id.minutesLeft);
 
         mConfig = AppUtil.getSavedConfig(getContext());
-
+        mIsOnlineReading = ((FolioActivity) getActivity()).isOnlineReading();
         loadingView = mRootView.findViewById(R.id.loadingView);
         initSeekbar();
         initAnimations();
@@ -531,10 +542,22 @@ public class FolioPageFragment
 
         mWebview.getSettings().setDefaultTextEncodingName("utf-8");
         if (mEpubSourceType.equals(ENCRYPTED_FILE.name())) {
-            onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+            if (mIsOnlineReading) {
+                final FolioActivity activity = (FolioActivity) getActivity();
+                mPresenter.downloadSingleFile(activity, activity.getDownloadInfo(),
+                                                activity.getEbook(),
+                                                spineItem.href);
+            } else {
+                onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+            }
         } else {
             new HtmlTask(this).execute(getWebviewUrl());
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
+        onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
     }
 
     private WebViewClient webViewClient = new WebViewClient() {

@@ -3,10 +3,10 @@ package com.sap_press.rheinwerk_reader.download.util;
 import android.content.Context;
 import android.content.Intent;
 
-import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.download.DownloadService;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -22,10 +22,9 @@ import static com.sap_press.rheinwerk_reader.utils.Util.isMyServiceRunning;
 
 public class DownloadUtil {
 
-    public enum ReadingType {
-        OFFLINE,
-        ONLINE
-    }
+    public static final boolean ONLINE = true;
+    public static final boolean OFFLINE = false;
+
     private static final String TAG = DownloadUtil.class.getSimpleName();
 
     public static String getErrorCode(Throwable throwable) {

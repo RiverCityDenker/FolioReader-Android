@@ -47,7 +47,7 @@ import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.ui.folio.adapter.FolioPageFragmentAdapter;
 import com.folioreader.ui.folio.fragment.ContentHighlightTabletFragment;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
-import com.folioreader.ui.folio.presenter.MainMvpView;
+import com.folioreader.ui.folio.views.MainMvpView;
 import com.folioreader.ui.folio.presenter.MainPresenter;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.DialogFactory;
@@ -62,7 +62,6 @@ import com.folioreader.view.ImageViewerFragment;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
-import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
@@ -118,7 +117,11 @@ public class FolioActivity
     private FolioDataManager dataManager;
     private MainPresenter mMainPresenter;
     private DownloadInfo mDownloadInfo;
-    private DownloadUtil.ReadingType mReadingType;
+    private boolean mIsOnlineReading;
+
+    public boolean isOnlineReading() {
+        return mIsOnlineReading;
+    }
 
     private MainPresenter getPresenter() {
         return mMainPresenter;
@@ -171,6 +174,14 @@ public class FolioActivity
 
     }
 
+    public DownloadInfo getDownloadInfo() {
+        return mDownloadInfo;
+    }
+
+    public Ebook getEbook() {
+        return mEbook;
+    }
+
     public enum EpubSourceType {
         RAW,
         ASSETS,
@@ -214,13 +225,12 @@ public class FolioActivity
         this.savedInstanceState = savedInstanceState;
         mEpubSourceType = (EpubSourceType)
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
-        mReadingType = (DownloadUtil.ReadingType)
-                getIntent().getExtras().getSerializable(FolioActivity.INTENT_READING_TYPE);
+        mIsOnlineReading = getIntent().getExtras().getBoolean(FolioActivity.INTENT_READING_TYPE);
 
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mEbook = getIntent().getParcelableExtra(INTENT_EBOOK);
             mDownloadInfo = getIntent().getParcelableExtra(INTENT_DOWNLOAD_INFO);
-            if (mReadingType != null && mReadingType.equals(DownloadUtil.ReadingType.OFFLINE)) {
+            if (!mIsOnlineReading) {
                 if (mEbook != null) {
                     mBookId = String.valueOf(mEbook.getId());
                     ebookFilePath = mEbook.getFilePath();
@@ -766,7 +776,7 @@ public class FolioActivity
     }
 
     private void setupBook() {
-        if (mReadingType != null && mReadingType.equals(DownloadUtil.ReadingType.OFFLINE)) {
+        if (!mIsOnlineReading) {
             if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
                 bookFileName = mBookId;
                 initBook();
@@ -782,7 +792,7 @@ public class FolioActivity
     }
 
     private void downloadContent() {
-        getPresenter().downloadContent(mEbook);
+        getPresenter().downloadContent(this, mEbook, mDownloadInfo);
     }
 
     private void initBook() {
@@ -791,7 +801,9 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onFinishedDownloadContent(FinishDownloadContentEvent event) {
-
+        mEbook = event.getEbook();
+        ebookFilePath = mEbook.getFilePath();
+        initBook();
     }
 
     @Override

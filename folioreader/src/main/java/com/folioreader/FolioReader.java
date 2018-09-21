@@ -151,13 +151,13 @@ public class FolioReader {
         return singleton;
     }
 
-    public FolioReader openBook(Ebook book, DownloadInfo downloadInfo, DownloadUtil.ReadingType readingType) {
-        Intent intent = getIntent(book, downloadInfo, readingType);
+    public FolioReader openBook(Ebook book, DownloadInfo downloadInfo, boolean isOnlineReading) {
+        Intent intent = getIntent(book, downloadInfo, isOnlineReading);
         context.startActivity(intent);
         return singleton;
     }
 
-    private Intent getIntent(Ebook ebook, DownloadInfo downloadInfo, DownloadUtil.ReadingType readingType) {
+    private Intent getIntent(Ebook ebook, DownloadInfo downloadInfo, boolean isOnlineReading) {
         Intent intent = new Intent(context, FolioActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Config.INTENT_CONFIG, config);
@@ -165,7 +165,7 @@ public class FolioReader {
         intent.putExtra(FolioActivity.INTENT_EBOOK, ebook);
         intent.putExtra(FolioActivity.INTENT_DOWNLOAD_INFO, downloadInfo);
         intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.ENCRYPTED_FILE);
-        intent.putExtra(FolioActivity.INTENT_READING_TYPE, readingType);
+        intent.putExtra(FolioActivity.INTENT_READING_TYPE, isOnlineReading);
         intent.putExtra(FolioActivity.EXTRA_READ_POSITION, readPosition);
         return intent;
     }

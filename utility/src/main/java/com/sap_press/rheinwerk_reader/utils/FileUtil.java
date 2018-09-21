@@ -94,6 +94,15 @@ public class FileUtil {
         return new File(folder, fileName);
     }
 
+    @NonNull
+    public static String reformatHref(String href) {
+        if (href.startsWith("/"))
+            href = href.substring(1);
+        else
+            return href;
+        return reformatHref(href);
+    }
+
     public static boolean isFileExist(Context context, String ebookId, String href) {
         File file = getFile(context, ebookId, href);
         return file.exists();

@@ -5,8 +5,12 @@ import android.content.Context;
 import com.folioreader.ui.base.ManifestCallBack;
 import com.folioreader.ui.base.ManifestTask;
 import com.folioreader.ui.custom.EpubPublicationCustom;
+import com.folioreader.ui.folio.views.MainMvpView;
 import com.sap_press.rheinwerk_reader.download.DownloadManager;
+import com.sap_press.rheinwerk_reader.download.DownloadService;
+import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.events.UpdateBookUIEvent;
+import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
@@ -21,10 +25,12 @@ import org.greenrobot.eventbus.EventBus;
 public class MainPresenter implements ManifestCallBack {
     private MainMvpView mainMvpView;
     private final DownloadManager downloadManager;
+    private final DownloadDataManager dataManager;
 
     public MainPresenter(MainMvpView mainMvpView) {
         this.mainMvpView = mainMvpView;
         downloadManager = DownloadManager.getInstance();
+        dataManager = DownloadDataManager.getInstance();
     }
 
     public void parseManifest(String url) {
@@ -93,7 +99,12 @@ public class MainPresenter implements ManifestCallBack {
         }
     }
 
-    public void downloadContent(Ebook mEbook) {
-
+    public void downloadContent(Context context, Ebook mEbook, DownloadInfo downloadInfo) {
+        new DownloadService().downloadContent(context,
+                                            mEbook,
+                                            dataManager.getAccessToken(),
+                                            downloadInfo.getmAppVersion(),
+                                            downloadInfo.getmBaseUrl(),
+                                            DownloadUtil.ONLINE);
     }
 }
