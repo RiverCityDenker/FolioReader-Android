@@ -375,6 +375,7 @@ public class DownloadService extends Service {
         @Override
         protected Ebook doInBackground(String... hrefs) {
             String href = hrefs[0];
+            Log.e(TAG, "doInBackground: >>>href = " + href);
             href = FileUtil.reformatHref(href);
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
             String contentKey;
@@ -388,15 +389,18 @@ public class DownloadService extends Service {
             if (!TextUtils.isEmpty(contentKey) && !contentKey.equals(ebook.getContentKey())) {
                 ebook.setContentKey(contentKey);
             }
+            ebook.setHref(href);
             return ebook;
         }
 
         @Override
         protected void onPostExecute(Ebook ebook) {
-            if (isBasicData)
+            Log.e(TAG, "onPostExecute: >>>href = " + ebook.getHref());
+            if (isBasicData) {
                 EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
-            else
+            } else {
                 EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook));
+            }
         }
 
         private void onDownloadSingleFileError(IOException e, String ebookId) {

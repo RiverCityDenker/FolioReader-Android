@@ -71,6 +71,7 @@ import com.folioreader.view.VerticalSeekbar;
 import com.folioreader.view.WebViewPager;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
+import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -546,9 +547,13 @@ public class FolioPageFragment
         if (mEpubSourceType.equals(ENCRYPTED_FILE.name())) {
             if (mIsOnlineReading) {
                 final FolioActivity activity = (FolioActivity) getActivity();
-                mPresenter.downloadSingleFile(activity, activity.getDownloadInfo(),
-                                                activity.getEbook(),
-                                                spineItem.href);
+                if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)) {
+                    Log.e(TAG, "initWebView: >>>" + spineItem.href);
+                    mPresenter.downloadSingleFile(activity, activity.getDownloadInfo(),
+                            activity.getEbook(),
+                            spineItem.href);
+                } else
+                    onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
             } else {
                 onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
             }
@@ -559,7 +564,10 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
+        Log.e(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
+        mActivityCallback.updateEbook(event.getEbook());
+        if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href)))
+            onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
     }
 
     private WebViewClient webViewClient = new WebViewClient() {

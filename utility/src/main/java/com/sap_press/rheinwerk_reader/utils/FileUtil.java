@@ -104,6 +104,7 @@ public class FileUtil {
     }
 
     public static boolean isFileExist(Context context, String ebookId, String href) {
+        href = FileUtil.reformatHref(href);
         final String folderPath = getEbookPath(context, ebookId);
         File file = getFile(folderPath, href);
         return file.exists();
