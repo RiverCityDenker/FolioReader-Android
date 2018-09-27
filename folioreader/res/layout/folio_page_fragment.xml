@@ -24,11 +24,11 @@
 
     </FrameLayout>
 
-    <com.folioreader.view.LoadingView
-        android:id="@+id/loadingView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="invisible" />
+    <!--<com.folioreader.view.LoadingView-->
+        <!--android:id="@+id/loadingView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--tools:visibility="invisible" />-->
 
     <com.folioreader.view.VerticalSeekbar
         android:id="@+id/scrollSeekbar"

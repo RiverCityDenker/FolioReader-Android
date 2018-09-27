@@ -23,7 +23,7 @@ import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent
 import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
-import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
+import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
@@ -55,7 +55,7 @@ import io.reactivex.schedulers.Schedulers;
 import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.NOT_ENOUGH_SPACE;
 import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
 import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
-import static com.sap_press.rheinwerk_reader.utils.FileUtil.reformatHref;
+import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
 import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class DownloadService extends Service {
@@ -68,6 +68,7 @@ public class DownloadService extends Service {
     private static final String BASE_URL_KEY = "base_url";
     private static final String APP_VERSION_KEY = "app_version";
     private static final String CONTENT_FILE_PATH = "content_file_path";
+    private static final String CSS_ID = "css";
     private Object LOCK_SHUT_DOWN = new Object();
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
@@ -204,12 +205,13 @@ public class DownloadService extends Service {
         final String ebookId = String.valueOf(ebook.getId());
         if (mApiService == null)
             mApiService = ApiClient.getClient(this, mBaseUrl).create(ApiService.class);
+        final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, mAppVersion);
         final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .subscribe(o -> downloadContentSuccess(context, ebook, o, token, isOnlineReading), throwable -> {
+                .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
                     handleError(throwable, ebookId, null, isOnlineReading);
                 });
 
@@ -259,21 +261,29 @@ public class DownloadService extends Service {
         }
     }
 
-    private void downloadContentSuccess(Context context, Ebook ebook, Object object, String token, boolean isOnlineReading) {
+    private void downloadContentSuccess(Context context, Ebook ebook, Object object, ApiInfo apiInfo, boolean isOnlineReading) {
+        final EpubBook epub = (EpubBook) object;
+        final String ebookId = String.valueOf(ebook.getId());
         if (isOnlineReading) {
-            final String filePath = FileUtil.getEbookPath(context, String.valueOf(ebook.getId()));
+            final String filePath = getEbookPath(context, String.valueOf(ebook.getId()));
             ebook.setFilePath(filePath);
             if (dataManager == null)
                 dataManager = DownloadDataManager.getInstance();
             dataManager.updateEbookPath(ebook.getId(), filePath);
-            EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+            final String folderPath = getEbookPath(context, ebookId);
+            for (EpubBook.Manifest manifest : epub.manifestList) {
+                if (manifest.getId().equalsIgnoreCase(CSS_ID)) {
+                    new DownloadService.DownloadFileTask(ebook, apiInfo, folderPath, true).execute(manifest.getHref());
+                    break;
+                }
+            }
         } else {
             long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
             googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
-            final String filePath = FileUtil.getEbookPath(this, String.valueOf(ebook.getId()));
+            final String filePath = getEbookPath(this, String.valueOf(ebook.getId()));
             ebook.setFilePath(filePath);
             dataManager.updateEbookPath(ebook.getId(), filePath);
-            downloadAllFiles(((EpubBook) object), token, ebook);
+            downloadAllFiles(epub, apiInfo.getmToken(), ebook);
         }
     }
 
@@ -284,10 +294,11 @@ public class DownloadService extends Service {
         progress = FileUtil.getFilesCount(ebook.getFilePath());
         int totalFileListNeedToDownload = fileListForDownload.size();
         executor = ParallelExecutorTask.createPool();
+        final String folderPath = getEbookPath(this, ebookId);
         if (totalFileListNeedToDownload > 0) {
             for (int i = 0; i < totalFileListNeedToDownload; i++) {
                 final EpubBook.Manifest manifest = fileListForDownload.get(i);
-                DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(ebook, token, i, executor);
+                DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(ebook, folderPath, token, i, executor);
                 downloadFileAsyn.executeParallel(manifest);
             }
         } else {
@@ -301,10 +312,12 @@ public class DownloadService extends Service {
         String token;
         String ebookId;
         int name;
+        private String folderPath;
 
-        DownloadFileAsyn(Ebook ebook, String token, int name, ThreadPoolExecutor executor) {
+        DownloadFileAsyn(Ebook ebook, String folderPath, String token, int name, ThreadPoolExecutor executor) {
             super(executor);
             this.ebook = ebook;
+            this.folderPath = folderPath;
             this.token = token;
             this.ebookId = String.valueOf(ebook.getId());
             this.name = name;
@@ -319,7 +332,7 @@ public class DownloadService extends Service {
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + manifest.getHref();
             String contentKey;
             try {
-                contentKey = downloadFile(fileUrl, token, ebookId, manifest.getHref());
+                contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (IOException e) {
                 e.printStackTrace();
                 handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
@@ -337,36 +350,6 @@ public class DownloadService extends Service {
 
             return ebook;
         }
-
-        private String downloadFile(String fileUrl, String token, String ebookId, String href) throws IOException {
-            String contentKey = "";
-            File file = FileUtil.getFile(DownloadService.this, ebookId, href);
-            URL url = new URL(fileUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(60 * 1000);
-            connection.setConnectTimeout(60 * 1000);
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", token);
-            connection.setRequestProperty("x-project", "sap-press");
-            connection.setRequestProperty("app_version", mAppVersion);
-            connection.setRequestProperty("file_path", href);
-            final int BUFFER_SIZE = 23 * 1024;
-            InputStream is = connection.getInputStream();
-            BufferedInputStream bis = new BufferedInputStream(is, BUFFER_SIZE);
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            byte[] data = new byte[BUFFER_SIZE];
-            int current;
-
-            while ((current = bis.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, current);
-            }
-
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(buffer.toByteArray());
-            fos.flush();
-            fos.close();
-            return connection.getHeaderField(X_CONTENT_KEY);
-        }
     }
 
 
@@ -376,15 +359,17 @@ public class DownloadService extends Service {
         private final String ebookId;
         private final Ebook ebook;
         private final String baseUrl;
-        private final Context context;
+        private final boolean isBasicData;
+        private final String folderPath;
 
-        public DownloadFileTask(Context context, Ebook ebook, String token, DownloadInfo downloadInfo) {
-            this.context = context;
+        public DownloadFileTask(Ebook ebook, ApiInfo apiInfo, String folderPath, boolean isBasicData) {
             this.ebook = ebook;
-            this.token = token;
+            this.token = apiInfo.getmToken();
             this.ebookId = String.valueOf(ebook.getId());
-            this.appVersion = downloadInfo.getmAppVersion();
-            this.baseUrl = downloadInfo.getmBaseUrl();
+            this.appVersion = apiInfo.getmAppVersion();
+            this.baseUrl = apiInfo.getmBaseUrl();
+            this.folderPath = folderPath;
+            this.isBasicData = isBasicData;
         }
 
         @Override
@@ -394,7 +379,7 @@ public class DownloadService extends Service {
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
             String contentKey;
             try {
-                contentKey = downloadFile(context, fileUrl, token, ebookId, href, appVersion);
+                contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
             } catch (IOException e) {
                 e.printStackTrace();
                 onDownloadSingleFileError(e, ebookId);
@@ -408,7 +393,10 @@ public class DownloadService extends Service {
 
         @Override
         protected void onPostExecute(Ebook ebook) {
-            EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook));
+            if (isBasicData)
+                EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+            else
+                EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook));
         }
 
         private void onDownloadSingleFileError(IOException e, String ebookId) {
@@ -416,15 +404,13 @@ public class DownloadService extends Service {
         }
     }
 
-
-    private static String downloadFile(Context context,
-                                       String fileUrl,
+    private static String downloadFile(String fileUrl,
                                        String token,
-                                       String ebookId,
+                                       String folderPath,
                                        String href,
                                        String appVersion) throws IOException {
 
-        File file = FileUtil.getFile(context, ebookId, href);
+        File file = FileUtil.getFile(folderPath, href);
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);
@@ -451,6 +437,7 @@ public class DownloadService extends Service {
         fos.close();
         return connection.getHeaderField(X_CONTENT_KEY);
     }
+
     private ArrayList<EpubBook.Manifest> getListFileForDownload(ArrayList<EpubBook.Manifest> manifestList, String ebookId) {
         deleteSomeHTMLFile(manifestList, ebookId);
         ArrayList<EpubBook.Manifest> downloadFileList = new ArrayList<>();
@@ -464,10 +451,11 @@ public class DownloadService extends Service {
 
     private void deleteSomeHTMLFile(ArrayList<EpubBook.Manifest> manifestList, String ebookId) {
         int deleteCount = 0;
+        String folderPath = getEbookPath(DownloadService.this, ebookId);
         for (EpubBook.Manifest manifest : manifestList) {
             if (manifest.getHref().contains("html") && FileUtil.isFileExist(this, ebookId, manifest.getHref()) && deleteCount < 5) {
                 deleteCount++;
-                FileUtil.deleteFile(FileUtil.getFile(this, ebookId, manifest.getHref()));
+                FileUtil.deleteFile(FileUtil.getFile(folderPath, manifest.getHref()));
             }
         }
     }

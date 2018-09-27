@@ -2,6 +2,7 @@ package com.folioreader.ui.folio.activity;
 
 import com.folioreader.Config;
 import com.folioreader.model.ReadPosition;
+import com.folioreader.view.LoadingView;
 
 public interface FolioActivityCallback {
 
@@ -22,4 +23,6 @@ public interface FolioActivityCallback {
     ReadPosition getLastReadPosition();
 
     void showSinglePage(String url);
+
+    LoadingView getLoadingView();
 }

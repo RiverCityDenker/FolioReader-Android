@@ -69,11 +69,11 @@ public class MainPresenter implements ManifestCallBack {
         updateDownloadProgress(ebook.getId(), ebook.getDownloadProgress());
         EventBus.getDefault().post(new UpdateBookUIEvent(downloadInfo.getmBookPosition(), ebook));
         downloadManager.startDownload(context,
-                                        ebook,
-                                        downloadInfo.getmDownloadIcon(),
-                                        downloadInfo.getmAppVersion(),
-                                        downloadInfo.getmBaseUrl(),
-                                        this::handleDownloadError);
+                ebook,
+                downloadInfo.getmDownloadIcon(),
+                downloadInfo.getmAppVersion(),
+                downloadInfo.getmBaseUrl(),
+                this::handleDownloadError);
     }
 
     private void updateDetailUIAfterDelete(Ebook ebook) {
@@ -100,11 +100,17 @@ public class MainPresenter implements ManifestCallBack {
     }
 
     public void downloadContent(Context context, Ebook mEbook, DownloadInfo downloadInfo) {
+        showLoading();
         new DownloadService().downloadContent(context,
-                                            mEbook,
-                                            dataManager.getAccessToken(),
-                                            downloadInfo.getmAppVersion(),
-                                            downloadInfo.getmBaseUrl(),
-                                            DownloadUtil.ONLINE);
+                mEbook,
+                dataManager.getAccessToken(),
+                downloadInfo.getmAppVersion(),
+                downloadInfo.getmBaseUrl(),
+                DownloadUtil.ONLINE);
+    }
+
+    private void showLoading() {
+        if (mainMvpView != null)
+            mainMvpView.showLoading();
     }
 }

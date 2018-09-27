@@ -41,7 +41,8 @@ public class FileUtil {
     }
 
     public static String writeResponseBodyToDisk(Context context, ResponseBody response, String ebookId, String href) {
-        File file = getFile(context, ebookId, href);
+        String folderPath = getEbookPath(context, ebookId);
+        File file = getFile(folderPath, href);
         try {
             InputStream inputStream = null;
             OutputStream outputStream = null;
@@ -80,10 +81,9 @@ public class FileUtil {
     }
 
     @NonNull
-    public static File getFile(Context context, String ebookId, String href) {
+    public static File getFile(String folderPath, String href) {
         String folderName;
         String fileName = href;
-        String folderPath = getEbookPath(context, ebookId);
         if (href.contains(SLASH_SIGN)) {
             folderName = href.substring(0, href.indexOf(SLASH_SIGN));
             fileName = href.substring(href.lastIndexOf(SLASH_SIGN));
@@ -104,7 +104,8 @@ public class FileUtil {
     }
 
     public static boolean isFileExist(Context context, String ebookId, String href) {
-        File file = getFile(context, ebookId, href);
+        final String folderPath = getEbookPath(context, ebookId);
+        File file = getFile(folderPath, href);
         return file.exists();
     }
 

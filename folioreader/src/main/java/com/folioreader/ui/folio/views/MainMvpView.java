@@ -13,4 +13,6 @@ public interface MainMvpView extends BaseMvpView {
     void updateUIAfterDelete(Ebook ebook);
     void updateDownloadProgress(int id, int progress);
     void showDownloadError(String message);
+    void showLoading();
+    void hideLoading();
 }

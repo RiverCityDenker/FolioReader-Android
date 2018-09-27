@@ -53,6 +53,7 @@ import com.folioreader.model.sqlite.HighLightTable;
 import com.folioreader.ui.base.HtmlTask;
 import com.folioreader.ui.base.HtmlTaskCallback;
 import com.folioreader.ui.base.HtmlUtil;
+import com.folioreader.ui.custom.CustomLink;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
 import com.folioreader.ui.folio.mediaoverlay.MediaController;
@@ -216,7 +217,7 @@ public class FolioPageFragment
         mUserKey = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_USER_KEY);
         mBookId = getArguments().getString(FolioReader.INTENT_BOOK_ID);
         mEpubSourceType = getArguments().getString(KEY_SOURCE_TYPE);
-        spineItem = (Link) getArguments().getSerializable(SPINE_ITEM);
+        spineItem = (CustomLink) getArguments().getSerializable(SPINE_ITEM);
 
         if ((savedInstanceState != null)
                 && savedInstanceState.containsKey(KEY_FRAGMENT_FOLIO_POSITION)
@@ -224,7 +225,7 @@ public class FolioPageFragment
             mPosition = savedInstanceState.getInt(KEY_FRAGMENT_FOLIO_POSITION);
             mBookTitle = savedInstanceState.getString(KEY_FRAGMENT_FOLIO_BOOK_TITLE);
             mEpubFileName = savedInstanceState.getString(KEY_FRAGMENT_EPUB_FILE_NAME);
-            spineItem = (Link) savedInstanceState.getSerializable(SPINE_ITEM);
+            spineItem = (CustomLink) savedInstanceState.getSerializable(SPINE_ITEM);
         } else {
             mPosition = getArguments().getInt(KEY_FRAGMENT_FOLIO_POSITION);
             mBookTitle = getArguments().getString(KEY_FRAGMENT_FOLIO_BOOK_TITLE);
@@ -247,7 +248,7 @@ public class FolioPageFragment
 
         mConfig = AppUtil.getSavedConfig(getContext());
         mIsOnlineReading = ((FolioActivity) getActivity()).isOnlineReading();
-        loadingView = mRootView.findViewById(R.id.loadingView);
+        loadingView = mActivityCallback.getLoadingView();
         initSeekbar();
         initAnimations();
         initWebView();
@@ -389,6 +390,7 @@ public class FolioPageFragment
     }
 
     private void setHtml(boolean reloaded) {
+        Log.e(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
         if (spineItem != null) {
             String ref = spineItem.href;
             if (!reloaded && spineItem.properties.contains("media-overlay")) {
@@ -570,7 +572,7 @@ public class FolioPageFragment
 
         @Override
         public void onPageFinished(WebView view, String url) {
-
+            hideLoading();
             if (isAdded()) {
 
                 mWebview.loadPage("javascript:getCompatMode()");
@@ -1292,5 +1294,10 @@ public class FolioPageFragment
             mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
             this.highlightId = null;
         }
+    }
+
+    @Override
+    public void showLoading() {
+        loadingView.visible();
     }
 }

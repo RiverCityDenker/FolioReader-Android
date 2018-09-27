@@ -29,6 +29,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.folioreader.Config;
@@ -59,6 +60,7 @@ import com.folioreader.view.FolioToolbar;
 import com.folioreader.view.FolioToolbarCallback;
 import com.folioreader.view.FolioWebView;
 import com.folioreader.view.ImageViewerFragment;
+import com.folioreader.view.LoadingView;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
@@ -118,6 +120,7 @@ public class FolioActivity
     private MainPresenter mMainPresenter;
     private DownloadInfo mDownloadInfo;
     private boolean mIsOnlineReading;
+    private LoadingView loadingView;
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -174,6 +177,16 @@ public class FolioActivity
 
     }
 
+    @Override
+    public void showLoading() {
+        loadingView.visible();
+    }
+
+    @Override
+    public void hideLoading() {
+        loadingView.invisible();
+    }
+
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
     }
@@ -222,6 +235,7 @@ public class FolioActivity
         mMainPresenter = new MainPresenter(this);
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
+        loadingView = (LoadingView) findViewById(R.id.loadingView);
         this.savedInstanceState = savedInstanceState;
         mEpubSourceType = (EpubSourceType)
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
@@ -575,7 +589,6 @@ public class FolioActivity
     }
 
     private void configFolio() {
-
         mFolioPageViewPager = (DirectionalViewpager) findViewById(R.id.folioPageViewPager);
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
@@ -725,6 +738,11 @@ public class FolioActivity
                 break;
             }
         }
+    }
+
+    @Override
+    public LoadingView getLoadingView() {
+        return loadingView;
     }
 
     private void setConfig(Bundle savedInstanceState) {
