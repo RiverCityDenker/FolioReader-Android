@@ -50,18 +50,12 @@ public class DialogFactory {
                 .setView(vi)
                 .setTitle("Reading online")
                 .setMessage(msg)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.download(TypeDownload.LIVE_READING, dontShowAgain.isChecked());
-                        dialog.dismiss();
-                    }
-                }).setNegativeButton("START DOWNLOAD", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.download(TypeDownload.DOWNLOAD, dontShowAgain.isChecked());
-                        dialog.dismiss();
-                    }
+                .setPositiveButton("READ ONLINE", (dialog1, which) -> {
+                    callback.download(TypeDownload.LIVE_READING, dontShowAgain.isChecked());
+                    dialog1.dismiss();
+                }).setNegativeButton("START DOWNLOAD", (dialog12, which) -> {
+                    callback.download(TypeDownload.DOWNLOAD, dontShowAgain.isChecked());
+                    dialog12.dismiss();
                 }).create();
         boolean isSkip = SharedPreferenceUtil.getSharedPreferencesBoolean(context, SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, false);
         if (!isSkip) {

@@ -301,15 +301,12 @@ public class FolioActivity
     }
 
     private void initAskingDialog() {
-        DialogFactory.createDownloadDialog(this, getResources().getString(R.string.download_asking), new DialogFactory.DownLoadCallback() {
-            @Override
-            public void download(DialogFactory.TypeDownload typeDownload, boolean isSkip) {
-                SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
-                if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
-                    //Handle function download here
-                    Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
-                    startDownloadBook(currentEbook);
-                }
+        DialogFactory.createDownloadDialog(this, getResources().getString(R.string.download_asking), (typeDownload, isSkip) -> {
+            SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
+            if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
+                //Handle function download here
+                Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
+                startDownloadBook(currentEbook);
             }
         });
     }
