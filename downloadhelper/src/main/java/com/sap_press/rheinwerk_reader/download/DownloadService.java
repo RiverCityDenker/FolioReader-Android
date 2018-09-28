@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.api.ApiClient;
 import com.sap_press.rheinwerk_reader.download.api.ApiService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
@@ -205,7 +206,7 @@ public class DownloadService extends Service {
         final String ebookId = String.valueOf(ebook.getId());
         if (mApiService == null)
             mApiService = ApiClient.getClient(this, mBaseUrl).create(ApiService.class);
-        final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, mAppVersion);
+        final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, mAppVersion, dataManager.getApiKey());
         final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
@@ -361,6 +362,7 @@ public class DownloadService extends Service {
         private final String baseUrl;
         private final boolean isBasicData;
         private final String folderPath;
+        private final String apiKey;
 
         public DownloadFileTask(Ebook ebook, ApiInfo apiInfo, String folderPath, boolean isBasicData) {
             this.ebook = ebook;
@@ -368,19 +370,26 @@ public class DownloadService extends Service {
             this.ebookId = String.valueOf(ebook.getId());
             this.appVersion = apiInfo.getmAppVersion();
             this.baseUrl = apiInfo.getmBaseUrl();
+            this.apiKey = apiInfo.getmApiKey();
             this.folderPath = folderPath;
             this.isBasicData = isBasicData;
         }
 
         @Override
-        protected Ebook doInBackground(String... hrefs) {
-            String href = hrefs[0];
-            Log.e(TAG, "doInBackground: >>>href = " + href);
-            href = FileUtil.reformatHref(href);
+        protected Ebook doInBackground(String... originalHrefs) {
+            String originalHref = originalHrefs[0];
+            final String href = FileUtil.reformatHref(originalHref);
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
             String contentKey;
+            String html;
             try {
+                Log.e(TAG, "doInBackground: >>>" + folderPath + " - " + originalHref + " - " + apiKey);
                 contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
+                if (href.contains(".html")) {
+                    html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
+
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 onDownloadSingleFileError(e, ebookId);
@@ -391,6 +400,10 @@ public class DownloadService extends Service {
             }
             ebook.setHref(href);
             return ebook;
+        }
+
+        private String getFilePath(String folderPath, String originalHref) {
+            return folderPath + originalHref;
         }
 
         @Override

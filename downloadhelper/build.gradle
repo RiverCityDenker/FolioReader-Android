@@ -45,4 +45,5 @@ dependencies {
     implementation project(':utility')
     implementation project(':aping')
     implementation project(':models')
+    implementation project(':crypto')
 }
