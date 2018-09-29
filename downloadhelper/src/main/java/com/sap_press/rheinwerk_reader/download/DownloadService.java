@@ -77,6 +77,7 @@ public class DownloadService extends Service {
     private static final String APP_VERSION_KEY = "app_version";
     private static final String CONTENT_FILE_PATH = "content_file_path";
     private static final String CSS_ID = "css";
+    private static final String TOC_ID = "ncx";
     private Object LOCK_SHUT_DOWN = new Object();
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
@@ -282,7 +283,8 @@ public class DownloadService extends Service {
             dataManager.updateEbookPath(ebook.getId(), filePath);
             final String folderPath = getEbookPath(context, ebookId);
             for (EpubBook.Manifest manifest : epub.manifestList) {
-                if (manifest.getId().equalsIgnoreCase(CSS_ID)) {
+                if (manifest.getId().equalsIgnoreCase(CSS_ID)
+                    || manifest.getId().equalsIgnoreCase(TOC_ID)) {
                     new DownloadService.DownloadFileTask(ebook, apiInfo, folderPath, true).execute(manifest.getHref());
                     break;
                 }
