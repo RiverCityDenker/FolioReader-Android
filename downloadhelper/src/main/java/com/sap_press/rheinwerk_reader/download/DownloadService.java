@@ -34,6 +34,13 @@ import com.sap_press.rheinwerk_reader.utils.Util;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.readium.r2_streamer.parser.EpubParser;
+import org.readium.r2_streamer.parser.EpubParserException;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -206,7 +213,9 @@ public class DownloadService extends Service {
         final String ebookId = String.valueOf(ebook.getId());
         if (mApiService == null)
             mApiService = ApiClient.getClient(this, mBaseUrl).create(ApiService.class);
-        final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, mAppVersion, dataManager.getApiKey());
+        if (dataManager == null)
+            dataManager = DownloadDataManager.getInstance();
+        final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, dataManager.getApiKey(), mAppVersion);
         final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
                 .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
                 .map(FileUtil::parseContentFileToObject)
@@ -387,7 +396,12 @@ public class DownloadService extends Service {
                 contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
                 if (href.contains(".html")) {
                     html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
-
+                    try {
+                        Log.e(TAG, "doInBackground: >>>aaa");
+                        parseHtml(html);
+                    } catch (EpubParserException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             } catch (IOException e) {
@@ -400,6 +414,31 @@ public class DownloadService extends Service {
             }
             ebook.setHref(href);
             return ebook;
+        }
+
+        private void parseHtml(String html) throws EpubParserException {
+            Document document = EpubParser.xmlParser(html);
+            if (document == null) {
+                throw new EpubParserException("Error while parsing");
+            }
+            NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
+            if (itemNodes != null) {
+                for (int i = 0; i < itemNodes.getLength(); i++) {
+                    Element itemElement = (Element) itemNodes.item(i);
+
+                    NamedNodeMap nodeMap = itemElement.getAttributes();
+                    for (int j = 0; j < nodeMap.getLength(); j++) {
+                        Attr attr = (Attr) nodeMap.item(j);
+                        switch (attr.getNodeName()) {
+                            case "src":
+                                final String src = attr.getNodeValue();
+                                Log.e(TAG, "parseHtml: >>>" + src);
+                                doInBackground(src);
+                                break;
+                        }
+                    }
+                }
+            }
         }
 
         private String getFilePath(String folderPath, String originalHref) {

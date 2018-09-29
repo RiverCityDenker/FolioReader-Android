@@ -547,9 +547,10 @@ public class FolioPageFragment
         if (mEpubSourceType.equals(ENCRYPTED_FILE.name())) {
             if (mIsOnlineReading) {
                 final FolioActivity activity = (FolioActivity) getActivity();
-                if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)) {
+                if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
+                        || mContentKey == null || mContentKey.isEmpty()) {
                     Log.e(TAG, "initWebView: >>>" + spineItem.href);
-                    mPresenter.downloadSingleFile(activity, activity.getDownloadInfo(),
+                    mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
                             activity.getEbook(),
                             spineItem.href);
                 } else

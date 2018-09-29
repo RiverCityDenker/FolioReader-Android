@@ -186,6 +186,7 @@ public class FolioActivity
         loadingView.invisible();
     }
 
+    @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
     }
@@ -537,6 +538,7 @@ public class FolioActivity
         if (mEpubServer != null) {
             mEpubServer.stop();
         }
+        Log.e(TAG, "onDestroy: >>>");
         getPresenter().deleteCacheData(mEbook);
         long timeRead = TimeUnit.SECONDS.toSeconds(FileUtil.getCurrentTimeStamp() - SharedPreferenceUtil.getSharedPreferencesLong(this, titleEbook, 1526620402));
         googleAnalytic.sendEvent(AnalyticViewName.eBook_reading_duration, AnalyticViewName.reading_duration, titleEbook, timeRead);
@@ -747,6 +749,7 @@ public class FolioActivity
 
     @Override
     public void updateEbook(Ebook ebook) {
+        contentKey = ebook.getContentKey();
         mEbook = ebook;
         mFolioPageFragmentAdapter.setContentKey(ebook.getContentKey());
     }

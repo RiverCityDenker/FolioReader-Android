@@ -98,7 +98,7 @@ public class FileUtil {
 
     @NonNull
     public static String reformatHref(String href) {
-        if (href.startsWith("/"))
+        if (href.startsWith("/") || href.startsWith("."))
             href = href.substring(1);
         else
             return href;

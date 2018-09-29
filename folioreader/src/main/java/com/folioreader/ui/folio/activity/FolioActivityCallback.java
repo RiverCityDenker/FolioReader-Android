@@ -3,6 +3,7 @@ package com.folioreader.ui.folio.activity;
 import com.folioreader.Config;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.view.LoadingView;
+import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 public interface FolioActivityCallback {
@@ -28,4 +29,6 @@ public interface FolioActivityCallback {
     LoadingView getLoadingView();
 
     void updateEbook(Ebook ebook);
+
+    DownloadInfo getDownloadInfo();
 }
