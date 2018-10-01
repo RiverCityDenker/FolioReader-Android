@@ -90,4 +90,9 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         return mSpineReferences.size();
     }
+
+    public void setContentKey(String contentKey) {
+        if (contentKey != null)
+            this.contentKey = contentKey;
+    }
 }

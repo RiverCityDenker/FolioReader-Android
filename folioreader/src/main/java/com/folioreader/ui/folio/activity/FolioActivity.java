@@ -29,7 +29,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.folioreader.Config;
@@ -48,8 +47,8 @@ import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.ui.folio.adapter.FolioPageFragmentAdapter;
 import com.folioreader.ui.folio.fragment.ContentHighlightTabletFragment;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
-import com.folioreader.ui.folio.views.MainMvpView;
 import com.folioreader.ui.folio.presenter.MainPresenter;
+import com.folioreader.ui.folio.views.MainMvpView;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.DialogFactory;
 import com.folioreader.util.FileUtil;
@@ -187,6 +186,7 @@ public class FolioActivity
         loadingView.invisible();
     }
 
+    @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
     }
@@ -535,6 +535,8 @@ public class FolioActivity
         if (mEpubServer != null) {
             mEpubServer.stop();
         }
+        Log.e(TAG, "onDestroy: >>>");
+        getPresenter().deleteCacheData(mEbook);
         long timeRead = TimeUnit.SECONDS.toSeconds(FileUtil.getCurrentTimeStamp() - SharedPreferenceUtil.getSharedPreferencesLong(this, titleEbook, 1526620402));
         googleAnalytic.sendEvent(AnalyticViewName.eBook_reading_duration, AnalyticViewName.reading_duration, titleEbook, timeRead);
     }
@@ -740,6 +742,13 @@ public class FolioActivity
     @Override
     public LoadingView getLoadingView() {
         return loadingView;
+    }
+
+    @Override
+    public void updateEbook(Ebook ebook) {
+        contentKey = ebook.getContentKey();
+        mEbook = ebook;
+        mFolioPageFragmentAdapter.setContentKey(ebook.getContentKey());
     }
 
     private void setConfig(Bundle savedInstanceState) {

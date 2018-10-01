@@ -26,8 +26,9 @@ public class FolioPagePresenter {
     public void downloadSingleFile(Context context, DownloadInfo downloadInfo, Ebook ebook, String href) {
         showLoading();
         final ApiInfo apiInfo = new ApiInfo(downloadInfo.getmBaseUrl(),
-                dataManager.getAccessToken(),
-                downloadInfo.getmAppVersion());
+                                            dataManager.getAccessToken(),
+                                            downloadInfo.getmApiKey(),
+                                            downloadInfo.getmAppVersion());
 
         final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
         new DownloadService.DownloadFileTask(ebook, apiInfo, folderPath, false).execute(href);

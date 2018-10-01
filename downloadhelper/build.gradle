@@ -42,7 +42,11 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.FOLIO_RXJAVA_VERSION"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.ext.FOLIO_RXANDROID_VERSION"
     implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:$rootProject.ext.FOLIO_ADAPTER_RETROFIT_VERSION"
+
+    // r2-streamer
+    api "org.readium:r2-parser:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
     implementation project(':utility')
     implementation project(':aping')
     implementation project(':models')
+    implementation project(':crypto')
 }

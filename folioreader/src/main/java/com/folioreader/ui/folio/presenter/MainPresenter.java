@@ -14,6 +14,7 @@ import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.utils.FileUtil;
 import com.sap_press.rheinwerk_reader.utils.NetworkErrorUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -112,5 +113,9 @@ public class MainPresenter implements ManifestCallBack {
     private void showLoading() {
         if (mainMvpView != null)
             mainMvpView.showLoading();
+    }
+
+    public void deleteCacheData(Ebook ebook) {
+        FileUtil.deleteDownloadedEbookFromExternalStorage(ebook);
     }
 }

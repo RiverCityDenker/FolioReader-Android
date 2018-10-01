@@ -7,12 +7,14 @@ import android.util.Log;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubCommon;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -96,7 +98,7 @@ public class FileUtil {
 
     @NonNull
     public static String reformatHref(String href) {
-        if (href.startsWith("/"))
+        if (href.startsWith("/") || href.startsWith("."))
             href = href.substring(1);
         else
             return href;
@@ -104,6 +106,7 @@ public class FileUtil {
     }
 
     public static boolean isFileExist(Context context, String ebookId, String href) {
+        href = FileUtil.reformatHref(href);
         final String folderPath = getEbookPath(context, ebookId);
         File file = getFile(folderPath, href);
         return file.exists();
@@ -252,4 +255,32 @@ public class FileUtil {
         }
         return ebookNameList;
     }
+
+    public String readFromFile(String rootPath, String relativePath) {
+        String filePath = rootPath.concat(relativePath);
+        File epubFile = new File(filePath);
+
+        if (epubFile.exists()) {
+            System.out.println(TAG + relativePath + " File exists at given path");
+
+            try {
+                InputStream is = new FileInputStream(epubFile);
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                StringBuilder sb = new StringBuilder();
+                String line;
+
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                return sb.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (!epubFile.exists()) {
+            System.out.println(TAG + " No such file exists at given path: " + relativePath);
+        }
+        return null;
+    }
+
 }
