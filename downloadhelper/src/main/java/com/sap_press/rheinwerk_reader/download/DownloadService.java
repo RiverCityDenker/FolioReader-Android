@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.api.ApiClient;
 import com.sap_press.rheinwerk_reader.download.api.ApiService;
@@ -234,6 +235,7 @@ public class DownloadService extends Service {
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
         if (!isOnlineReading) {
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
+            Log.e(TAG, "handleError: >>>");
             mCurrentBookId = ebookId;
             String url = mBaseUrl + "ebooks/" + ebookId + "/download";
             googleAnalyticManager.sendEvent(AnalyticViewName.download_error, url, DownloadUtil.getErrorCode(throwable));
@@ -342,15 +344,18 @@ public class DownloadService extends Service {
             EpubBook.Manifest manifest = manifests[0];
 
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + manifest.getHref();
-            String contentKey;
-            try {
-                contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
-            } catch (IOException e) {
-                e.printStackTrace();
-                handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
-                return null;
-            }
 
+//            String contentKey;
+//            try {
+//                contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
+//                return null;
+//            }
+
+            final String contentKey = downloadSingleFile(manifest, fileUrl, 2);
+            if (contentKey == null) return null;
             if (isStop()) return null;
             if (!TextUtils.isEmpty(contentKey) && !contentKey.equals(ebook.getContentKey())) {
                 ebook.setContentKey(contentKey);
@@ -361,6 +366,37 @@ public class DownloadService extends Service {
             }
 
             return ebook;
+        }
+
+        private String downloadSingleFile(EpubBook.Manifest manifest, String fileUrl, int retryCount) {
+            String contentKey = null;
+            try {
+                contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (e instanceof IOException) {
+                    Log.e(TAG, "downloadSingleFile: >>>IOException");
+                    handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
+                    return null;
+                } else if (e instanceof HttpException) {
+                    Log.e(TAG, "downloadSingleFile: >>>HttpException");
+                    if (--retryCount == 0) {
+                        handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
+                        return null;
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    return downloadSingleFile(manifest, fileUrl, retryCount);
+                } else {
+                    Log.e(TAG, "downloadSingleFile: >>>ELSE");
+                    handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
+                    return null;
+                }
+            }
+            return contentKey;
         }
     }
 
@@ -406,7 +442,7 @@ public class DownloadService extends Service {
                     }
                 }
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 onDownloadSingleFileError(e, ebookId);
                 return null;
@@ -449,7 +485,6 @@ public class DownloadService extends Service {
 
         @Override
         protected void onPostExecute(Ebook ebook) {
-            Log.e(TAG, "onPostExecute: >>>href = " + ebook.getHref());
             if (isBasicData) {
                 EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
             } else {
@@ -457,7 +492,7 @@ public class DownloadService extends Service {
             }
         }
 
-        private void onDownloadSingleFileError(IOException e, String ebookId) {
+        private void onDownloadSingleFileError(Exception e, String ebookId) {
             Log.e(TAG, "onDownloadSingleFileError: >>>" + e.getMessage());
         }
     }
@@ -466,7 +501,7 @@ public class DownloadService extends Service {
                                        String token,
                                        String folderPath,
                                        String href,
-                                       String appVersion) throws IOException {
+                                       String appVersion) throws Exception {
 
         File file = FileUtil.getFile(folderPath, href);
         URL url = new URL(fileUrl);

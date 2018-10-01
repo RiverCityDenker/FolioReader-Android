@@ -51,4 +51,12 @@ public class DownloadUtil {
             EventBus.getDefault().post(new UnableDownloadEvent(errorType));
         }
     }
+
+    public static void onPauseDownloads(Context context, UnableDownloadEvent.DownloadErrorType errorType) {
+        Intent serviceIntent = new Intent(context, DownloadService.class);
+        if (context != null && isMyServiceRunning(context, DownloadService.class)) {
+            context.stopService(serviceIntent);
+        }
+        EventBus.getDefault().post(new UnableDownloadEvent(errorType));
+    }
 }
