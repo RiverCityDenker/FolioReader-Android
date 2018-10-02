@@ -45,6 +45,7 @@ public class EbookTable {
     public static String COLUMN_LAST_READ_TIME = "last_read_time";
     public static String COLUMN_NEED_SYNC_TO_SERVER = "need_sync_to_server";
     public static String COLUMN_TIME_STAMP_DOWNLOAD = "timestamp_download_start";
+    private static final String COLUMN_IS_DOWNLOAD_FAILED = "is_download_failed";
 
 
     private static boolean isTableHasRecord(String tableName) {
@@ -90,6 +91,7 @@ public class EbookTable {
         contentValues.put(COLUMN_X_CONTENT_KEY, ebook.getContentKey());
         contentValues.put(COLUMN_IS_FAVORITEN, String.valueOf(ebook.isFavoriten()));
         contentValues.put(COLUMN_NEED_SYNC_TO_SERVER, String.valueOf(ebook.isNeedSyncToServer()));
+        contentValues.put(COLUMN_IS_DOWNLOAD_FAILED, String.valueOf(ebook.isDownloadFailed()));
         contentValues.put(COLUMN_LAST_READ_TIME, ebook.getLastReadTime());
         contentValues.put(COLUMN_TIME_STAMP_DOWNLOAD, String.valueOf(ebook.getDownloadTimeStamp()));
         return contentValues;
@@ -197,6 +199,7 @@ public class EbookTable {
         ebook.setContentKey(cursor.getString(cursor.getColumnIndex(COLUMN_X_CONTENT_KEY)));
         ebook.setFavoriten(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_IS_FAVORITEN))));
         ebook.setNeedSyncToServer(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_NEED_SYNC_TO_SERVER))));
+        ebook.setDownloadFailed(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_IS_DOWNLOAD_FAILED))));
         ebook.setDownloadTimeStamp(Long.parseLong(cursor.getString(cursor.getColumnIndex(COLUMN_TIME_STAMP_DOWNLOAD))));
         ebook.setLastReadTime(cursor.getString(cursor.getColumnIndex(COLUMN_LAST_READ_TIME)));
         ebook.setLinksString(cursor.getString(cursor.getColumnIndex(COLUMN_LINKS)));

@@ -57,6 +57,14 @@ public class DownloadUtil {
         if (context != null && isMyServiceRunning(context, DownloadService.class)) {
             context.stopService(serviceIntent);
         }
-        EventBus.getDefault().post(new UnableDownloadEvent(errorType));
+        List<Ebook> downloadedEbookList = LibraryTable.getDownloadingEbooks();
+        if (!downloadedEbookList.isEmpty()) {
+            for (int i = 0; i < downloadedEbookList.size(); i++) {
+                Ebook ebook = downloadedEbookList.get(i);
+                ebook.setDownloadFailed(true);
+                LibraryTable.updateEbook(ebook);
+            }
+            EventBus.getDefault().post(new UnableDownloadEvent(errorType));
+        }
     }
 }
