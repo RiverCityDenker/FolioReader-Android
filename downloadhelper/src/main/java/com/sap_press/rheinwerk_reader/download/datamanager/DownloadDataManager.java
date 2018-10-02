@@ -37,6 +37,12 @@ public class DownloadDataManager {
         return ebookList;
     }
 
+    public List<Ebook> getAllResumeDownloadEbooks() {
+        List<Ebook> ebookList = LibraryTable.getDownloadingEbooks();
+        Collections.sort(ebookList, (ebook1, ebook2) -> Long.compare(ebook1.getDownloadTimeStamp(), ebook2.getDownloadTimeStamp()));
+        return ebookList;
+    }
+
     public void saveTimestampDownload(String key) {
         mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_TIME_STAMP_DOWNLOAD(key), Util.getCurrentTimeStamp());
     }

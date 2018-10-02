@@ -183,6 +183,7 @@ public class DownloadService extends Service {
     }
 
     private void downloadNextOrStop() {
+        
         List<Ebook> ebookList = dataManager.getAllWaitingDownloadEbooks();
         if (!ebookList.isEmpty()) {
             final Ebook ebook = ebookList.get(0);

@@ -67,4 +67,20 @@ public class DownloadUtil {
             EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, errorType));
         }
     }
+
+    public static void onResumeDownloads(Context context) {
+        Intent serviceIntent = new Intent(context, DownloadService.class);
+        if (context != null && isMyServiceRunning(context, DownloadService.class)) {
+            context.stopService(serviceIntent);
+        }
+        List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
+        if (!downloadingEbookList.isEmpty()) {
+            for (int i = 0; i < downloadingEbookList.size(); i++) {
+                Ebook ebook = downloadingEbookList.get(i);
+                ebook.setDownloadFailed(true);
+                LibraryTable.updateEbook(ebook);
+            }
+            EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, errorType));
+        }
+    }
 }
