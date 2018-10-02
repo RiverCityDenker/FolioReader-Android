@@ -41,6 +41,7 @@ public class LibraryTable {
             + COLUMN_IS_FAVORITEN + " VARCHAR(10), "
             + COLUMN_LAST_READ_TIME + " TEXT, "
             + COLUMN_NEED_SYNC_TO_SERVER + " VARCHAR(10), "
+            + COLUMN_IS_DOWNLOAD_FAILED + " VARCHAR(10), "
             + COLUMN_TIME_STAMP_DOWNLOAD + " TEXT, "
             + COLUMN_X_CONTENT_KEY + " TEXT)";
 

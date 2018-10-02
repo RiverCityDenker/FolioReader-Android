@@ -45,7 +45,7 @@ public class EbookTable {
     public static String COLUMN_LAST_READ_TIME = "last_read_time";
     public static String COLUMN_NEED_SYNC_TO_SERVER = "need_sync_to_server";
     public static String COLUMN_TIME_STAMP_DOWNLOAD = "timestamp_download_start";
-    private static final String COLUMN_IS_DOWNLOAD_FAILED = "is_download_failed";
+    public static final String COLUMN_IS_DOWNLOAD_FAILED = "is_download_failed";
 
 
     private static boolean isTableHasRecord(String tableName) {

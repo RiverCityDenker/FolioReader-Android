@@ -57,14 +57,14 @@ public class DownloadUtil {
         if (context != null && isMyServiceRunning(context, DownloadService.class)) {
             context.stopService(serviceIntent);
         }
-        List<Ebook> downloadedEbookList = LibraryTable.getDownloadingEbooks();
-        if (!downloadedEbookList.isEmpty()) {
-            for (int i = 0; i < downloadedEbookList.size(); i++) {
-                Ebook ebook = downloadedEbookList.get(i);
+        List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
+        if (!downloadingEbookList.isEmpty()) {
+            for (int i = 0; i < downloadingEbookList.size(); i++) {
+                Ebook ebook = downloadingEbookList.get(i);
                 ebook.setDownloadFailed(true);
                 LibraryTable.updateEbook(ebook);
             }
-            EventBus.getDefault().post(new UnableDownloadEvent(errorType));
+            EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, errorType));
         }
     }
 }

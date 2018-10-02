@@ -5,19 +5,19 @@ import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
-import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -45,6 +45,8 @@ public abstract class DownloadingView extends RelativeLayout {
     protected Drawable mActiveDownloadIcon;
     protected Drawable mDefaultDownloadIcon;
     protected Drawable mRemoveDownloadIcon;
+    protected Drawable mFailedDownloadIcon;
+    protected Context mContext;
 
     public DownloadingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,9 +59,11 @@ public abstract class DownloadingView extends RelativeLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
+        this.mContext = context;
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRootView = layoutInflater.inflate(getLayout(), null);
         addView(mRootView);
+        mFailedDownloadIcon = AppCompatResources.getDrawable(context, R.drawable.ic_downloadpaused);
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.DownloadingView,
@@ -100,7 +104,7 @@ public abstract class DownloadingView extends RelativeLayout {
     protected void configViews() {
         configText();
         configIcon();
-        configProgressBar();
+        configProgressBar(mActiveColor, mDefaultColor);
         configWaitingProgressBar();
     }
 
@@ -116,14 +120,16 @@ public abstract class DownloadingView extends RelativeLayout {
         tvBookSize.setTextColor(mTextColorDefault);
     }
 
-    private void configProgressBar() {
+    protected void configProgressBar(int activeColor, int defaultColor) {
         LayerDrawable progressBarDrawable = (LayerDrawable) mProgressBar.getProgressDrawable();
         Drawable backgroundDrawable = progressBarDrawable.getDrawable(0);
         Drawable progressDrawable = progressBarDrawable.getDrawable(1);
 
-        backgroundDrawable.setColorFilter(mActiveColor, PorterDuff.Mode.SRC_IN);
-        progressDrawable.setColorFilter(mDefaultColor, PorterDuff.Mode.SRC_IN);
+        backgroundDrawable.setColorFilter(activeColor, PorterDuff.Mode.SRC_IN);
+        progressDrawable.setColorFilter(defaultColor, PorterDuff.Mode.SRC_IN);
     }
+
+    protected abstract void onPaused(int progress);
 
     private void configWaitingProgressBar() {
         ViewGroup.LayoutParams progressBarWaitingLayoutParams = mProgressBarWaiting.getLayoutParams();

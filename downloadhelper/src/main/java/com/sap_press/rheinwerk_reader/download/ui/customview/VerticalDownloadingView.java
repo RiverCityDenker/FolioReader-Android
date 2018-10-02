@@ -32,6 +32,22 @@ public class VerticalDownloadingView extends DownloadingView {
     }
 
     @Override
+    protected void onPaused(int progress) {
+        mImageView.setImageDrawable(mFailedDownloadIcon);
+        if (progress >= 80) {
+            tvBookSize.setTextColor(mContext.getResources().getColor(R.color.color_white));
+        } else {
+            tvBookSize.setTextColor(mContext.getResources().getColor(R.color.color_gray_paused_download));
+        }
+        if (progress >= 50) {
+            mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_white));
+        } else {
+            mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_gray_paused_download));
+        }
+        configProgressBar(mContext.getResources().getColor(R.color.color_white), mContext.getResources().getColor(R.color.color_gray_paused_download));
+    }
+
+    @Override
     protected int getLayout() {
         return R.layout.layout_download_vertical;
     }
@@ -49,26 +65,36 @@ public class VerticalDownloadingView extends DownloadingView {
         } else if (progress < 0) {
             showViewNomal();
         } else if (progress == 0) {
-            showHideContent(false);
-            showHideWaitingProgressBar(true);
-        } else {
-            if (progress >= 80) {
-                tvBookSize.setTextColor(mActiveColor);
+            if (mEbook.isDownloadFailed()) {
+                onPaused(progress);
+                tvBookSize.setText(String.format("%d%%", progress));
+                showHideContent(true);
             } else {
-                tvBookSize.setTextColor(mTextColorDefault);
+                showHideContent(false);
+                showHideWaitingProgressBar(true);
             }
-            if (progress >= 50) {
-                mImageView.setImageDrawable(mActiveDownloadIcon);
-                mImageView.setColorFilter(mActiveColor);
+        } else {
+            if (mEbook.isDownloadFailed()) {
+                onPaused(progress);
             } else {
-                mImageView.setImageDrawable(mDefaultDownloadIcon);
-                mImageView.setColorFilter(mDefaultColor);
+                if (progress >= 80) {
+                    tvBookSize.setTextColor(mActiveColor);
+                } else {
+                    tvBookSize.setTextColor(mTextColorDefault);
+                }
+                if (progress >= 50) {
+                    mImageView.setImageDrawable(mActiveDownloadIcon);
+                    mImageView.setColorFilter(mActiveColor);
+                } else {
+                    mImageView.setImageDrawable(mDefaultDownloadIcon);
+                    mImageView.setColorFilter(mDefaultColor);
+                }
             }
             tvBookSize.setText(String.format("%d%%", progress));
             showHideContent(true);
         }
 
-        showHideWaitingProgressBar(progress == 0);
+        showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed());
         mProgressBar.setProgress(progress);
     }
 

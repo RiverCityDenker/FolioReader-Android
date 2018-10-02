@@ -26,6 +26,19 @@ public class HorizontalDownloadingView extends DownloadingView {
     }
 
     @Override
+    protected void onPaused(int progress) {
+        mImageView.setImageDrawable(mFailedDownloadIcon);
+        if (progress >= 45) {
+            tvBookSize.setTextColor(mContext.getResources().getColor(R.color.color_white));
+            mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_white));
+        } else {
+            tvBookSize.setTextColor(mContext.getResources().getColor(R.color.color_gray_paused_download));
+            mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_gray_paused_download));
+        }
+        configProgressBar(mActiveColor, mContext.getResources().getColor(R.color.color_gray_paused_download));
+    }
+
+    @Override
     protected int getLayout() {
         return R.layout.layout_download_horizontal;
     }
@@ -44,23 +57,33 @@ public class HorizontalDownloadingView extends DownloadingView {
         } else if (progress < 0) {
             showViewNomal();
         } else if (progress == 0) {
-            showHideContent(false);
-            showHideWaitingProgressBar(true);
-        } else {
-            if (progress >= 45) {
-                tvBookSize.setTextColor(mActiveColor);
-                mImageView.setImageDrawable(mDefaultDownloadIcon);
-                mImageView.setColorFilter(mActiveColor);
+            if (mEbook.isDownloadFailed()) {
+                onPaused(progress);
+                tvBookSize.setText(String.format("%d%%", progress));
+                showHideContent(true);
             } else {
-                tvBookSize.setTextColor(mDefaultColor);
-                mImageView.setImageDrawable(mDefaultDownloadIcon);
-                mImageView.setColorFilter(mDefaultColor);
+                showHideContent(false);
+                showHideWaitingProgressBar(true);
+            }
+        } else {
+            if (mEbook.isDownloadFailed()) {
+                onPaused(progress);
+            } else {
+                if (progress >= 45) {
+                    tvBookSize.setTextColor(mActiveColor);
+                    mImageView.setImageDrawable(mDefaultDownloadIcon);
+                    mImageView.setColorFilter(mActiveColor);
+                } else {
+                    tvBookSize.setTextColor(mDefaultColor);
+                    mImageView.setImageDrawable(mDefaultDownloadIcon);
+                    mImageView.setColorFilter(mDefaultColor);
+                }
             }
             tvBookSize.setText(String.format("%d%%", progress));
             showHideContent(true);
         }
 
-        showHideWaitingProgressBar(progress == 0);
+        showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed());
         mProgressBar.setProgress(progress);
     }
 

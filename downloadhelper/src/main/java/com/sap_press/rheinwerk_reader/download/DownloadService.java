@@ -355,7 +355,6 @@ public class DownloadService extends Service {
 //            }
 
             final String contentKey = downloadSingleFile(manifest, fileUrl, 2);
-            if (contentKey == null) return null;
             if (isStop()) return null;
             if (!TextUtils.isEmpty(contentKey) && !contentKey.equals(ebook.getContentKey())) {
                 ebook.setContentKey(contentKey);
