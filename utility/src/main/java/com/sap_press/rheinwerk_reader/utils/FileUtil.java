@@ -1,10 +1,12 @@
 package com.sap_press.rheinwerk_reader.utils;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubCommon;
 
 import java.io.BufferedReader;
@@ -33,6 +35,10 @@ public class FileUtil {
     private static final String LIST_TOPIC_FILE_NAME = "topicslist.txt";
     private static final String LIST_FAVORITE_FILE_NAME = "favoriteslist.txt";
     private static final String TAG = FileUtil.class.getSimpleName();
+
+    public interface ContentParserResult {
+        void onContentParserResult(EpubBook epubBook);
+    }
 
     public static String getEbookPath(Context context, String ebookId) {
         return getFolderEbookPath(context) + File.separator + ebookId;
@@ -117,6 +123,26 @@ public class FileUtil {
         return epubCommon.parseBookInfo();
     }
 
+    public static class ContentParserAsyn extends AsyncTask<String, Void, EpubBook> {
+
+        private ContentParserResult listener;
+
+        public ContentParserAsyn(ContentParserResult listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected EpubBook doInBackground(String... strings) {
+            final String filePath = strings[0];
+            return (EpubBook) parseContentFileToObject(filePath);
+        }
+
+        @Override
+        protected void onPostExecute(EpubBook epubBook) {
+            this.listener.onContentParserResult(epubBook);
+        }
+    }
+
     private static <T> void saveObjectToFile(Context context, String fileName, T t) {
         FileOutputStream fos;
         ObjectOutputStream os;
@@ -157,6 +183,7 @@ public class FileUtil {
             Log.w("FileUtil", "path to download is empty: " + path);
             return;
         }
+        Log.e(TAG, "deleteDownloadedEbookFromExternalStorage: >>>" + path);
         File file = new File(path);
         deleteDirectory(file);
     }

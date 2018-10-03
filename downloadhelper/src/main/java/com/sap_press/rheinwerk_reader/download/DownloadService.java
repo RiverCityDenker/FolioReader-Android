@@ -22,6 +22,8 @@ import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
+import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
+import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
@@ -61,10 +63,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.DISCONNECTED;
 import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.NOT_ENOUGH_SPACE;
 import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
 import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
+import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
 import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class DownloadService extends Service {
@@ -177,24 +181,58 @@ public class DownloadService extends Service {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUnableDownloadEvent(UnableDownloadEvent event) {
+        Log.e(TAG, "onUnableDownloadEvent: >>>" + event.getEbookList().size());
+        if (event.getErrorType() == UnableDownloadEvent.DownloadErrorType.DISCONNECTED)
+            if (executor != null) {
+                Log.e(TAG, "onUnableDownloadEvent: >>>shutdownAndAwaitTermination");
+                shutdownAndAwaitTermination(executor);
+            }
+        stopSelf();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDestroyDownloadServiceEvent(DestroyDownloadServiceEvent event) {
         this.stopSelf();
         onDestroy();
     }
 
     private void downloadNextOrStop() {
-        
-        List<Ebook> ebookList = dataManager.getAllWaitingDownloadEbooks();
+        List<Ebook> ebookList = dataManager.getAllDownloadingEbooks();
         if (!ebookList.isEmpty()) {
             final Ebook ebook = ebookList.get(0);
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
             if (availableSize > ebook.getFileSize()) {
-                downloadEbook(ebook);
+                Log.e(TAG, "downloadNextOrStop: >>>");
+                updateDownloadStatus(ebook);
+                checkFileExist(DownloadService.this, ebook);
             } else {
+                Log.e(TAG, "downloadNextOrStop: >>> STOP SERVICE & RESET BOOK");
                 DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
             }
         } else {
             this.stopSelf();
+        }
+    }
+
+    private void updateDownloadStatus(Ebook ebook) {
+        ebook.setDownloadFailed(false);
+        dataManager.updateEbook(ebook);
+        EventBus.getDefault().post(new OnResetDownloadBookEvent(ebook.getId(), ebook.isDownloadFailed()));
+    }
+
+    private void checkFileExist(Context context, Ebook ebook) {
+        if (!isFileExist(context, String.valueOf(ebook.getId()), mContentFileDefault)) {
+            downloadEbook(ebook);
+        } else {
+            final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
+            final String contentPath = folderPath + "/" + mContentFileDefault;
+            final String token = dataManager.getAccessToken();
+            Log.e(TAG, "checkFileExist: >>>");
+            new FileUtil.ContentParserAsyn(epubBook -> {
+                Log.e(TAG, "onContentParserResult: >>>" + epubBook.manifestList.size());
+                downloadAllFiles(epubBook, token, ebook);
+            }).execute(contentPath);
         }
     }
 
@@ -247,6 +285,9 @@ public class DownloadService extends Service {
             if (isOnline(this)) {
                 EventBus.getDefault().post(new DownloadingErrorEvent(Integer.parseInt(ebookId)));
                 downloadNextOrStop();
+            } else {
+                DownloadUtil.updateBookInDatabase(DISCONNECTED);
+                stopSelf();
             }
             // Comment this line because this ticket : https://2denker.atlassian.net/browse/RE-431
             //listener.handleDownloadError(throwable);
@@ -287,7 +328,7 @@ public class DownloadService extends Service {
             final String folderPath = getEbookPath(context, ebookId);
             for (EpubBook.Manifest manifest : epub.manifestList) {
                 if (manifest.getId().equalsIgnoreCase(CSS_ID)
-                    || manifest.getId().equalsIgnoreCase(TOC_ID)) {
+                        || manifest.getId().equalsIgnoreCase(TOC_ID)) {
                     new DownloadService.DownloadFileTask(ebook, apiInfo, folderPath, true).execute(manifest.getHref());
                     break;
                 }
@@ -310,6 +351,7 @@ public class DownloadService extends Service {
         int totalFileListNeedToDownload = fileListForDownload.size();
         executor = ParallelExecutorTask.createPool();
         final String folderPath = getEbookPath(this, ebookId);
+        Log.e(TAG, "downloadAllFiles: >>>" + totalFileListNeedToDownload + " -- TOTAL = " + ebook.getTotal());
         if (totalFileListNeedToDownload > 0) {
             for (int i = 0; i < totalFileListNeedToDownload; i++) {
                 final EpubBook.Manifest manifest = fileListForDownload.get(i);
@@ -345,15 +387,6 @@ public class DownloadService extends Service {
             EpubBook.Manifest manifest = manifests[0];
 
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + manifest.getHref();
-
-//            String contentKey;
-//            try {
-//                contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
-//                return null;
-//            }
 
             final String contentKey = downloadSingleFile(manifest, fileUrl, 2);
             if (isStop()) return null;

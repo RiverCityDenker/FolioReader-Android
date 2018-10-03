@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
+import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
@@ -27,6 +29,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public abstract class DownloadingView extends RelativeLayout {
 
     protected static final int FILE_SIZE_UNIT = 1024 * 1024;
+    private static final String TAG = DownloadingView.class.getSimpleName();
     protected ProgressBar mProgressBar;
     protected ProgressBar mProgressBarWaiting;
     protected ImageView mImageView;
@@ -176,5 +179,17 @@ public abstract class DownloadingView extends RelativeLayout {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadingEvent(DownloadingEvent event) {
         updateUI(event.getProgress(), event.getEbookId());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onResetDownloadBookEvent(OnResetDownloadBookEvent event) {
+        Log.e(TAG, "onResetDownloadBookEvent: >>>");
+        if (event.getBookId() != getEbook().getId()) return;
+        mEbook.setDownloadFailed(event.isDownloadFailed());
+        resetProgressBar();
+    }
+
+    private void resetProgressBar() {
+        configProgressBar(mActiveColor, mDefaultColor);
     }
 }

@@ -2,6 +2,7 @@ package com.sap_press.rheinwerk_reader.download.ui.customview;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.LinearLayout;
 
@@ -9,6 +10,8 @@ import com.sap_press.rheinwerk_reader.downloadhelper.R;
 
 
 public class VerticalDownloadingView extends DownloadingView {
+
+    private static final String TAG = VerticalDownloadingView.class.getSimpleName();
 
     public VerticalDownloadingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,6 +47,7 @@ public class VerticalDownloadingView extends DownloadingView {
         } else {
             mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_gray_paused_download));
         }
+        Log.e(TAG, "onPaused: >>>" + progress);
         configProgressBar(mContext.getResources().getColor(R.color.color_white), mContext.getResources().getColor(R.color.color_gray_paused_download));
     }
 
