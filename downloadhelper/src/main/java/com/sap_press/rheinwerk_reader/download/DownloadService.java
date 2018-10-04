@@ -286,7 +286,6 @@ public class DownloadService extends Service {
                 EventBus.getDefault().post(new DownloadingErrorEvent(Integer.parseInt(ebookId)));
                 downloadNextOrStop();
             } else {
-                DownloadUtil.updateBookInDatabase(DISCONNECTED);
                 stopSelf();
             }
             // Comment this line because this ticket : https://2denker.atlassian.net/browse/RE-431
@@ -385,7 +384,7 @@ public class DownloadService extends Service {
             if (isStop()) return null;
             executor = getPoolExecutor();
             EpubBook.Manifest manifest = manifests[0];
-
+            
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + manifest.getHref();
 
             final String contentKey = downloadSingleFile(manifest, fileUrl, 2);

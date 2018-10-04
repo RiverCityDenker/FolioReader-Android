@@ -95,7 +95,6 @@ public class DownloadDataManager {
     }
 
     public void updateDownloadedEbook(Ebook ebook) {
-        ebook.resetInfo();
         LibraryTable.updateEbook(ebook);
     }
 
