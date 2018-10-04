@@ -129,6 +129,7 @@ public class EbookTable {
         ebook.setFilePath(ebookFromLocal.getFilePath());
         ebook.setContentKey(ebookFromLocal.getContentKey());
         ebook.setLastReadTime(ebookFromLocal.getLastReadTime());
+        ebook.setDownloadFailed(ebookFromLocal.isDownloadFailed());
         Log.e(TAG, "updateLocalBook: >>>" + ebook.getDownloadProgress());
         update(ebook, tableName);
     }
@@ -173,6 +174,7 @@ public class EbookTable {
     @NonNull
     private static Ebook getEbookFromCursor(Cursor cursor) {
         Ebook ebook = new Ebook();
+        Log.e(TAG, "getEbookFromCursor: ID = " + cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
         ebook.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
         ebook.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
         ebook.setSubtitle(cursor.getString(cursor.getColumnIndex(COLUMN_SUBTITLE)));
@@ -199,6 +201,7 @@ public class EbookTable {
         ebook.setContentKey(cursor.getString(cursor.getColumnIndex(COLUMN_X_CONTENT_KEY)));
         ebook.setFavoriten(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_IS_FAVORITEN))));
         ebook.setNeedSyncToServer(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_NEED_SYNC_TO_SERVER))));
+        Log.e(TAG, "getEbookFromCursor: >>> IS_DOWNLOAD_FAILED = " + Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_IS_DOWNLOAD_FAILED))));
         ebook.setDownloadFailed(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(COLUMN_IS_DOWNLOAD_FAILED))));
         ebook.setDownloadTimeStamp(Long.parseLong(cursor.getString(cursor.getColumnIndex(COLUMN_TIME_STAMP_DOWNLOAD))));
         ebook.setLastReadTime(cursor.getString(cursor.getColumnIndex(COLUMN_LAST_READ_TIME)));
@@ -235,7 +238,7 @@ public class EbookTable {
     }
 
     public static synchronized boolean update(Ebook ebook, String tableName) {
-        Log.e(TAG, "update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey());
+        Log.e(TAG, "update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey() + " - isFailed = " + ebook.isDownloadFailed());
         return EbookDbAdapter.updateEbook(tableName, getEbookContentValues(ebook), String.valueOf(ebook.getId()));
     }
 
@@ -321,12 +324,6 @@ public class EbookTable {
     public static List<Ebook> getDownloadingEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getDownloadingBooks(tableName);
         return getEbooksFromQuery(cursor);
-    }
-
-    public static void resetDownloadStateBook(String ebookId, String tableName) {
-        final Ebook ebookFromLocal = getEbook(Integer.parseInt(ebookId), tableName);
-        ebookFromLocal.resetInfo();
-        update(ebookFromLocal, tableName);
     }
 }
 

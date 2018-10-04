@@ -143,8 +143,5 @@ public class LibraryTable {
         return EbookTable.getWatingDownloadBooks(TABLE_NAME);
     }
 
-    public static void resetDownloadStateBook(String ebookId) {
-        EbookTable.resetDownloadStateBook(ebookId, TABLE_NAME);
-    }
 }
 

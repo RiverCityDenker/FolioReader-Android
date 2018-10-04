@@ -100,6 +100,7 @@ public class VerticalDownloadingView extends DownloadingView {
 
         showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed());
         mProgressBar.setProgress(progress);
+        Log.e(TAG, "updateUI: >>>" + mEbook.isDownloadFailed());
     }
 
     @Override

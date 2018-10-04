@@ -19,7 +19,6 @@ import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.events.DestroyDownloadServiceEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
-import com.sap_press.rheinwerk_reader.download.events.DownloadingErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
@@ -63,7 +62,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.DISCONNECTED;
 import static com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent.DownloadErrorType.NOT_ENOUGH_SPACE;
 import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
 import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
@@ -143,7 +141,7 @@ public class DownloadService extends Service {
                     .setContentText("Downloading...").build();
 
             startForeground(SERVICE_FOREGROUND_ID, notification);
-            downloadNextOrStop();
+            downloadNextOrStop(false, 0);
         }
         return START_STICKY;
     }
@@ -168,7 +166,7 @@ public class DownloadService extends Service {
                 if (executor != null) {
                     shutdownAndAwaitTermination(executor);
                 }
-                downloadNextOrStop();
+                downloadNextOrStop(false, ebook.getId());
             }
         } else {
             Ebook ebook = LibraryTable.getEbook(currentEbookId);
@@ -197,15 +195,23 @@ public class DownloadService extends Service {
         onDestroy();
     }
 
-    private void downloadNextOrStop() {
+    private void downloadNextOrStop(boolean hasErrorInPreviousBook, int errorBookId) {
         List<Ebook> ebookList = dataManager.getAllDownloadingEbooks();
+
         if (!ebookList.isEmpty()) {
-            final Ebook ebook = ebookList.get(0);
+            Ebook currentEbook = ebookList.get(0);
+            if (hasErrorInPreviousBook) {
+                currentEbook = getNextBook(errorBookId, ebookList);
+            }
+            if (currentEbook == null) {
+                destroyService();
+                return;
+            }
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
-            if (availableSize > ebook.getFileSize()) {
+            if (availableSize > currentEbook.getFileSize()) {
                 Log.e(TAG, "downloadNextOrStop: >>>");
-                updateDownloadStatus(ebook);
-                checkFileExist(DownloadService.this, ebook);
+                updateDownloadStatus(currentEbook);
+                checkFileExist(DownloadService.this, currentEbook);
             } else {
                 Log.e(TAG, "downloadNextOrStop: >>> STOP SERVICE & RESET BOOK");
                 DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
@@ -215,10 +221,40 @@ public class DownloadService extends Service {
         }
     }
 
+    private void destroyService() {
+        if (executor != null) {
+            Log.e(TAG, "onUnableDownloadEvent: >>>shutdownAndAwaitTermination");
+            shutdownAndAwaitTermination(executor);
+        }
+        this.stopSelf();
+    }
+
+    private Ebook getNextBook(int errorBookId, List<Ebook> ebookList) {
+        Ebook currentEbook = null;
+        for (Ebook ebook : ebookList) {
+            if (ebook.getId() != errorBookId) {
+                currentEbook = ebook;
+                break;
+            }
+        }
+        return currentEbook;
+    }
+
     private void updateDownloadStatus(Ebook ebook) {
+        Log.e(TAG, "updateDownloadStatus:1 >>>" + ebook.getId() + " - false");
         ebook.setDownloadFailed(false);
         dataManager.updateEbook(ebook);
         EventBus.getDefault().post(new OnResetDownloadBookEvent(ebook.getId(), ebook.isDownloadFailed()));
+    }
+
+    private void updateDownloadStatus(int ebookId, boolean isDownloadFailed) {
+        synchronized (DownloadService.class) {
+            Log.e(TAG, "updateDownloadStatus:2 >>>" + ebookId + " - " + isDownloadFailed);
+            final Ebook ebook = dataManager.getEbookById(ebookId);
+            ebook.setDownloadFailed(isDownloadFailed);
+            dataManager.updateEbook(ebook);
+            EventBus.getDefault().post(new OnResetDownloadBookEvent(ebook.getId(), ebook.isDownloadFailed()));
+        }
     }
 
     private void checkFileExist(Context context, Ebook ebook) {
@@ -276,15 +312,16 @@ public class DownloadService extends Service {
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
             Log.e(TAG, "handleError: >>>");
             mCurrentBookId = ebookId;
-            String url = mBaseUrl + "ebooks/" + ebookId + "/download";
-            googleAnalyticManager.sendEvent(AnalyticViewName.download_error, url, DownloadUtil.getErrorCode(throwable));
+            sendErrorDownloadEventToGA(throwable, ebookId);
 
             if (executor != null) {
                 shutdownAndAwaitTermination(executor);
             }
             if (isOnline(this)) {
-                EventBus.getDefault().post(new DownloadingErrorEvent(Integer.parseInt(ebookId)));
-                downloadNextOrStop();
+                updateDownloadStatus(Integer.parseInt(ebookId), true);
+                final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
+                EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
+                downloadNextOrStop(true, Integer.parseInt(ebookId));
             } else {
                 stopSelf();
             }
@@ -294,6 +331,11 @@ public class DownloadService extends Service {
             Log.e(TAG, "handleError: >>>" + throwable.getMessage());
         }
 
+    }
+
+    private void sendErrorDownloadEventToGA(Throwable throwable, String ebookId) {
+        String url = mBaseUrl + "ebooks/" + ebookId + "/download";
+        googleAnalyticManager.sendEvent(AnalyticViewName.download_error, url, DownloadUtil.getErrorCode(throwable));
     }
 
     void shutdownAndAwaitTermination(ExecutorService pool) {
@@ -384,8 +426,12 @@ public class DownloadService extends Service {
             if (isStop()) return null;
             executor = getPoolExecutor();
             EpubBook.Manifest manifest = manifests[0];
-            
-            final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + manifest.getHref();
+            String href = manifest.getHref();
+            if (progress == 100) {
+                href = href.endsWith(".html") ? href.replace(".html", "T@@@%###%%ST.html") : href;
+                Log.e(TAG, "doInBackground100: >>> href = " + href);
+            }
+            final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + href;
 
             final String contentKey = downloadSingleFile(manifest, fileUrl, 2);
             if (isStop()) return null;
@@ -411,8 +457,9 @@ public class DownloadService extends Service {
                     handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
                     return null;
                 } else if (e instanceof HttpException) {
-                    Log.e(TAG, "downloadSingleFile: >>>HttpException");
+                    Log.e(TAG, "downloadSingleFile: >>>HttpException retryCount = " + retryCount);
                     if (--retryCount == 0) {
+                        Log.e(TAG, "downloadSingleFile:Handle Error >>>" + retryCount);
                         handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
                         return null;
                     }
@@ -595,7 +642,7 @@ public class DownloadService extends Service {
                 shutdownAndAwaitTermination(executor);
             }
             dataManager.saveNumberDownloadsEbook();
-            downloadNextOrStop();
+            downloadNextOrStop(false, ebook.getId());
         }
         EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
     }

@@ -106,4 +106,7 @@ public class DownloadDataManager {
         return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_READING_TYPE_KEY, true);
     }
 
+    public Ebook getEbookById(int ebookId) {
+        return LibraryTable.getEbook(ebookId);
+    }
 }
