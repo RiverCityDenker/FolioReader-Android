@@ -15,7 +15,6 @@ import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
-import com.sap_press.rheinwerk_reader.utils.NetworkErrorUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -73,8 +72,7 @@ public class MainPresenter implements ManifestCallBack {
                 ebook,
                 downloadInfo.getmDownloadIcon(),
                 downloadInfo.getmAppVersion(),
-                downloadInfo.getmBaseUrl(),
-                this::handleDownloadError);
+                downloadInfo.getmBaseUrl());
     }
 
     private void updateDetailUIAfterDelete(Ebook ebook) {
@@ -86,17 +84,6 @@ public class MainPresenter implements ManifestCallBack {
     private void updateDownloadProgress(int id, int downloadProgress) {
         if (mainMvpView != null) {
             mainMvpView.updateDownloadProgress(id, downloadProgress);
-        }
-    }
-
-    private void handleDownloadError(Throwable throwable) {
-        try {
-            String message = NetworkErrorUtil.ConvertErrorMessageToString(throwable);
-            if (mainMvpView != null) {
-                mainMvpView.showDownloadError(message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

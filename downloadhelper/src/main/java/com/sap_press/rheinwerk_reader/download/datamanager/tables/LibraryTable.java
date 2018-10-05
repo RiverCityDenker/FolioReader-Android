@@ -143,5 +143,8 @@ public class LibraryTable {
         return EbookTable.getWatingDownloadBooks(TABLE_NAME);
     }
 
+    public static boolean checkDownloadFailed(int ebookId) {
+        return EbookTable.checkDownloadFailed(ebookId, TABLE_NAME);
+    }
 }
 

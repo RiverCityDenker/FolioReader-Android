@@ -47,6 +47,10 @@ public final class DialogCreator {
         void onClick();
     }
 
+    public interface DismissPausedDialogCallback {
+        void dismissPausedDialog();
+    }
+
     public static AlertDialog.Builder getDialogBuilder(Context context) {
         return new AlertDialog.Builder(context, R.style.AlertDialogStyle);
     }
@@ -169,7 +173,11 @@ public final class DialogCreator {
         dialog.show();
     }
 
-    public static void createDeleteEbookDialog(final Context context, String bookTitle, boolean isDownloading, MessageDialogCallback callback) {
+    public static void createDeleteEbookDialog(final Context context,
+                                               String bookTitle,
+                                               boolean isDownloading,
+                                               MessageDialogCallback callback,
+                                               DismissPausedDialogCallback dismissPausedDialogCallback) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View vi = inflater.inflate(R.layout.dialog_one_message_two_button, null);
@@ -202,8 +210,43 @@ public final class DialogCreator {
                 callback.onClick();
                 dialog.dismiss();
             }
+            if (dismissPausedDialogCallback != null)
+                dismissPausedDialogCallback.dismissPausedDialog();
         });
         cancel.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+    }
+
+    public static void createPausedDownloadDialog(final Context context, String bookTitle, boolean isDownloading, MessageDialogCallback callback) {
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        final View vi = inflater.inflate(R.layout.dialog_pause_download, null);
+        TextView tvMessage = vi.findViewById(R.id.tv_dialog_message);
+        Button btnAbort = vi.findViewById(R.id.btn_abort);
+        Button btnResume = vi.findViewById(R.id.btn_resume);
+        Button btnBack = vi.findViewById(R.id.btn_back);
+
+        tvMessage.setText(context.getString(R.string.text_paused_dialog_message));
+
+        final AlertDialog.Builder builder = getDialogBuilder(context);
+        builder.setView(vi).setTitle(R.string.text_paused_dialog_title);
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
+
+        btnAbort.setOnClickListener(view -> {
+            createDeleteEbookDialog(context, bookTitle, isDownloading, callback, new DismissPausedDialogCallback() {
+                @Override
+                public void dismissPausedDialog() {
+                    dialog.dismiss();
+                }
+            });
+        });
+        btnResume.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+        btnBack.setOnClickListener(view -> {
             dialog.dismiss();
         });
     }

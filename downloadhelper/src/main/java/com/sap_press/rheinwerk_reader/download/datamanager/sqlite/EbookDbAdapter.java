@@ -159,4 +159,8 @@ public class EbookDbAdapter {
         return mDatabase.rawQuery("SELECT * FROM " + tableName + " WHERE " + EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT + " >= " + 0 + " and " +
                 EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT + " < " + 100, null);
     }
+
+    public static Cursor checkDownloadFailed(String tableName, int ebookId) {
+        return mDatabase.rawQuery("SELECT * FROM " + tableName + " WHERE " + EbookTable.COLUMN_IS_DOWNLOAD_FAILED + " = '" + true + "' and " + EbookTable.COLUMN_ID + " = '" + ebookId + "'", null);
+    }
 }

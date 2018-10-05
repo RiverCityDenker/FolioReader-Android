@@ -41,10 +41,6 @@ public class DownloadManager {
         return progress == 100;
     }
 
-    public interface DownloadCallback {
-        void handleDownloadError(Throwable throwable);
-    }
-
     public interface EbookDeleteCallback {
         void deleteEbookSuccess(Ebook ebook);
 
@@ -52,8 +48,7 @@ public class DownloadManager {
     }
 
     public synchronized void startDownload(Context context, Ebook ebook, int iconId,
-                                           String appVersion, String baseUrl,
-                                           DownloadCallback downloadCallback) {
+                                           String appVersion, String baseUrl) {
         updateBookState(ebook);
         if (!isMyServiceRunning(context, DownloadService.class)) {
             DownloadService.startDownloadService(context, iconId,
@@ -69,22 +64,23 @@ public class DownloadManager {
 
     public void deleteEbook(Context context, Ebook ebook, GoogleAnalyticManager googleAnalyticManager,
                             EbookDeleteCallback listener) {
-        googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
-                AnalyticViewName.download_delete,
-                ebook.getTitle(),
-                (long) ebook.getFileSize());
+
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         boolean isDownloading = ebookAfterUpdate.getDownloadProgress() > 0 && ebookAfterUpdate.getDownloadProgress() < 100;
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading, () -> {
-                    listener.deleteEbookTriggered();
-                    //update UI
-                    if (!ebookAfterUpdate.isDownloaded()) {
-                        EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate));
-                    }
-                    compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(listener::deleteEbookSuccess));
-                });
+            googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
+                    AnalyticViewName.download_delete,
+                    ebook.getTitle(),
+                    (long) ebook.getFileSize());
+            listener.deleteEbookTriggered();
+            //update UI
+            if (!ebookAfterUpdate.isDownloaded()) {
+                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate));
+            }
+            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(listener::deleteEbookSuccess));
+        }, null);
     }
 }

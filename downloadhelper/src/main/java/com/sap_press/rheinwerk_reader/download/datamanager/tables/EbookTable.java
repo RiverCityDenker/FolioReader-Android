@@ -325,5 +325,13 @@ public class EbookTable {
         Cursor cursor = EbookDbAdapter.getDownloadingBooks(tableName);
         return getEbooksFromQuery(cursor);
     }
+
+    public static boolean checkDownloadFailed(int ebookId, String tableName) {
+        boolean isExis;
+        Cursor cursor = EbookDbAdapter.checkDownloadFailed(tableName, ebookId);
+        isExis = cursor.getCount() > 0;
+        cursor.close();
+        return isExis;
+    }
 }
 
