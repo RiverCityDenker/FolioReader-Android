@@ -3,12 +3,12 @@ apply plugin: 'checkstyle'
 
 android {
 
-    compileSdkVersion ANDROID_COMPILE_SDK_VERSION
+    compileSdkVersion rootProject.ext.FOLIO_ANDROID_COMPILE_SDK_VERSION
 
     defaultConfig {
         applicationId "com.folioreader.android.sample"
-        minSdkVersion ANDROID_MIN_SDK
-        targetSdkVersion ANDROID_TARGET_SDK_VERSION
+        minSdkVersion rootProject.ext.FOLIO_ANDROID_MIN_SDK
+        targetSdkVersion rootProject.ext.FOLIO_ANDROID_TARGET_SDK_VERSION
         versionCode VERSION_CODE
         versionName VERSION_NAME
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
