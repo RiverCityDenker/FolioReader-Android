@@ -112,7 +112,6 @@ public class EbookTable {
                 if (!isEbookExist(ebook.getId(), tableName)) {
                     EbookDbAdapter.saveEbook(getEbookContentValues(ebook), tableName);
                 } else {
-                    Log.e(TAG, "insertEbookList: >>>" + ebook.getId());
                     final Ebook ebookFromLocal = getEbook(ebook.getId(), tableName);
                     final int downloadProgress = ebookFromLocal.getDownloadProgress();
                     /*Reset favotite ebook*/
@@ -133,7 +132,6 @@ public class EbookTable {
         ebook.setLastReadTime(ebookFromLocal.getLastReadTime());
         ebook.setDownloadFailed(ebookFromLocal.isDownloadFailed());
         ebook.setNeedResume(ebookFromLocal.isNeedResume());
-        Log.e(TAG, "updateLocalBook: >>>" + ebook.getDownloadProgress());
         update(ebook, tableName);
     }
 
@@ -177,7 +175,6 @@ public class EbookTable {
     @NonNull
     private static Ebook getEbookFromCursor(Cursor cursor) {
         Ebook ebook = new Ebook();
-        Log.e(TAG, "getEbookFromCursor: ID = " + cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
         ebook.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
         ebook.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
         ebook.setSubtitle(cursor.getString(cursor.getColumnIndex(COLUMN_SUBTITLE)));

@@ -198,10 +198,8 @@ public class DownloadService extends Service {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPausedDownloading(PausedDownloadingEvent event) {
         if (executor != null) {
-            Log.e(TAG, "onPausedDownloading: >>>shutdownAndAwaitTermination");
             shutdownAndAwaitTermination(executor);
         }
-        Log.e(TAG, "onPausedDownloading: >>>");
         List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
         if (!downloadingEbookList.isEmpty()) {
             for (int i = 0; i < downloadingEbookList.size(); i++) {
@@ -221,9 +219,7 @@ public class DownloadService extends Service {
     }
 
     private void downloadNextOrStop(boolean hasErrorInPreviousBook, int errorBookId) {
-//        List<Ebook> ebookList = dataManager.getAllDownloadingEbooks();
         List<Ebook> ebookList;
-
         if (mIsNetworkResume) {
             ebookList = dataManager.getAllToResumeFromNetwork();
             if (ebookList.isEmpty()) {
@@ -232,7 +228,6 @@ public class DownloadService extends Service {
         } else {
             ebookList = dataManager.getNeedDownloadBooks();
         }
-        Log.e(TAG, "downloadNextOrStop: >>>" + ebookList.size());
         if (!ebookList.isEmpty()) {
             Ebook currentEbook = ebookList.get(0);
             if (hasErrorInPreviousBook) {
@@ -244,11 +239,9 @@ public class DownloadService extends Service {
             }
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
             if (availableSize > currentEbook.getFileSize()) {
-                Log.e(TAG, "downloadNextOrStop: >>>");
                 updateDownloadStatusFailed(currentEbook, false);
                 checkFileExist(DownloadService.this, currentEbook);
             } else {
-                Log.e(TAG, "downloadNextOrStop: >>> STOP SERVICE & RESET BOOK");
                 DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
             }
         } else {
@@ -258,7 +251,6 @@ public class DownloadService extends Service {
 
     private void destroyService() {
         if (executor != null) {
-            Log.e(TAG, "onUnableDownloadEvent: >>>shutdownAndAwaitTermination");
             shutdownAndAwaitTermination(executor);
         }
         this.stopSelf();
@@ -317,9 +309,7 @@ public class DownloadService extends Service {
             final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
             final String contentPath = folderPath + "/" + mContentFileDefault;
             final String token = dataManager.getAccessToken();
-            Log.e(TAG, "checkFileExist: >>>");
             new FileUtil.ContentParserAsyn(epubBook -> {
-                Log.e(TAG, "onContentParserResult: >>>" + epubBook.manifestList.size());
                 downloadAllFiles(epubBook, token, ebook);
             }).execute(contentPath);
         }
@@ -363,7 +353,6 @@ public class DownloadService extends Service {
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
         if (!isOnlineReading) {
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
-            Log.e(TAG, "handleError: >>>");
             mCurrentBookId = ebookId;
             sendErrorDownloadEventToGA(throwable, ebookId);
 
@@ -371,7 +360,6 @@ public class DownloadService extends Service {
                 shutdownAndAwaitTermination(executor);
             }
             if (isOnline(this)) {
-                Log.e(TAG, "handleError: >>>ONLINE");
                 updateDownloadStatus(Integer.parseInt(ebookId), true, false);
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
                 EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
@@ -446,7 +434,6 @@ public class DownloadService extends Service {
         int totalFileListNeedToDownload = fileListForDownload.size();
         executor = ParallelExecutorTask.createPool();
         final String folderPath = getEbookPath(this, ebookId);
-        Log.e(TAG, "downloadAllFiles: >>>" + totalFileListNeedToDownload + " -- TOTAL = " + ebook.getTotal());
         if (totalFileListNeedToDownload > 0) {
             for (int i = 0; i < totalFileListNeedToDownload; i++) {
                 final EpubBook.Manifest manifest = fileListForDownload.get(i);
@@ -501,9 +488,7 @@ public class DownloadService extends Service {
                 contentKey = downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e(TAG, "downloadSingleFile: >>>Error1");
                 if (isOnline(DownloadService.this)) {
-                    Log.e(TAG, "downloadSingleFile: >>>Error2 - " + retryCount);
                     if (--retryCount == 0) {
                         handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
                         if (FileUtil.isFileExist(DownloadService.this, ebookId, manifest.getHref()))
@@ -552,12 +537,10 @@ public class DownloadService extends Service {
             String contentKey;
             String html;
             try {
-                Log.e(TAG, "doInBackground: >>>" + folderPath + " - " + originalHref + " - " + apiKey);
                 contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
                 if (href.contains(".html")) {
                     html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
                     try {
-                        Log.e(TAG, "doInBackground: >>>aaa");
                         parseHtml(html);
                     } catch (EpubParserException e) {
                         e.printStackTrace();
@@ -592,7 +575,6 @@ public class DownloadService extends Service {
                         switch (attr.getNodeName()) {
                             case "src":
                                 final String src = attr.getNodeValue();
-                                Log.e(TAG, "parseHtml: >>>" + src);
                                 doInBackground(src);
                                 break;
                         }
