@@ -49,7 +49,7 @@ public class DownloadManager {
 
     public synchronized void startDownload(Context context, Ebook ebook, int iconId,
                                            String appVersion, String baseUrl) {
-        updateBookState(ebook);
+        updateBookDownloadTime(ebook);
         if (!isMyServiceRunning(context, DownloadService.class)) {
             DownloadService.startDownloadService(context, iconId,
                     context.getResources().getString(R.string.app_name),
@@ -57,17 +57,31 @@ public class DownloadManager {
         }
     }
 
-    private void updateBookState(Ebook ebook) {
+    public synchronized void startResume(Context context, Ebook ebook, int iconId,
+                                           String appVersion, String baseUrl) {
+        updateBookResumeState(ebook);
+        if (!isMyServiceRunning(context, DownloadService.class)) {
+            DownloadService.startDownloadService(context, iconId,
+                    context.getResources().getString(R.string.app_name),
+                    baseUrl, appVersion, FILE_PATH_DEFAULT);
+        }
+    }
+
+    private void updateBookDownloadTime(Ebook ebook) {
         ebook.setDownloadTimeStamp(Util.getCurrentTimeStamp());
         dataManager.updateEbook(ebook);
+    }
+
+    private void updateBookResumeState(Ebook ebook) {
+        ebook.setNeedResume(true);
+        updateBookDownloadTime(ebook);
     }
 
     public void deleteEbook(Context context, Ebook ebook, GoogleAnalyticManager googleAnalyticManager,
                             EbookDeleteCallback listener) {
 
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
-        boolean isDownloading = ebookAfterUpdate.getDownloadProgress() > 0 && ebookAfterUpdate.getDownloadProgress() < 100;
-        createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading, () -> {
+        createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
             googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
                     AnalyticViewName.download_delete,
                     ebook.getTitle(),
@@ -81,6 +95,10 @@ public class DownloadManager {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(listener::deleteEbookSuccess));
-        }, null);
+        });
+    }
+
+    public static boolean isDownloading(Ebook ebookAfterUpdate) {
+        return ebookAfterUpdate.getDownloadProgress() > 0 && ebookAfterUpdate.getDownloadProgress() < 100;
     }
 }

@@ -31,14 +31,8 @@ public class DownloadDataManager {
         LibraryTable.updateEbook(ebook);
     }
 
-    public List<Ebook> getAllWaitingDownloadEbooks() {
-        List<Ebook> ebookList = LibraryTable.getWaitingDownloadBooks();
-        Collections.sort(ebookList, (ebook1, ebook2) -> Long.compare(ebook1.getDownloadTimeStamp(), ebook2.getDownloadTimeStamp()));
-        return ebookList;
-    }
-
-    public List<Ebook> getAllDownloadingEbooks() {
-        List<Ebook> ebookList = LibraryTable.getDownloadingEbooks();
+    public List<Ebook> getNeedDownloadBooks() {
+        List<Ebook> ebookList = LibraryTable.getNeedDownloadBooks();
         Collections.sort(ebookList, (ebook1, ebook2) -> Long.compare(ebook1.getDownloadTimeStamp(), ebook2.getDownloadTimeStamp()));
         return ebookList;
     }
@@ -108,5 +102,11 @@ public class DownloadDataManager {
 
     public Ebook getEbookById(int ebookId) {
         return LibraryTable.getEbook(ebookId);
+    }
+
+    public List<Ebook> getAllToResumeFromNetwork() {
+        final List<Ebook> ebookList = LibraryTable.getAllToResumeFromNetwork();
+        Collections.sort(ebookList, (ebook1, ebook2) -> Long.compare(ebook1.getDownloadTimeStamp(), ebook2.getDownloadTimeStamp()));
+        return ebookList;
     }
 }

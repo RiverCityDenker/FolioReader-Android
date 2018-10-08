@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.sap_press.rheinwerk_reader.download.DownloadService;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
+import com.sap_press.rheinwerk_reader.download.events.PausedDownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
@@ -57,18 +58,19 @@ public class DownloadUtil {
             Intent serviceIntent = new Intent(context, DownloadService.class);
             context.stopService(serviceIntent);
         }
-        updateBookInDatabase(errorType);
+        updateBookInDatabase();
     }
 
-    public static void updateBookInDatabase(UnableDownloadEvent.DownloadErrorType errorType) {
-        List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
-        if (!downloadingEbookList.isEmpty()) {
-            for (int i = 0; i < downloadingEbookList.size(); i++) {
-                Ebook ebook = downloadingEbookList.get(i);
-                ebook.setDownloadFailed(true);
-                LibraryTable.updateEbook(ebook);
-            }
-            EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, errorType));
-        }
+    public static void updateBookInDatabase() {
+        EventBus.getDefault().post(new PausedDownloadingEvent());
+//        List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
+//        if (!downloadingEbookList.isEmpty()) {
+//            for (int i = 0; i < downloadingEbookList.size(); i++) {
+//                Ebook ebook = downloadingEbookList.get(i);
+//                ebook.setDownloadFailed(true);
+//                LibraryTable.updateEbook(ebook);
+//            }
+//            EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, errorType));
+//        }
     }
 }

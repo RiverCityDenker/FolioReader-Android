@@ -47,8 +47,9 @@ public final class DialogCreator {
         void onClick();
     }
 
-    public interface DismissPausedDialogCallback {
-        void dismissPausedDialog();
+    public interface PausedDialogCallback {
+        void onAbort();
+        void onResume();
     }
 
     public static AlertDialog.Builder getDialogBuilder(Context context) {
@@ -176,8 +177,7 @@ public final class DialogCreator {
     public static void createDeleteEbookDialog(final Context context,
                                                String bookTitle,
                                                boolean isDownloading,
-                                               MessageDialogCallback callback,
-                                               DismissPausedDialogCallback dismissPausedDialogCallback) {
+                                               MessageDialogCallback callback) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View vi = inflater.inflate(R.layout.dialog_one_message_two_button, null);
@@ -210,15 +210,13 @@ public final class DialogCreator {
                 callback.onClick();
                 dialog.dismiss();
             }
-            if (dismissPausedDialogCallback != null)
-                dismissPausedDialogCallback.dismissPausedDialog();
         });
         cancel.setOnClickListener(view -> {
             dialog.dismiss();
         });
     }
 
-    public static void createPausedDownloadDialog(final Context context, String bookTitle, boolean isDownloading, MessageDialogCallback callback) {
+    public static void createPausedDownloadDialog(final Context context, PausedDialogCallback callback) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View vi = inflater.inflate(R.layout.dialog_pause_download, null);
@@ -236,14 +234,13 @@ public final class DialogCreator {
         dialog.show();
 
         btnAbort.setOnClickListener(view -> {
-            createDeleteEbookDialog(context, bookTitle, isDownloading, callback, new DismissPausedDialogCallback() {
-                @Override
-                public void dismissPausedDialog() {
-                    dialog.dismiss();
-                }
-            });
+            if (callback != null)
+                callback.onAbort();
+            dialog.dismiss();
         });
         btnResume.setOnClickListener(view -> {
+            if (callback != null)
+                callback.onResume();
             dialog.dismiss();
         });
         btnBack.setOnClickListener(view -> {

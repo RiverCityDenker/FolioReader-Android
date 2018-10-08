@@ -42,6 +42,7 @@ public class LibraryTable {
             + COLUMN_LAST_READ_TIME + " TEXT, "
             + COLUMN_NEED_SYNC_TO_SERVER + " VARCHAR(10), "
             + COLUMN_IS_DOWNLOAD_FAILED + " VARCHAR(10), "
+            + COLUMN_NEED_TO_RESUME + " VARCHAR(10), "
             + COLUMN_TIME_STAMP_DOWNLOAD + " TEXT, "
             + COLUMN_X_CONTENT_KEY + " TEXT)";
 
@@ -105,10 +106,6 @@ public class LibraryTable {
         return EbookTable.getDownloadedEbooks(TABLE_NAME);
     }
 
-    public static List<Ebook> getDownloadingEbooks() {
-        return EbookTable.getDownloadingEbooks(TABLE_NAME);
-    }
-
     public static int getDownloadProgressEbook(int ebookId) {
         return EbookTable.getDownloadProgressEbook(ebookId, TABLE_NAME);
     }
@@ -145,6 +142,19 @@ public class LibraryTable {
 
     public static boolean checkDownloadFailed(int ebookId) {
         return EbookTable.checkDownloadFailed(ebookId, TABLE_NAME);
+    }
+
+    public static List<Ebook> getDownloadingEbooks() {
+        return EbookTable.getDownloadingEbooks(TABLE_NAME);
+    }
+
+
+    public static List<Ebook> getNeedDownloadBooks() {
+        return EbookTable.getNeedDownloadBooks(TABLE_NAME);
+    }
+
+    public static List<Ebook> getAllToResumeFromNetwork() {
+        return EbookTable.getAllToResumeFromNetwork(TABLE_NAME);
     }
 }
 
