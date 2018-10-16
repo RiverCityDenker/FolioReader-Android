@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.sap_press.rheinwerk_reader.BuildConfig;
 import com.sap_press.rheinwerk_reader.download.api.network.HostSelectionInterceptor;
 import com.sap_press.rheinwerk_reader.download.api.network.TLSSocketFactory;
 
@@ -17,6 +18,7 @@ import javax.net.ssl.SSLContext;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -41,11 +43,18 @@ public class ApiClient {
     }
 
     private static void initOkHttp(final Context context) {
+
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .addInterceptor(new HostSelectionInterceptor())
                 .connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS);
+
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
+            logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addInterceptor(logInterceptor);
+        }
 
         if (Build.VERSION.SDK_INT < 22) {
             try {
