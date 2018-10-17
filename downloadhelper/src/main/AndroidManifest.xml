@@ -2,4 +2,5 @@
     package="com.sap_press.rheinwerk_reader.downloadhelper" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 </manifest>

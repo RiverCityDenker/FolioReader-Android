@@ -1,11 +1,16 @@
 package com.sap_press.rheinwerk_reader.download;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -151,7 +156,14 @@ public class DownloadService extends Service {
             mContentFileDefault = intent.getStringExtra(CONTENT_FILE_PATH);
             mIsNetworkResume = intent.getBooleanExtra(IS_NETWORK_RESUME, false);
             mApiService = ApiClient.getClient(this, mBaseUrl).create(ApiService.class);
-            final Notification notification = new NotificationCompat.Builder(this)
+
+            String channelId = "";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                createNotificationChannel();
+                channelId = "my_service";
+            }
+
+            final Notification notification = new NotificationCompat.Builder(this, channelId)
                     .setSmallIcon(mIconId)
                     .setContentTitle(mTitle)
                     .setContentText("Downloading...").build();
@@ -160,6 +172,16 @@ public class DownloadService extends Service {
             downloadNextOrStop(false, 0);
         }
         return START_STICKY;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        NotificationChannel chan = new NotificationChannel("my_service",
+                "My Background Service", NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        service.createNotificationChannel(chan);
     }
 
     @Override
