@@ -344,3 +344,6 @@ table, td, th {
 p {
     text-indent: 0 !important;
 }
+p.kastenueberschrift {
+    margin: 0 0 0 0;
+}
