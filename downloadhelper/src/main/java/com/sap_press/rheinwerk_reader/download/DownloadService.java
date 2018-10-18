@@ -658,7 +658,6 @@ public class DownloadService extends Service {
     }
 
     private ArrayList<EpubBook.Manifest> getListFileForDownload(ArrayList<EpubBook.Manifest> manifestList, String ebookId) {
-        deleteSomeHTMLFile(manifestList, ebookId);
         ArrayList<EpubBook.Manifest> downloadFileList = new ArrayList<>();
         for (EpubBook.Manifest manifest : manifestList) {
             if (!FileUtil.isFileExist(this, ebookId, manifest.getHref())) {
@@ -680,10 +679,15 @@ public class DownloadService extends Service {
     }
 
     private synchronized void downloadSingleSucscess(Ebook ebook, long fileCount) {
+        final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
+
         int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
-        ebook.setDownloadProgress(progressPercent);
         if (progressPercent > 100) return;
-        dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
+        if (progressPercent >= downloadedPercent) {
+            ebook.setDownloadProgress(progressPercent);
+            dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
+        }
+
         if (fileCount == ebook.getTotal()) {
             if (executor != null) {
                 shutdownAndAwaitTermination(executor);
@@ -692,6 +696,7 @@ public class DownloadService extends Service {
             dataManager.saveNumberDownloadsEbook();
             downloadNextOrStop(false, ebook.getId());
         }
+
         EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
     }
 
