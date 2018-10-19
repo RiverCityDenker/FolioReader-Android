@@ -18,6 +18,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createDeleteEbookDialog;
+import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createDeleteEbookInReaderDialog;
 import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
 import static com.sap_press.rheinwerk_reader.utils.Util.isMyServiceRunning;
 
@@ -58,7 +59,7 @@ public class DownloadManager {
     }
 
     public synchronized void startResume(Context context, Ebook ebook, int iconId,
-                                           String appVersion, String baseUrl) {
+                                         String appVersion, String baseUrl) {
         updateBookResumeState(ebook);
         if (!isMyServiceRunning(context, DownloadService.class)) {
             DownloadService.startDownloadService(context, iconId,
@@ -82,6 +83,27 @@ public class DownloadManager {
 
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
+            googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
+                    AnalyticViewName.download_delete,
+                    ebook.getTitle(),
+                    (long) ebook.getFileSize());
+            listener.deleteEbookTriggered();
+            //update UI
+            if (!ebookAfterUpdate.isDownloaded()) {
+                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate));
+            }
+            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(listener::deleteEbookSuccess));
+        });
+    }
+
+    public void deleteEbookFromReaderInOffline(Context context, Ebook ebook, GoogleAnalyticManager googleAnalyticManager,
+                                               EbookDeleteCallback listener) {
+
+        Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
+        createDeleteEbookInReaderDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
             googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
                     AnalyticViewName.download_delete,
                     ebook.getTitle(),

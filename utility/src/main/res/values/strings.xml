@@ -6,7 +6,7 @@
     <string name="not_enough_space_dialog_title">Not enough space left on your device!</string>
     <string name="not_enough_space_dialog_mesage">You do not have enough space on your device to download the e-book completely.</string>
     <string name="limit_title">Download not possible</string>
-    <string name="limit_message">You reached the maximum number of downloads for this device (20). To download this e-book, you\'ll need to delete one or more of your previous downloads</string>
+    <string name="limit_message">You reached the maximum number of downloads for this device (20). To download this e-book, you\'ll need to delete one or more of your previous downloads.</string>
     <string name="download_offline_title">Oops… You\'re not connected to the internet.</string>
     <string name="download_offline_message">The e-book is not available as a file on your device. To continue reading, please connect to the internet.</string>
     <string name="close">Close</string>
@@ -14,4 +14,5 @@
     <string name="text_delete_dialog_message">Do you really want to delete the file \"%1$s\" from your device?</string>
     <string name="text_paused_dialog_message">The download was interrupted.\nHow would you like to proceed?</string>
     <string name="text_paused_dialog_title">Download Paused</string>
+    <string name="text_delete_in_reader_dialog_message">Do you really want to delete the file \"%1$s\" from your device? \nYou are offline and can not continue reading online after deleting.</string>
 </resources>

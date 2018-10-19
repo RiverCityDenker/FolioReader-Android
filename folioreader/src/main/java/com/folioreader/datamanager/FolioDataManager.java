@@ -26,6 +26,10 @@ public class FolioDataManager {
         return LibraryTable.checkEbookDownload(ebookId);
     }
 
+    public boolean checkDownloadFailed(int id) {
+        return LibraryTable.checkDownloadFailed(id);
+    }
+
     public Ebook getCurrentBook(int id) {
         return LibraryTable.getEbook(id);
     }

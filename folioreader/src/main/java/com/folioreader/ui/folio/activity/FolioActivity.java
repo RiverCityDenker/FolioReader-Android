@@ -67,7 +67,6 @@ import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
-import com.sap_press.rheinwerk_reader.utils.Constant;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -85,8 +84,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
-import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createMessageDialog;
-import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class FolioActivity
         extends AppCompatActivity
@@ -135,26 +132,14 @@ public class FolioActivity
 
     @Override
     public void downloadOrDelete() {
-        boolean isDownloadEbook = dataManager.checkEbookDownload(mEbook.getId());
-        Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
-        if (dataManager.getDownloadedEbooksCount() >= Constant.MAXIMUM_DOWNLOAD_NUMBER && !isDownloadEbook) {
-            createMessageDialog(this, getString(R.string.limit_title), getString(R.string.limit_message));
-        } else if (!isOnline(this) && currentEbook.getDownloadProgress() < 0) {
-            createMessageDialog(this, getString(R.string.download_offline_title), getString(R.string.download_offline_message), getString(R.string.close));
-        } else {
-            if (isDownloadEbook) {
-                sendEventActionGoogleAnalytics("Selected delete book");
-                getPresenter().deleteEbook(this, currentEbook, googleAnalytic, mDownloadInfo.getmBookPosition());
-            } else {
-                startDownloadBook(currentEbook);
-            }
-        }
+        getPresenter().handleClickOnDownloadingView(this, mEbook);
+
     }
 
     private void startDownloadBook(Ebook currentEbook) {
         sendEventActionGoogleAnalytics("Selected download book");
         toolbar.setEbook(currentEbook);
-        getPresenter().downloadEbook(this, currentEbook, mDownloadInfo);
+        getPresenter().downloadEbook(this, currentEbook);
     }
 
     @Override
@@ -184,6 +169,11 @@ public class FolioActivity
     @Override
     public void hideLoading() {
         loadingView.invisible();
+    }
+
+    @Override
+    public void exitReader() {
+        this.finish();
     }
 
     @Override
@@ -232,7 +222,7 @@ public class FolioActivity
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
         dataManager = FolioDataManager.getInstance();
-        mMainPresenter = new MainPresenter(this);
+
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
         loadingView = (LoadingView) findViewById(R.id.loadingView);
@@ -262,7 +252,6 @@ public class FolioActivity
                 if (mEbook != null) {
                     mBookId = String.valueOf(mEbook.getId());
                     titleEbook = mEbook.getTitle();
-
                 }
             }
 
@@ -271,6 +260,7 @@ public class FolioActivity
             }
             SharedPreferenceUtil.putSharedPreferencesLong(this, titleEbook, FileUtil.getCurrentTimeStamp());
             googleAnalytic = new GoogleAnalyticManager(this);
+            mMainPresenter = new MainPresenter(this, mEbook, mDownloadInfo, googleAnalytic);
         } else {
             mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
             if (mEpubSourceType.equals(EpubSourceType.RAW)) {

@@ -49,6 +49,7 @@ public final class DialogCreator {
 
     public interface PausedDialogCallback {
         void onAbort();
+
         void onResume();
     }
 
@@ -188,6 +189,48 @@ public final class DialogCreator {
         cancel.setText(R.string.cancel);
 
         messageText.setText(String.format(context.getString(R.string.text_delete_dialog_message), bookTitle));
+
+        final AlertDialog.Builder builder = getDialogBuilder(context);
+        builder.setView(vi).setTitle(R.string.text_delete_dialog_title);
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
+
+        delete.setOnClickListener(view -> {
+            if (isDownloading) {
+                messageText.setText("Please wait..");
+                delete.setVisibility(View.GONE);
+                cancel.setVisibility(View.GONE);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    callback.onClick();
+                    dialog.dismiss();
+                }, 300);
+            } else {
+                callback.onClick();
+                dialog.dismiss();
+            }
+        });
+        cancel.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+    }
+
+    public static void createDeleteEbookInReaderDialog(final Context context,
+                                                       String bookTitle,
+                                                       boolean isDownloading,
+                                                       MessageDialogCallback callback) {
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        final View vi = inflater.inflate(R.layout.dialog_one_message_two_button, null);
+        TextView messageText = vi.findViewById(R.id.dialog_delete_message);
+        Button delete = vi.findViewById(R.id.dialog_delete_delete);
+        Button cancel = vi.findViewById(R.id.dialog_delete_cancel);
+        delete.setText(R.string.delete);
+        cancel.setText(R.string.cancel);
+
+        messageText.setText(String.format(context.getString(R.string.text_delete_in_reader_dialog_message), bookTitle));
 
         final AlertDialog.Builder builder = getDialogBuilder(context);
         builder.setView(vi).setTitle(R.string.text_delete_dialog_title);

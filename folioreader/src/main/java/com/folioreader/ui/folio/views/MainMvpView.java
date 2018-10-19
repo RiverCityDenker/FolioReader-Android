@@ -10,9 +10,16 @@ import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 public interface MainMvpView extends BaseMvpView {
     void onLoadPublication(EpubPublicationCustom publication);
+
     void updateUIAfterDelete(Ebook ebook);
+
     void updateDownloadProgress(int id, int progress);
+
     void showDownloadError(String message);
+
     void showLoading();
+
     void hideLoading();
+
+    void exitReader();
 }
