@@ -291,14 +291,17 @@ public class FolioActivity
     }
 
     private void initAskingDialog() {
-        DialogFactory.createDownloadDialog(this, getResources().getString(R.string.download_asking), (typeDownload, isSkip) -> {
-            SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
-            if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
-                //Handle function download here
-                Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
-                startDownloadBook(currentEbook);
-            }
-        });
+        final FolioDataManager folioDataManager = FolioDataManager.getInstance();
+        final boolean isDownloadingEbook = folioDataManager.checkEbookDownload(this.mEbook.getId());
+        if (!isDownloadingEbook)
+            DialogFactory.createDownloadDialog(this, getResources().getString(R.string.download_asking), (typeDownload, isSkip) -> {
+                SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
+                if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
+                    //Handle function download here
+                    Ebook currentEbook = dataManager.getCurrentBook(mEbook.getId());
+                    startDownloadBook(currentEbook);
+                }
+            });
     }
 
 

@@ -152,8 +152,8 @@ public class MainPresenter implements ManifestCallBack {
 
     public void handleClickOnDownloadingView(Context context, Ebook ebook) {
         mEbook = ebook;
-        boolean isDownloadEbook = folioDataManager.checkEbookDownload(this.mEbook.getId());
-        Ebook currentEbook = folioDataManager.getCurrentBook(this.mEbook.getId());
+        final boolean isDownloadEbook = folioDataManager.checkEbookDownload(this.mEbook.getId());
+        final Ebook currentEbook = folioDataManager.getCurrentBook(this.mEbook.getId());
         if (folioDataManager.getDownloadedEbooksCount() >= Constant.MAXIMUM_DOWNLOAD_NUMBER && !isDownloadEbook) {
             createMessageDialog(context, context.getString(R.string.limit_title), context.getString(R.string.limit_message));
         } else if (!isOnline(context) && currentEbook.getDownloadProgress() < 0) {
