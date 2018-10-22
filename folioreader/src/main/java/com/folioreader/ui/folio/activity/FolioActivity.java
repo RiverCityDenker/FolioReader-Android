@@ -122,6 +122,11 @@ public class FolioActivity
         return mIsOnlineReading;
     }
 
+    private boolean isDownloadingBook() {
+        final FolioDataManager folioDataManager = FolioDataManager.getInstance();
+        return folioDataManager.checkEbookDownload(this.mEbook.getId());
+    }
+
     private MainPresenter getPresenter() {
         return mMainPresenter;
     }
@@ -291,9 +296,7 @@ public class FolioActivity
     }
 
     private void initAskingDialog() {
-        final FolioDataManager folioDataManager = FolioDataManager.getInstance();
-        final boolean isDownloadingEbook = folioDataManager.checkEbookDownload(this.mEbook.getId());
-        if (!isDownloadingEbook)
+        if (!isDownloadingBook())
             DialogFactory.createDownloadDialog(this, getResources().getString(R.string.download_asking), (typeDownload, isSkip) -> {
                 SharedPreferenceUtil.putSharedPreferencesBoolean(getApplicationContext(), SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, isSkip);
                 if (typeDownload == DialogFactory.TypeDownload.DOWNLOAD) {
@@ -528,7 +531,7 @@ public class FolioActivity
             mEpubServer.stop();
         }
         Log.e(TAG, "onDestroy: >>>");
-        if (isOnlineReading()) {
+        if (isOnlineReading() && !isDownloadingBook()) {
             getPresenter().deleteCacheData(mEbook);
         }
         long timeRead = TimeUnit.SECONDS.toSeconds(FileUtil.getCurrentTimeStamp() - SharedPreferenceUtil.getSharedPreferencesLong(this, titleEbook, 1526620402));
