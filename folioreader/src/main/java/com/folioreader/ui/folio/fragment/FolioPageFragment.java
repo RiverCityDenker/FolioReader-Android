@@ -446,23 +446,17 @@ public class FolioPageFragment
     }
 
     public void scrollToLast() {
-
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToLast -> isPageLoading = " + isPageLoading);
-
         if (!isPageLoading) {
-            loadingView.show();
             mWebview.loadPage("javascript:scrollToLast()");
         }
     }
 
     public void scrollToFirst() {
-
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToFirst -> isPageLoading = " + isPageLoading);
-
         if (!isPageLoading) {
-            loadingView.show();
             mWebview.loadPage("javascript:scrollToFirst()");
         }
     }
