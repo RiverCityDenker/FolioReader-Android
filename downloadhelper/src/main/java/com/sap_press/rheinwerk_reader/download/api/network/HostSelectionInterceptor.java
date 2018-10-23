@@ -13,6 +13,7 @@ import okhttp3.Response;
 public final class HostSelectionInterceptor implements Interceptor {
     private String host;
     private String scheme;
+    private static HostSelectionInterceptor instant;
 
     public HostSelectionInterceptor() {
     }
@@ -21,6 +22,15 @@ public final class HostSelectionInterceptor implements Interceptor {
         HttpUrl httpUrl = HttpUrl.parse(url);
         scheme = httpUrl.scheme();
         host = httpUrl.host();
+    }
+
+    public static HostSelectionInterceptor getInstant() {
+        if (instant != null) {
+            return instant;
+        } else {
+            instant = new HostSelectionInterceptor();
+            return instant;
+        }
     }
 
     @Override

@@ -45,7 +45,7 @@ public class ApiClient {
     private static void initOkHttp(final Context context) {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new HostSelectionInterceptor())
+                .addInterceptor(HostSelectionInterceptor.getInstant())
                 .connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS);
