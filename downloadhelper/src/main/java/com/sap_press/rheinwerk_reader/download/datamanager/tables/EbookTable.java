@@ -99,12 +99,12 @@ public class EbookTable {
         return contentValues;
     }
 
-    public static long insertEbook(Ebook ebook, String tableName) {
+    static long insertEbook(Ebook ebook, String tableName) {
         if (isEbookExist(ebook.getId(), tableName)) return -1;
         return EbookDbAdapter.saveEbook(getEbookContentValues(ebook), tableName);
     }
 
-    public static int insertEbookList(List<Ebook> ebookList, String tableName) {
+    static int insertEbookList(List<Ebook> ebookList, String tableName) {
         int i = 0;
         if (ebookList != null) {
             for (i = 0; i < ebookList.size(); i++) {
@@ -146,7 +146,7 @@ public class EbookTable {
         return i;
     }
 
-    public static boolean deleteEbooks(String tableName) {
+    static boolean deleteEbooks(String tableName) {
         return EbookDbAdapter.deleteAll(tableName);
     }
 
@@ -164,7 +164,7 @@ public class EbookTable {
         return ebook;
     }
 
-    public static boolean checkEbookDownload(Integer ebookId, String tableName) {
+    static boolean checkEbookDownload(Integer ebookId, String tableName) {
         boolean isExis;
         Cursor cursor = EbookDbAdapter.checkDownloadedEbooks(tableName, ebookId);
         isExis = cursor.getCount() > 0;
@@ -209,12 +209,12 @@ public class EbookTable {
         return ebook;
     }
 
-    public static List<Ebook> getEbooks(String tableName) {
+    static List<Ebook> getEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getEbooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static boolean checkEbookIsLoaded(String tableName) {
+    static boolean checkEbookIsLoaded(String tableName) {
         boolean isLoaded;
         Cursor cursor = EbookDbAdapter.getEbooks(tableName);
         isLoaded = cursor.getCount() > 0;
@@ -256,16 +256,16 @@ public class EbookTable {
         return ebook;
     }
 
-    public static boolean deleteEbook(Ebook ebook, String tableName) {
+    static boolean deleteEbook(Ebook ebook, String tableName) {
         return EbookDbAdapter.deleteEbook(tableName, String.valueOf(ebook.getId()));
     }
 
-    public static List<Ebook> getDownloadedEbooks(String tableName) {
+    static List<Ebook> getDownloadedEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getDownloadedEbooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static int getDownloadProgressEbook(int ebookId, String tableName) {
+    static int getDownloadProgressEbook(int ebookId, String tableName) {
         Cursor cursor = EbookDbAdapter.getDownloadProgressEbook(ebookId, tableName);
         int progress = -1;
         if (cursor.getCount() > 0) {
@@ -276,7 +276,7 @@ public class EbookTable {
         return progress;
     }
 
-    public static int getDownloadedEbooksCount(String tableName) {
+    static int getDownloadedEbooksCount(String tableName) {
         int count;
         Cursor cursor = EbookDbAdapter.getDownloadedEbooks(tableName);
         count = cursor.getCount();
@@ -298,17 +298,17 @@ public class EbookTable {
         }
     }
 
-    public static List<Ebook> getFavoriteNeedSyncEbooks(String tableName) {
+    static List<Ebook> getFavoriteNeedSyncEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getFavoriteNeedSyncEbooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static List<Ebook> getFavoritenEbooks(String tableName) {
+    static List<Ebook> getFavoritenEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getFavoritenEbooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static boolean checkFavoriteIsLoaded(String tableName) {
+    static boolean checkFavoriteIsLoaded(String tableName) {
         boolean isLoaded;
         Cursor cursor = EbookDbAdapter.getFavoritenEbooks(tableName);
         isLoaded = cursor.getCount() > 0;
@@ -316,23 +316,23 @@ public class EbookTable {
         return isLoaded;
     }
 
-    public static List<Ebook> getWatingDownloadBooks(String tableName) {
+    static List<Ebook> getWatingDownloadBooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getWatingDownloadBooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static List<Ebook> getDownloadingEbooks(String tableName) {
+    static List<Ebook> getDownloadingEbooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getDownloadingBooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
 
-    public static List<Ebook> getNeedDownloadBooks(String tableName) {
+    static List<Ebook> getNeedDownloadBooks(String tableName) {
         Cursor cursor = EbookDbAdapter.getNeedDownloadBooks(tableName);
         return getEbooksFromQuery(cursor);
     }
 
-    public static boolean checkDownloadFailed(int ebookId, String tableName) {
+    static boolean checkDownloadFailed(int ebookId, String tableName) {
         boolean isExis;
         Cursor cursor = EbookDbAdapter.checkDownloadFailed(tableName, ebookId);
         isExis = cursor.getCount() > 0;
@@ -340,7 +340,7 @@ public class EbookTable {
         return isExis;
     }
 
-    public static List<Ebook> getAllToResumeFromNetwork(String tableName) {
+    static List<Ebook> getAllToResumeFromNetwork(String tableName) {
         Cursor cursor = EbookDbAdapter.getAllToResumeFromNetwork(tableName);
         return getEbooksFromQuery(cursor);
     }
