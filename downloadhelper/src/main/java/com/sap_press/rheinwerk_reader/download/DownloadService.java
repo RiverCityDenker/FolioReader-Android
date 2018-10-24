@@ -566,7 +566,7 @@ public class DownloadService extends Service {
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
             final String contentKey = downloadSingleFile(contextWeakReference.get(), fileUrl, href, appVersion, RETRY_COUNT);
             ebook.setHref(href);
-            if (href.contains(".html")) {
+            if (href.contains(".html") && !href.contains("toc.html")) {
                 if (contentKey != null) {
                     final String html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
                     try {
@@ -726,7 +726,7 @@ public class DownloadService extends Service {
                                       String appVersion) throws Exception {
 
         File file = FileUtil.getFile(folderPath, href);
-        //Log.e(TAG, "downloadFile: >>>" + file.getCanonicalPath());
+        Log.e(TAG, "downloadFile: >>>" + file.getCanonicalPath());
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);

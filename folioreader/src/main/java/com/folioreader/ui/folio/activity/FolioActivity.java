@@ -353,6 +353,11 @@ public class FolioActivity
 
     @Override
     public void startContentHighlightActivity() {
+        if (mSpineReferenceList.isEmpty()) {
+            Log.e(TAG, "startContentHighlightActivity: >>>");
+            showErrorDialog();
+            return;
+        }
         if (getResources().getBoolean(R.bool.isTablet)) {
             Bundle bundle = new Bundle();
             bundle.putString(CHAPTER_SELECTED, mSpineReferenceList.get(mChapterPosition).href);

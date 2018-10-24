@@ -102,7 +102,7 @@
     <string name="xhtml_mime_type" translatable="false">application/xhtml+xml</string>
     <string name="html_mime_type" translatable="false">text/html</string>
     <string name="back_compat" translatable="false">BackCompat</string>
-    <string name="ebook_error_msg">There is an error while loading ebook. Let try again !</string>
+    <string name="ebook_error_msg">There is an error while loading ebook. Please try again later.</string>
     <string name="close_button">Close</string>
     <string name="btn_ok">OK</string>
 </resources>
