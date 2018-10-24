@@ -1,4 +1,8 @@
 <resources>
     <string name="text_delete_dialog_title">Delete Download</string>
     <string name="text_delete_dialog_message">Do you really want to delete the file \"%1$s\" from your device?</string>
+    <string name="download_error_from_file_title">Download Interrupted.</string>
+    <string name="download_error_from_file_message">The download of the page was interrupted. Please try again later.</string>
+    <string name="download_error_from_offline_title">Oops ... You\'re not connected to the internet.</string>
+    <string name="download_error_from_offline_message">To continue reading this e-book, please connect to internet.</string>
 </resources>

@@ -71,6 +71,7 @@ import com.folioreader.view.VerticalSeekbar;
 import com.folioreader.view.WebViewPager;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
+import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -84,6 +85,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.folioreader.ui.base.HtmlUtil.getErrorHtml;
 import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENCRYPTED_FILE;
 
 /**
@@ -166,6 +168,7 @@ public class FolioPageFragment
     private String mConfigedHtml;
     private boolean mIsOnlineReading;
     private FolioPagePresenter mPresenter;
+    private boolean mIsErrorPage;
 
     public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
@@ -250,10 +253,11 @@ public class FolioPageFragment
         mConfig = AppUtil.getSavedConfig(getContext());
         mIsOnlineReading = ((FolioActivity) getActivity()).isOnlineReading();
         loadingView = mActivityCallback.getLoadingView();
+        showLoading();
         initSeekbar();
         initAnimations();
         initWebView();
-        updatePagesLeftTextBg();
+        //updatePagesLeftTextBg();
 
         return mRootView;
     }
@@ -390,39 +394,51 @@ public class FolioPageFragment
         }
     }
 
-    private void setHtml(boolean reloaded) {
-        Log.e(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
-        if (spineItem != null) {
-            String ref = spineItem.href;
-            if (!reloaded && spineItem.properties.contains("media-overlay")) {
-                mediaController.setSMILItems(SMILParser.parseSMIL(mHtmlString));
-                mediaController.setUpMediaPlayer(spineItem.mediaOverlay, spineItem.mediaOverlay.getAudioPath(spineItem.href), mBookTitle);
-            }
-            mConfig = AppUtil.getSavedConfig(getContext());
-
-            String path = "";
-            int forwardSlashLastIndex = ref.lastIndexOf('/');
-            if (forwardSlashLastIndex != -1)
-                path = ref.substring(0, forwardSlashLastIndex + 1);
-
-            String mimeType;
-            if (spineItem.typeLink.equalsIgnoreCase(getString(R.string.xhtml_mime_type))) {
-                mimeType = getString(R.string.xhtml_mime_type);
-            } else {
-                mimeType = getString(R.string.html_mime_type);
-            }
-
-            final String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
-                    URL_PREFIX + mBookFilePath + SLASH_SIGN : Constants.LOCALHOST + mBookTitle + SLASH_SIGN + path;
-
-            mConfigedHtml = HtmlUtil.reformatHtml(getContext(), mHtmlString, mConfig);
+    private synchronized void setHtml(boolean reloaded) {
+        if (mIsErrorPage) {
+            final String baseUrl = URL_PREFIX + "/";
+            String mimeType = "text/html";
             mWebview.loadDataWithBaseURL(
                     baseUrl,
-                    mConfigedHtml,
+                    mHtmlString,
                     mimeType,
                     "UTF-8",
                     null);
+        } else {
+            Log.e(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
+            if (spineItem != null) {
+                String ref = spineItem.href;
+                if (!reloaded && spineItem.properties.contains("media-overlay")) {
+                    mediaController.setSMILItems(SMILParser.parseSMIL(mHtmlString));
+                    mediaController.setUpMediaPlayer(spineItem.mediaOverlay, spineItem.mediaOverlay.getAudioPath(spineItem.href), mBookTitle);
+                }
+                mConfig = AppUtil.getSavedConfig(getContext());
+
+                String path = "";
+                int forwardSlashLastIndex = ref.lastIndexOf('/');
+                if (forwardSlashLastIndex != -1)
+                    path = ref.substring(0, forwardSlashLastIndex + 1);
+
+                String mimeType;
+                if (spineItem.typeLink.equalsIgnoreCase(getString(R.string.xhtml_mime_type))) {
+                    mimeType = getString(R.string.xhtml_mime_type);
+                } else {
+                    mimeType = getString(R.string.html_mime_type);
+                }
+
+                final String baseUrl = mEpubSourceType.equals(ENCRYPTED_FILE.name()) ?
+                        URL_PREFIX + mBookFilePath + SLASH_SIGN : Constants.LOCALHOST + mBookTitle + SLASH_SIGN + path;
+
+                mConfigedHtml = HtmlUtil.reformatHtml(getContext(), mHtmlString, mConfig);
+                mWebview.loadDataWithBaseURL(
+                        baseUrl,
+                        mConfigedHtml,
+                        mimeType,
+                        "UTF-8",
+                        null);
+            }
         }
+
     }
 
     @SuppressWarnings("unused")
@@ -487,12 +503,8 @@ public class FolioPageFragment
             }
         });
 
-        mWebview.clearCache(true);
-        mWebview.clearHistory();
         mWebview.getSettings().setJavaScriptEnabled(true);
-        mWebview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebview.getSettings().setAllowFileAccess(true);
-        mWebview.setVerticalScrollBarEnabled(false);
 
         mWebview.setHorizontalScrollBarEnabled(false);
 
@@ -501,15 +513,6 @@ public class FolioPageFragment
         mWebview.addJavascriptInterface(webViewPager, "WebViewPager");
         mWebview.addJavascriptInterface(loadingView, "LoadingView");
         mWebview.addJavascriptInterface(mWebview, "FolioWebView");
-
-        mWebview.setScrollListener(new FolioWebView.ScrollListener() {
-            @Override
-            public void onScrollChange(int percent) {
-
-                mScrollSeekbar.setProgressAndThumb(percent);
-                updatePagesLeftText(percent);
-            }
-        });
 
         mWebview.setWebChromeClient(webChromeClient);
         mWebview.setWebViewClient(webViewClient);
@@ -543,7 +546,6 @@ public class FolioPageFragment
                 final FolioActivity activity = (FolioActivity) getActivity();
                 if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                         || mContentKey == null || mContentKey.isEmpty()) {
-                    Log.e(TAG, "initWebView: >>>" + spineItem.href);
                     mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
                             activity.getEbook(),
                             spineItem.href);
@@ -557,12 +559,28 @@ public class FolioPageFragment
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.e(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
-        mActivityCallback.updateEbook(event.getEbook());
-        if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href)))
-            onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+                    mActivityCallback.updateEbook(event.getEbook());
+                    onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
+                }
+            });
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                if (event != null && event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+                    mIsErrorPage = true;
+                    onReceiveHtml(getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage()));
+                }
+            });
+        }
     }
 
     private WebViewClient webViewClient = new WebViewClient() {
@@ -1301,6 +1319,7 @@ public class FolioPageFragment
 
     @Override
     public void showLoading() {
-        loadingView.visible();
+        if (loadingView != null)
+            loadingView.visible();
     }
 }

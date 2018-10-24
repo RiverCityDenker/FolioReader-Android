@@ -17,6 +17,7 @@ package com.folioreader.ui.folio.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
@@ -62,6 +63,8 @@ import com.folioreader.view.ImageViewerFragment;
 import com.folioreader.view.LoadingView;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
+import com.sap_press.rheinwerk_reader.dialog.DialogCreator;
+import com.sap_press.rheinwerk_reader.download.events.DownloadBasicFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
@@ -91,7 +94,8 @@ public class FolioActivity
         FolioWebView.ToolBarListener,
         MainMvpView,
         MediaControllerCallback,
-        FolioToolbarCallback {
+        FolioToolbarCallback,
+        DialogInterface.OnDismissListener{
 
     private static final String LOG_TAG = "FolioActivity";
 
@@ -117,6 +121,7 @@ public class FolioActivity
     private DownloadInfo mDownloadInfo;
     private boolean mIsOnlineReading;
     private LoadingView loadingView;
+    private boolean mImageClicked;
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -188,6 +193,11 @@ public class FolioActivity
 
     public Ebook getEbook() {
         return mEbook;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialogInterface) {
+        mImageClicked = false;
     }
 
     public enum EpubSourceType {
@@ -719,6 +729,8 @@ public class FolioActivity
 
     @Override
     public void showSinglePage(String href) {
+        if (mImageClicked) return;
+        mImageClicked = true;
         String idref = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1, href.lastIndexOf("."));
         Log.e(TAG, "showSinglePage: >>>" + idref);
         for (CustomLink spine : mSpineReferenceList) {
@@ -730,7 +742,12 @@ public class FolioActivity
                 } else {
                     mimeType = getString(R.string.html_mime_type);
                 }
-                ImageViewerFragment.startShowImage(href, mBookId, mimeType, contentKey, userKey, getSupportFragmentManager());
+                ImageViewerFragment.startShowImage(href,
+                        mBookId,
+                        mimeType,
+                        contentKey,
+                        getDownloadInfo(),
+                        getSupportFragmentManager());
                 break;
             }
         }
@@ -825,6 +842,30 @@ public class FolioActivity
         mEbook = event.getEbook();
         ebookFilePath = mEbook.getFilePath();
         initBook();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDownloadBasicFileErrorEvent(DownloadBasicFileErrorEvent event) {
+        final boolean isHttpError = event.isHttpError();
+        final String title;
+        final String message;
+        if (!isHttpError) {
+            title = getResources().getString(R.string.download_error_from_offline_title);
+            message = getResources().getString(R.string.download_error_from_offline_message);
+        } else {
+            title = getResources().getString(R.string.download_error_from_file_title);
+            message = getResources().getString(R.string.download_error_from_file_message);
+        }
+        DialogCreator.createDownLoadFailDialog(this,
+                title,
+                message,
+                getResources().getString(R.string.btn_ok),
+                new DialogCreator.MessageDialogCallback() {
+                    @Override
+                    public void onClick() {
+                        finish();
+                    }
+                });
     }
 
     @Override

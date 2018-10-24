@@ -15,6 +15,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.api.ApiClient;
 import com.sap_press.rheinwerk_reader.download.api.ApiService;
@@ -22,13 +23,16 @@ import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.events.DestroyDownloadServiceEvent;
+import com.sap_press.rheinwerk_reader.download.events.DownloadBasicFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
+import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
 import com.sap_press.rheinwerk_reader.download.events.PausedDownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
+import com.sap_press.rheinwerk_reader.downloadhelper.R;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
@@ -54,6 +58,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -87,7 +92,8 @@ public class DownloadService extends Service {
     private static final String CSS_ID = "css";
     private static final String TOC_ID = "ncx";
     private static final String IS_NETWORK_RESUME = "is_network_resume";
-    private Object LOCK_SHUT_DOWN = new Object();
+    static final int RETRY_COUNT = 3;
+    private static final Object LOCK_OBJECT = new Object();
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
     DownloadDataManager dataManager;
@@ -393,6 +399,7 @@ public class DownloadService extends Service {
             //listener.handleDownloadError(throwable);
         } else {
             Log.e(TAG, "handleError: >>>" + throwable.getMessage());
+            EventBus.getDefault().post(new DownloadBasicFileErrorEvent(throwable instanceof HttpException));
         }
 
     }
@@ -434,8 +441,7 @@ public class DownloadService extends Service {
             for (EpubBook.Manifest manifest : epub.manifestList) {
                 if (manifest.getId().equalsIgnoreCase(CSS_ID)
                         || manifest.getId().equalsIgnoreCase(TOC_ID)) {
-                    new DownloadService.DownloadFileTask(ebook, apiInfo, folderPath, true).execute(manifest.getHref());
-                    break;
+                    new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, true).execute(manifest.getHref());
                 }
             }
         } else {
@@ -491,7 +497,7 @@ public class DownloadService extends Service {
             EpubBook.Manifest manifest = manifests[0];
             String href = manifest.getHref();
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + href;
-            final String contentKey = downloadSingleFile(manifest, fileUrl, 2);
+            final String contentKey = downloadSingleFile(manifest, fileUrl, RETRY_COUNT);
             if (isStop()) return null;
             if (!TextUtils.isEmpty(contentKey) && !contentKey.equals(ebook.getContentKey())) {
                 ebook.setContentKey(contentKey);
@@ -531,6 +537,7 @@ public class DownloadService extends Service {
 
 
     public static class DownloadFileTask extends AsyncTask<String, Integer, Ebook> {
+        private final WeakReference<Context> contextWeakReference;
         private final String appVersion;
         private final String token;
         private final String ebookId;
@@ -540,7 +547,8 @@ public class DownloadService extends Service {
         private final String folderPath;
         private final String apiKey;
 
-        public DownloadFileTask(Ebook ebook, ApiInfo apiInfo, String folderPath, boolean isBasicData) {
+        public DownloadFileTask(Context context, Ebook ebook, ApiInfo apiInfo, String folderPath, boolean isBasicData) {
+            this.contextWeakReference = new WeakReference<>(context);
             this.ebook = ebook;
             this.token = apiInfo.getmToken();
             this.ebookId = String.valueOf(ebook.getId());
@@ -556,29 +564,55 @@ public class DownloadService extends Service {
             String originalHref = originalHrefs[0];
             final String href = FileUtil.reformatHref(originalHref);
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
-            String contentKey;
-            String html;
-            try {
-                contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
-                if (href.contains(".html")) {
-                    html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
+            final String contentKey = downloadSingleFile(contextWeakReference.get(), fileUrl, href, appVersion, RETRY_COUNT);
+            ebook.setHref(href);
+            if (href.contains(".html")) {
+                if (contentKey != null) {
+                    final String html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
                     try {
                         parseHtml(html);
                     } catch (EpubParserException e) {
                         e.printStackTrace();
                     }
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                onDownloadSingleFileError(e, ebookId);
-                return null;
             }
             if (!TextUtils.isEmpty(contentKey) && !contentKey.equals(ebook.getContentKey())) {
                 ebook.setContentKey(contentKey);
             }
-            ebook.setHref(href);
+
             return ebook;
+
+        }
+
+        private String downloadSingleFile(Context context,
+                                          String fileUrl,
+                                          String href,
+                                          String appVersion,
+                                          int retryCount) {
+            if (context == null) return null;
+            String contentKey;
+            try {
+                contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (--retryCount == 0) {
+                    if (FileUtil.isFileExist(context, ebookId, href))
+                        FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
+                    if (!isBasicData) {
+                        onDownloadSingleFileError(context, e, ebook, isOnline(context));
+                    } else {
+                        onDownloadBasicFileError(context, e, ebook, isOnline(context));
+                    }
+                    return null;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                return downloadSingleFile(context, href, fileUrl, appVersion, retryCount);
+            }
+            return contentKey;
         }
 
         private void parseHtml(String html) throws EpubParserException {
@@ -597,8 +631,44 @@ public class DownloadService extends Service {
                         switch (attr.getNodeName()) {
                             case "src":
                                 final String src = attr.getNodeValue();
-                                doInBackground(src);
+                                final String href = FileUtil.reformatHref(src);
+                                try {
+                                    final String fileUrl = baseUrl + "ebooks/" + ebookId
+                                            + "/download?app_version=" + appVersion
+                                            + "&file_path=" + href;
+                                    downloadFile(fileUrl, token, folderPath, href, appVersion);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
+                                }
                                 break;
+                        }
+                    }
+                }
+            }
+
+            NodeList linkNodes = document.getElementsByTagNameNS("*", "a");
+            if (linkNodes != null) {
+                List<String> srcList = new ArrayList<>();
+                for (int i = 0; i < linkNodes.getLength(); i++) {
+                    Element itemElement = (Element) linkNodes.item(i);
+                    NamedNodeMap nodeMap = itemElement.getAttributes();
+                    for (int j = 0; j < nodeMap.getLength(); j++) {
+                        Attr attr = (Attr) nodeMap.item(j);
+                        if (attr.getNodeName().equalsIgnoreCase("href")) {
+                            final String src = attr.getNodeValue();
+                            if (!srcList.contains(src) && src.contains(".html")) {
+                                final String href = FileUtil.reformatHref(src);
+                                srcList.add(src);
+                                try {
+                                    final String fileUrl = baseUrl + "ebooks/" + ebookId
+                                            + "/download?app_version=" + appVersion
+                                            + "&file_path=" + href;
+                                    downloadFile(fileUrl, token, folderPath, href, appVersion);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
+                                }
+                            }
+                            break;
                         }
                     }
                 }
@@ -606,30 +676,57 @@ public class DownloadService extends Service {
         }
 
         private String getFilePath(String folderPath, String originalHref) {
-            return folderPath + originalHref;
+            folderPath = folderPath.endsWith("/")
+                    ? folderPath.substring(0, folderPath.length() - 1)
+                    : folderPath;
+            originalHref = originalHref.startsWith("/")
+                    ? originalHref.substring(1, originalHref.length())
+                    : originalHref;
+            Log.e(TAG, "getFilePath: >>>" + folderPath + "/" + originalHref);
+            return folderPath + "/" + originalHref;
         }
 
         @Override
         protected void onPostExecute(Ebook ebook) {
+            if (ebook == null) {
+                return;
+            }
             if (isBasicData) {
-                EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+                if (isFileExist(contextWeakReference.get(), ebookId, "toc.ncx")
+                        && isFileExist(contextWeakReference.get(), ebookId, "Styles/styles.css"))
+                    EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
             } else {
                 EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook));
             }
         }
 
-        private void onDownloadSingleFileError(Exception e, String ebookId) {
-            Log.e(TAG, "onDownloadSingleFileError: >>>" + e.getMessage());
+        private void onDownloadSingleFileError(Context context, Exception e, Ebook ebook, boolean isOnline) {
+            String title;
+            String message;
+            if (context == null) return;
+            if (isOnline) {
+                title = context.getResources().getString(R.string.download_error_from_file_title);
+                message = context.getResources().getString(R.string.download_error_from_file_message);
+            } else {
+                title = context.getResources().getString(R.string.download_error_from_offline_title);
+                message = context.getResources().getString(R.string.download_error_from_offline_message);
+            }
+            EventBus.getDefault().post(new DownloadSingleFileErrorEvent(ebook, title, message));
+        }
+
+        private void onDownloadBasicFileError(Context context, Exception e, Ebook ebook, boolean online) {
+            EventBus.getDefault().post(new DownloadBasicFileErrorEvent(e instanceof HttpException));
         }
     }
 
-    private static String downloadFile(String fileUrl,
-                                       String token,
-                                       String folderPath,
-                                       String href,
-                                       String appVersion) throws Exception {
+    public static String downloadFile(String fileUrl,
+                                      String token,
+                                      String folderPath,
+                                      String href,
+                                      String appVersion) throws Exception {
 
         File file = FileUtil.getFile(folderPath, href);
+        //Log.e(TAG, "downloadFile: >>>" + file.getCanonicalPath());
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);

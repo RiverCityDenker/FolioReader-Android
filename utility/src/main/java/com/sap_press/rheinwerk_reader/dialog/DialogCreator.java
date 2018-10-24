@@ -106,7 +106,7 @@ public final class DialogCreator {
         dialog.show();
     }
 
-    public static void createDownLoadFailDialog(final Context context, String title, String msg, String okBtnText) {
+    public static void createDownLoadFailDialog(final Context context, String title, String msg, String okBtnText, MessageDialogCallback callback) {
         SharedPreferences prefs = context.getSharedPreferences("NotifyDialog", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         boolean isShowing = prefs.getBoolean("IsShowDownLoadFail", false);
@@ -117,6 +117,8 @@ public final class DialogCreator {
                     .setPositiveButton(okBtnText, (dialog1, id) -> {
                         editor.putBoolean("IsShowDownLoadFail", false);
                         editor.apply();
+                        if (callback != null)
+                            callback.onClick();
                         dialog1.dismiss();
                     }).create();
             dialog.show();

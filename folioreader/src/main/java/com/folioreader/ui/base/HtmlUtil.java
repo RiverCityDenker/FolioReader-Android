@@ -7,6 +7,8 @@ import com.folioreader.Config;
 import com.folioreader.Constants;
 import com.folioreader.R;
 
+import static com.sap_press.rheinwerk_reader.utils.FileUtil.readFileFromAssets;
+
 /**
  * @author gautam chibde on 14/6/17.
  */
@@ -106,6 +108,19 @@ public final class HtmlUtil {
 
         htmlContent = getUpdatedStyle(htmlContent, classes);
         return htmlContent;
+    }
+    public static String getErrorHtml(Context context, Config config, String title, String message) {
+
+        final String errorImageForDay = "file:///android_asset/image/error_ic.png";
+        final String errorImageForNight = "file:///android_asset/image/error_ic_night_mode.png";
+        final String errorImagePath = config.isNightMode() ? errorImageForNight : errorImageForDay;
+
+        String html = readFileFromAssets("html/empty_page.html", context);
+
+        final String htmlWithTitle = html.replace(">Title<", ">" + title +"<");
+        final String htmlWithMessage = htmlWithTitle.replace(">Message<", ">" + message + "<");
+
+        return htmlWithMessage;
     }
 
     private static String getUpdatedStyle(String htmlContent, String classes) {
