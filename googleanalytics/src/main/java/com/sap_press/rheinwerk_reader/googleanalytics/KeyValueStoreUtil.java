@@ -13,21 +13,21 @@ public class KeyValueStoreUtil {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = preferences.edit();
         edit.putString(key, val);
-        edit.commit();
+        edit.apply();
     }
 
     public static void putSharedPreferencesBoolean(Context context, String key, boolean val) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = preferences.edit();
         edit.putBoolean(key, val);
-        edit.commit();
+        edit.apply();
     }
 
     public static void putSharedPreferencesLong(Context context, String key, long val) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = preferences.edit();
         edit.putLong(key, val);
-        edit.commit();
+        edit.apply();
     }
 
     public static String getSharedPreferencesString(Context context, String key, String defaultValue) {
