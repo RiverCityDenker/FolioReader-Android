@@ -154,7 +154,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
     }
 
     @Override
-    public void showImage() {
+    public void showImage(String downloadResult) {
         Log.e(TAG, "showImage: >>>");
         imageWebView.loadDataWithBaseURL(
                 baseUrl,

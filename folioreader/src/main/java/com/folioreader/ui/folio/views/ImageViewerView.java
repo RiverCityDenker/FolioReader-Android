@@ -4,5 +4,5 @@ public interface ImageViewerView {
     void showLoading();
     void hideLoading();
 
-    void showImage();
+    void showImage(String downloadResult);
 }

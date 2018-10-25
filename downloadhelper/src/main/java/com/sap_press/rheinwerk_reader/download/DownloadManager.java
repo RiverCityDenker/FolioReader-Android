@@ -84,9 +84,9 @@ public class DownloadManager {
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
             googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
-                    AnalyticViewName.download_delete,
-                    ebook.getTitle(),
-                    (long) ebook.getFileSize());
+                                            AnalyticViewName.download_delete,
+                                            ebook.getTitle(),
+                                            (long) ebook.getFileSize());
             listener.deleteEbookTriggered();
             //update UI
             if (!ebookAfterUpdate.isDownloaded()) {

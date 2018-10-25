@@ -29,6 +29,8 @@ import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
 
 public class ImageViewerPresenter {
     private static final String TAG = ImageViewerPresenter.class.getSimpleName();
+    static final String DOWNLOAD_IMAGE_SUCCESS = "download_success";
+    static final String TABLE_TYPE = "table_type";
     private static ImageViewerView mvpView;
     private static DownloadDataManager dataManager;
 
@@ -63,7 +65,6 @@ public class ImageViewerPresenter {
     }
 
     static class XmlParserAsyn extends AsyncTask<String, Void, String> {
-        private static final String DOWNLOAD_SUCCESS = "download_success";
         private DownloadInfo downloadInfo;
         private String eBookId;
         private WeakReference<Context> contextWeakReference;
@@ -100,19 +101,23 @@ public class ImageViewerPresenter {
                                             + "&file_path=" + href;
                                     final String folderPath = getEbookPath(contextWeakReference.get(), eBookId);
                                     downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
-                                    return DOWNLOAD_SUCCESS;
+                                    return DOWNLOAD_IMAGE_SUCCESS;
                                 } catch (Exception e) {
                                     Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
                                     return null;
                                 }
                             } else {
                                 Log.e(TAG, "doInBackground: >>>File is already exist");
-                                return DOWNLOAD_SUCCESS;
+                                return DOWNLOAD_IMAGE_SUCCESS;
                             }
 
                         }
                     }
                 }
+            }
+            NodeList tableNodes = document.getElementsByTagNameNS("*", "table");
+            if (tableNodes != null && tableNodes.getLength() > 0) {
+                return TABLE_TYPE;
             }
             return null;
         }
@@ -123,7 +128,7 @@ public class ImageViewerPresenter {
                 mvpView.hideLoading();
                 Log.e(TAG, "onPostExecute: >>>downloadResult = " + downloadResult);
                 if (!TextUtils.isEmpty(downloadResult)) {
-                    mvpView.showImage();
+                    mvpView.showImage(downloadResult);
                 }
             }
 

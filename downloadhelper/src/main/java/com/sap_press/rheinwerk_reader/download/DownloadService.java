@@ -199,7 +199,7 @@ public class DownloadService extends Service {
         super.onDestroy();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onCancelDownloadEvent(CancelDownloadEvent event) {
         if (event.getEbook() != null) {
             if (currentEbookId == event.getEbook().getId()) {
@@ -207,7 +207,7 @@ public class DownloadService extends Service {
                     shutdownAndAwaitTermination(executor);
                 }
                 Ebook ebook = event.getEbook();
-                ebook.setDownloadProgress(-1);
+                ebook.resetInfo();
                 dataManager.updateEbook(ebook);
                 downloadNextOrStop(false, 0);
             } else {
@@ -223,7 +223,7 @@ public class DownloadService extends Service {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onPausedDownloading(PausedDownloadingEvent event) {
         if (executor != null) {
             shutdownAndAwaitTermination(executor);
@@ -240,20 +240,21 @@ public class DownloadService extends Service {
         stopSelf();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDestroyDownloadServiceEvent(DestroyDownloadServiceEvent event) {
         this.stopSelf();
         onDestroy();
     }
 
     private void downloadNextOrStop(boolean hasErrorInPreviousBook, int errorBookId) {
-        List<Ebook> ebookList;
+        List<Ebook> ebookList = new ArrayList<>();
         if (mIsNetworkResume) {
             ebookList = dataManager.getAllToResumeFromNetwork();
             if (ebookList.isEmpty()) {
                 mIsNetworkResume = false;
             }
-        } else {
+        }
+        if (!mIsNetworkResume) {
             ebookList = dataManager.getNeedDownloadBooks();
         }
         if (!ebookList.isEmpty()) {
