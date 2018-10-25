@@ -77,12 +77,15 @@ public class DownloadDataManager {
         return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_API_KEY, null);
     }
 
-    public Observable<Ebook> deleteEbook(Ebook ebook) {
+    public Observable<Ebook> deleteEbook(Ebook ebook, boolean isFullDelete) {
         return Observable.fromCallable(() -> {
             String filePath = LibraryTable.getEbook(ebook.getId()).getFilePath();
             ebook.setFilePath(filePath);
-            FileUtil.deleteDownloadedEbookFromExternalStorage(ebook);
-            ebook.resetInfo();
+            FileUtil.deleteDownloadedEbookFromExternalStorage(ebook, isFullDelete);
+            if (isFullDelete)
+                ebook.resetInfo();
+            else
+                ebook.resetApartInfo();
             updateDownloadedEbook(ebook);
             return ebook;
         });

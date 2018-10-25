@@ -82,7 +82,7 @@ public class MainPresenter implements ManifestCallBack {
                 public void deleteEbookTriggered() {
                     showLoading();
                 }
-            });
+            }, false);
         } else {
             downloadManager.deleteEbookFromReaderInOffline(context, ebook, googleAnalyticManager,
                     new DownloadManager.EbookDeleteCallback() {
@@ -147,7 +147,7 @@ public class MainPresenter implements ManifestCallBack {
     }
 
     public void deleteCacheData(Ebook ebook) {
-        FileUtil.deleteDownloadedEbookFromExternalStorage(ebook);
+        FileUtil.deleteDownloadedEbookFromExternalStorage(ebook, true);
     }
 
     public void handleClickOnDownloadingView(Context context, Ebook ebook) {

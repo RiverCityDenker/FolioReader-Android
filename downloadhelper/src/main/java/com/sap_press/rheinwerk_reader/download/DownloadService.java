@@ -1,6 +1,5 @@
 package com.sap_press.rheinwerk_reader.download;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,7 +7,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.RequiresApi;
@@ -211,7 +209,10 @@ public class DownloadService extends Service {
                     shutdownAndAwaitTermination(executor);
                 }
                 Ebook ebook = event.getEbook();
-                ebook.resetInfo();
+                if (event.isFullDelete())
+                    ebook.resetInfo();
+                else
+                    ebook.resetApartInfo();
                 dataManager.updateEbook(ebook);
                 downloadNextOrStop(false, 0);
             } else {
@@ -808,7 +809,7 @@ public class DownloadService extends Service {
         final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
         int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
-        if (progressPercent > 100) return;
+        if (progressPercent > 100 || downloadedPercent < 0) return;
         if (progressPercent >= downloadedPercent) {
             ebook.setDownloadProgress(progressPercent);
             dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());

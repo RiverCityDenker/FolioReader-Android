@@ -79,7 +79,7 @@ public class DownloadManager {
     }
 
     public void deleteEbook(Context context, Ebook ebook, GoogleAnalyticManager googleAnalyticManager,
-                            EbookDeleteCallback listener) {
+                            EbookDeleteCallback listener, boolean isFullDelete) {
 
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
@@ -90,9 +90,9 @@ public class DownloadManager {
             listener.deleteEbookTriggered();
             //update UI
             if (!ebookAfterUpdate.isDownloaded()) {
-                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate));
+                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate, isFullDelete));
             }
-            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate)
+            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate, isFullDelete)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(listener::deleteEbookSuccess));
@@ -111,9 +111,9 @@ public class DownloadManager {
             listener.deleteEbookTriggered();
             //update UI
             if (!ebookAfterUpdate.isDownloaded()) {
-                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate));
+                EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate, true));
             }
-            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate)
+            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate, true)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(listener::deleteEbookSuccess));

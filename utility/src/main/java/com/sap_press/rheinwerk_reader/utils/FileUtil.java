@@ -177,7 +177,7 @@ public class FileUtil {
         return object;
     }
 
-    public static void deleteDownloadedEbookFromExternalStorage(Ebook ebook) {
+    public static void deleteDownloadedEbookFromExternalStorage(Ebook ebook, boolean isFullDelete) {
         String path = ebook.getFilePath();
         if (path == null) {
             Log.w("FileUtil", "path to download is empty: " + path);
@@ -185,7 +185,11 @@ public class FileUtil {
         }
         Log.e(TAG, "deleteDownloadedEbookFromExternalStorage: >>>" + path);
         File file = new File(path);
-        deleteDirectory(file);
+        if (isFullDelete) {
+            deleteDirectory(file);
+        } else {
+            deleteAlmostFilesInReader(file);
+        }
     }
 
     public static boolean deleteAllEbook(Context context) {
@@ -241,6 +245,26 @@ public class FileUtil {
             }
         }
         return (path.delete());
+    }
+
+    private static void deleteAlmostFilesInReader(File path) {
+        if (path.exists()) {
+            File[] files = path.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteAlmostFilesInReader(file);
+                    } else {
+                        final String name = file.getName();
+                        if (name.contains("content.opf")
+                                || name.contains("toc.ncx")
+                                || name.contains("styles.css"))
+                            continue;
+                        file.delete();
+                    }
+                }
+            }
+        }
     }
 
     public static boolean deleteDirectory(String folderPath) {
@@ -309,6 +333,7 @@ public class FileUtil {
         }
         return null;
     }
+
     public static String readFileFromAssets(String fileName, Context context) {
         StringBuilder returnString = new StringBuilder();
         InputStream fIn = null;
