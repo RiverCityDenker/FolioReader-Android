@@ -94,6 +94,7 @@ public class DownloadService extends Service {
     private static final String TOC_ID = "ncx";
     private static final String HREF_TOC = "toc.ncx";
     private static final String HREF_STYLE = "Styles/styles.css";
+    private static final String HREF_STYLE_COMMON = "common/styles.css";
     private static final String IS_NETWORK_RESUME = "is_network_resume";
     static final int RETRY_COUNT = 3;
     private static final Object LOCK_OBJECT = new Object();
@@ -466,6 +467,8 @@ public class DownloadService extends Service {
             FileUtil.deleteFile(FileUtil.getFile(folderPath, HREF_TOC));
         if (FileUtil.isFileExist(context, ebookId, HREF_STYLE))
             FileUtil.deleteFile(FileUtil.getFile(folderPath, HREF_STYLE));
+        if (FileUtil.isFileExist(context, ebookId, HREF_STYLE_COMMON))
+            FileUtil.deleteFile(FileUtil.getFile(folderPath, HREF_STYLE_COMMON));
     }
 
     private void downloadAllFiles(EpubBook epubBook, String token, Ebook ebook) {
@@ -549,7 +552,7 @@ public class DownloadService extends Service {
         }
     }
 
-    public static class DownloadFileTask extends AsyncTask<String, Integer, Ebook> {
+    public static class DownloadFileTask extends ParallelExecutorTask<String, Integer, Ebook> {
         private final WeakReference<Context> contextWeakReference;
         private final String appVersion;
         private final String token;
@@ -560,7 +563,9 @@ public class DownloadService extends Service {
         private final String folderPath;
         private final String apiKey;
 
-        public DownloadFileTask(Context context, Ebook ebook, ApiInfo apiInfo, String folderPath, boolean isBasicData) {
+        public DownloadFileTask(Context context, Ebook ebook, ApiInfo apiInfo, String folderPath,
+                                boolean isBasicData) {
+            super(ParallelExecutorTask.createPool());
             this.contextWeakReference = new WeakReference<>(context);
             this.ebook = ebook;
             this.token = apiInfo.getmToken();
@@ -598,7 +603,8 @@ public class DownloadService extends Service {
                 }
                 if (isBasicData) {
                     if (isFileExist(contextWeakReference.get(), ebookId, HREF_TOC)
-                            && isFileExist(contextWeakReference.get(), ebookId, HREF_STYLE)) {
+                            && (isFileExist(contextWeakReference.get(), ebookId, HREF_STYLE)
+                            || isFileExist(contextWeakReference.get(), ebookId, HREF_STYLE_COMMON))) {
                         EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
                     }
                 } else {
