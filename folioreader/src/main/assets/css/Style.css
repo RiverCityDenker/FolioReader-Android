@@ -350,3 +350,7 @@ p.kastenueberschrift {
 h1, h2, h3, h4, h5, h6 {
     line-height: 1.0 !important;
 }
+
+table.informaltable td {
+    vertical-align: top !important;
+}
