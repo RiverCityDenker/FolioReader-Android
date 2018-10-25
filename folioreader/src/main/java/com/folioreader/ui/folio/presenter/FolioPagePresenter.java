@@ -1,6 +1,7 @@
 package com.folioreader.ui.folio.presenter;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.folioreader.ui.folio.views.FolioPageMvpView;
 import com.sap_press.rheinwerk_reader.download.DownloadManager;
@@ -13,6 +14,7 @@ import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
 
 public class FolioPagePresenter {
+    private static final String TAG = FolioPagePresenter.class.getSimpleName();
     private FolioPageMvpView mvpView;
     private final DownloadManager downloadManager;
     private final DownloadDataManager dataManager;

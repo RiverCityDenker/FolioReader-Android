@@ -3,6 +3,7 @@ package com.folioreader.ui.folio.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.folioreader.ui.custom.CustomLink;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
-    private static final String LOG_TAG = FolioPageFragmentAdapter.class.getSimpleName();
+    private static final String TAG = FolioPageFragmentAdapter.class.getSimpleName();
     private List<CustomLink> mSpineReferences;
     private String mEpubFileName;
     private String mBookId;
@@ -61,7 +62,7 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-
+        Log.e(TAG, "instantiateItem: >>>" + position);
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
         fragments.set(position, fragment);
         return fragment;
@@ -72,12 +73,14 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
         if (mSpineReferences.size() == 0 || position < 0 || position >= mSpineReferences.size())
             return null;
-
+        Log.e(TAG, "getItem: >>>position = " + position);
         Fragment fragment = fragments.get(position);
         if (fragment == null) {
             if (mEpubSourceType.equals(FolioActivity.EpubSourceType.ENCRYPTED_FILE)) {
+                Log.e(TAG, "getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position, mEbookFilePath, mSpineReferences.get(position), mBookId, mEpubFileName, contentKey, userKey, mEpubSourceType);
             } else {
+                Log.e(TAG, "getItem: NORMAL>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position,
                         mEpubFileName, mSpineReferences.get(position), mBookId, mEpubSourceType);
             }

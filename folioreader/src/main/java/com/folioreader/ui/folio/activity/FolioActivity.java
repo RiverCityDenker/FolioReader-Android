@@ -844,6 +844,7 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onFinishedDownloadContent(FinishDownloadContentEvent event) {
+        Log.e(TAG, "onFinishedDownloadContent: >>>");
         mEbook = event.getEbook();
         ebookFilePath = mEbook.getFilePath();
         initBook();

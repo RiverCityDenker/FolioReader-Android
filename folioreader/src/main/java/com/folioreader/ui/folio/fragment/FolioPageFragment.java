@@ -238,11 +238,11 @@ public class FolioPageFragment
 
         if (spineItem != null) {
             if (spineItem.properties.contains("media-overlay")) {
-                mediaController = new MediaController(getActivity(), MediaController.MediaType.SMIL, this);
+                mediaController = new MediaController(getContext(), MediaController.MediaType.SMIL, this);
                 hasMediaOverlay = true;
             } else {
-                mediaController = new MediaController(getActivity(), MediaController.MediaType.TTS, this);
-                mediaController.setTextToSpeech(getActivity());
+                mediaController = new MediaController(getContext(), MediaController.MediaType.TTS, this);
+                mediaController.setTextToSpeech(getContext());
             }
         }
         highlightStyle = HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal);
@@ -394,7 +394,7 @@ public class FolioPageFragment
         }
     }
 
-    private synchronized void setHtml(boolean reloaded) {
+    private void setHtml(boolean reloaded) {
         if (mIsErrorPage) {
             final String baseUrl = URL_PREFIX + "/";
             String mimeType = "text/html";
@@ -561,25 +561,34 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+        Log.e(TAG, "onDownloadFileSuccess: >>> event href = " + event.getEbook().getHref());
+        Log.e(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
+        if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+            final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
+            Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0,20) : "rong"));
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
                     mActivityCallback.updateEbook(event.getEbook());
-                    onReceiveHtml(CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath()));
-                }
-            });
+                    onReceiveHtml(html);
+
+                });
+            }
         }
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                if (event != null && event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>> event href = " + event.getEbook().getHref());
+        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>> spineItem.href = " + spineItem.href);
+        if (event != null && event.getEbook() != null
+                && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+            final String html = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
                     mIsErrorPage = true;
-                    onReceiveHtml(getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage()));
-                }
-            });
+                    onReceiveHtml(html);
+                });
+            }
         }
     }
 
@@ -845,7 +854,7 @@ public class FolioPageFragment
      */
     @Override
     public void onStop() {
-        super.onStop();
+
         Log.v(LOG_TAG, "-> onStop -> " + spineItem.originalHref + " -> " + isCurrentFragment());
 
         mediaController.stop();
@@ -853,6 +862,7 @@ public class FolioPageFragment
 
         if (isCurrentFragment())
             getLastReadPosition();
+        super.onStop();
     }
 
     public ReadPosition getLastReadPosition() {

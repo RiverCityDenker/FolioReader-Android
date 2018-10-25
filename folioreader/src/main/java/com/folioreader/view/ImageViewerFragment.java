@@ -23,10 +23,19 @@ import com.folioreader.ui.folio.presenter.ImageViewerPresenter;
 import com.folioreader.ui.folio.views.ImageViewerView;
 import com.folioreader.util.AppUtil;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
+import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
+import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
+import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import static com.folioreader.ui.base.HtmlUtil.getErrorHtml;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.SLASH_SIGN;
 import static com.folioreader.ui.folio.fragment.FolioPageFragment.URL_PREFIX;
+import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
 
 public class ImageViewerFragment extends DialogFragment implements ImageViewerView {
     private static final String KEY_EXTRA = "key_extra";
@@ -46,6 +55,9 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
     private ImageViewerPresenter mPresenter;
     private String configedHtml;
     private String baseUrl;
+    private String href;
+    private Config mConfig;
+    private String filePath;
 
     public static void startShowImage(String extra,
                                       String bookName,
@@ -69,6 +81,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPresenter = new ImageViewerPresenter(this);
+        EventBus.getDefault().register(this);
         if (getArguments() != null) {
             imagePath = getArguments().getString(KEY_EXTRA);
             mBookName = getArguments().getString(KEY_BOOK_NAME);
@@ -92,13 +105,9 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         loadingView = view.findViewById(R.id.loadingView);
         tvClose = view.findViewById(R.id.tv_close);
         tvClose.setOnClickListener(view1 -> dismiss());
-        final String filePath = (imagePath.contains("file")) ? imagePath.replace("file://", "") : imagePath;
-        final String baseFilePath = filePath.substring(0, filePath.indexOf(mBookName + "/") + mBookName.length() + 1);
+        filePath = (imagePath.contains("file")) ? imagePath.replace("file://", "") : imagePath;
         Log.e(TAG, "onCreateView: >>>" + filePath);
-        final String htmlString = CryptoManager.decryptContentKey(mContentKey, mDownloadInfo.getmApiKey(), filePath);
-        Config mConfig = AppUtil.getSavedConfig(getContext());
-        configedHtml = HtmlUtil.reformatHtml(getContext(), htmlString, mConfig);
-        baseUrl = URL_PREFIX + baseFilePath + (baseFilePath.endsWith(SLASH_SIGN) ? "" : SLASH_SIGN);
+
         imageWebView.getSettings().setJavaScriptEnabled(true);
         imageWebView.getSettings().setAllowFileAccess(true);
         imageWebView.getSettings().setSupportZoom(true);
@@ -107,16 +116,14 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         imageWebView.getSettings().setDisplayZoomControls(false);
         imageWebView.setWebViewClient(webViewClient);
         imageWebView.setInitialScale(100);
+        mConfig = AppUtil.getSavedConfig(getContext());
 
-
-//        String idref = imagePath.substring(imagePath.indexOf(mBookName + "/") + mBookName.length() + 1, imagePath.lastIndexOf("."));
-//        if (isFileExist(getActivity(), mBookName, idref)) {
-//            showImage();
-//        } else {
-//            getPresenter().downloadLinkedFile(getActivity(), mDownloadInfo, mBookName, idref);
-//        }
-
-        getPresenter().downloadImage(getActivity(), mDownloadInfo, mBookName, configedHtml);
+        href = imagePath.substring(imagePath.indexOf(mBookName + "/") + mBookName.length() + 1);
+        if (isFileExist(getActivity(), mBookName, href)) {
+            configAndDownloadImage();
+        } else {
+            getPresenter().downloadLinkedFile(getActivity(), mDownloadInfo, mBookName, href);
+        }
 
         return view;
     }
@@ -124,6 +131,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+        EventBus.getDefault().unregister(this);
         final Activity activity = getActivity();
         if (activity instanceof DialogInterface.OnDismissListener) {
             ((DialogInterface.OnDismissListener) activity).onDismiss(dialog);
@@ -156,11 +164,48 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
     @Override
     public void showImage(String downloadResult) {
         Log.e(TAG, "showImage: >>>");
+        loadPage();
+    }
+
+    private void loadPage() {
         imageWebView.loadDataWithBaseURL(
                 baseUrl,
                 configedHtml,
                 mMimeType,
                 "UTF-8",
                 null);
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
+        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                if (event != null && event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
+                    configedHtml = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
+                    baseUrl = URL_PREFIX + "/";
+                    mMimeType = "text/html";
+                    loadPage();
+                }
+            });
+        }
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
+        Log.e(TAG, "onDownloadFileSuccess: >>>");
+        if (event.getEbook().getHref() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
+            Log.e(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
+            configAndDownloadImage();
+        }
+    }
+
+    private void configAndDownloadImage() {
+        final String baseFilePath = filePath.substring(0, filePath.indexOf(mBookName + "/") + mBookName.length() + 1);
+        final String htmlString = CryptoManager.decryptContentKey(mContentKey, mDownloadInfo.getmApiKey(), filePath);
+        configedHtml = HtmlUtil.reformatHtml(getContext(), htmlString, mConfig);
+        baseUrl = URL_PREFIX + baseFilePath + (baseFilePath.endsWith(SLASH_SIGN) ? "" : SLASH_SIGN);
+        getPresenter().downloadImage(getActivity(), mDownloadInfo, mBookName, configedHtml);
     }
 }
