@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class DateUtil {
 
-    public static Date getDate(String dateStr) {
+    private static Date getDate(String dateStr) {
         Date date = null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
@@ -23,7 +23,7 @@ public class DateUtil {
         return dateFormat.format(date);
     }
 
-    public static boolean isAfterEndDate(String date) {
-        return new Date().after(getDate(date));
+    public static boolean isAfterEndDate(String currentDate, String date) {
+        return getDate(currentDate).after(getDate(date));
     }
 }
