@@ -180,4 +180,10 @@ public class EbookDbAdapter {
                 EbookTable.COLUMN_NEED_TO_RESUME + " = '" + false + "'"+ " or " +
                 EbookTable.COLUMN_NEED_TO_RESUME + " = '" + true + "'" , null);
     }
+
+    public static Cursor getEbooksNeedToResumeFromNetwork(String tableName) {
+        return mDatabase.rawQuery("SELECT * FROM " + tableName + " WHERE " +
+                EbookTable.COLUMN_IS_DOWNLOAD_FAILED + " = '" + true + "'" + " and " +
+                EbookTable.COLUMN_NEED_TO_RESUME + " = '" + true + "'", null);
+    }
 }

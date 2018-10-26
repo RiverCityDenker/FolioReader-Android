@@ -183,9 +183,8 @@ public abstract class DownloadingView extends RelativeLayout {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onResetDownloadBookEvent(OnResetDownloadBookEvent event) {
-        Log.e(TAG, "onResetDownloadBookEvent: >>>" + event.isDownloadFailed());
-        if (event.getBookId() != getEbook().getId()) return;
-        mEbook.setDownloadFailed(event.isDownloadFailed());
+        if (event.getEbook().getId() != getEbook().getId()) return;
+        mEbook.setDownloadFailed(event.getEbook().isDownloadFailed());
         if (!mEbook.isDownloadFailed()) {
             Log.e(TAG, "onResetDownloadBookEvent: >>>reset to default");
             resetProgressBar();

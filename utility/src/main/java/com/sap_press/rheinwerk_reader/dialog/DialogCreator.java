@@ -53,7 +53,7 @@ public final class DialogCreator {
         void onResume();
     }
 
-    public static AlertDialog.Builder getDialogBuilder(Context context) {
+    static AlertDialog.Builder getDialogBuilder(Context context) {
         return new AlertDialog.Builder(context, R.style.AlertDialogStyle);
     }
 
@@ -261,35 +261,57 @@ public final class DialogCreator {
         });
     }
 
-    public static void createPausedDownloadDialog(final Context context, PausedDialogCallback callback) {
+    public static synchronized void createPausedDownloadDialog(final Context context,
+                                                  String title,
+                                                  String message,
+                                                  String btnTextCancel,
+                                                  String btnTextAbort,
+                                                  String btnTextResume,
+                                                  PausedDialogCallback callback) {
+        SharedPreferences prefs = context.getSharedPreferences("NotifyDialog", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        boolean isShowing = prefs.getBoolean("IsShowDownLoadFail", false);
+        if (!isShowing) {
+            editor.putBoolean("IsShowDownLoadFail", true);
+            editor.apply();
+            LayoutInflater inflater = LayoutInflater.from(context);
+            final View vi = inflater.inflate(R.layout.dialog_pause_download, null);
+            TextView tvMessage = vi.findViewById(R.id.tv_dialog_message);
+            Button btnAbort = vi.findViewById(R.id.btn_abort);
+            Button btnResume = vi.findViewById(R.id.btn_resume);
+            Button btnBack = vi.findViewById(R.id.btn_back);
 
-        LayoutInflater inflater = LayoutInflater.from(context);
-        final View vi = inflater.inflate(R.layout.dialog_pause_download, null);
-        TextView tvMessage = vi.findViewById(R.id.tv_dialog_message);
-        Button btnAbort = vi.findViewById(R.id.btn_abort);
-        Button btnResume = vi.findViewById(R.id.btn_resume);
-        Button btnBack = vi.findViewById(R.id.btn_back);
+            tvMessage.setText(message);
+            btnAbort.setText(btnTextAbort);
+            btnResume.setText(btnTextResume);
+            btnBack.setText(btnTextCancel);
 
-        tvMessage.setText(context.getString(R.string.text_paused_dialog_message));
+            final AlertDialog.Builder builder = getDialogBuilder(context);
+            builder.setView(vi).setTitle(title);
+            AlertDialog dialog = builder.create();
+            dialog.setCancelable(false);
+            dialog.show();
 
-        final AlertDialog.Builder builder = getDialogBuilder(context);
-        builder.setView(vi).setTitle(R.string.text_paused_dialog_title);
-        AlertDialog dialog = builder.create();
-        dialog.setCancelable(false);
-        dialog.show();
+            btnAbort.setOnClickListener(view -> {
+                if (callback != null)
+                    callback.onAbort();
+                editor.putBoolean("IsShowDownLoadFail", false);
+                editor.apply();
+                dialog.dismiss();
+            });
+            btnResume.setOnClickListener(view -> {
+                if (callback != null)
+                    callback.onResume();
+                editor.putBoolean("IsShowDownLoadFail", false);
+                editor.apply();
+                dialog.dismiss();
+            });
+            btnBack.setOnClickListener(view -> {
+                editor.putBoolean("IsShowDownLoadFail", false);
+                editor.apply();
+                dialog.dismiss();
+            });
+        }
 
-        btnAbort.setOnClickListener(view -> {
-            if (callback != null)
-                callback.onAbort();
-            dialog.dismiss();
-        });
-        btnResume.setOnClickListener(view -> {
-            if (callback != null)
-                callback.onResume();
-            dialog.dismiss();
-        });
-        btnBack.setOnClickListener(view -> {
-            dialog.dismiss();
-        });
     }
 }

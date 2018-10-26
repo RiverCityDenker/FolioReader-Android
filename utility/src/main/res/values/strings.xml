@@ -14,5 +14,10 @@
     <string name="text_delete_dialog_message">Do you really want to delete the file \"%1$s\" from your device?</string>
     <string name="text_paused_dialog_message">The download was interrupted.\nHow would you like to proceed?</string>
     <string name="text_paused_dialog_title">Download Paused</string>
+    <string name="text_failed_dialog_title">Download failed</string>
     <string name="text_delete_in_reader_dialog_message">Do you really want to delete the file \"%1$s\" from your device? \nYou are offline and can not continue reading online after deleting.</string>
+    <string name="back">BACK</string>
+    <string name="abort">ABORT</string>
+    <string name="resume">RESUME</string>
+    <string name="try_again">Try again</string>
 </resources>

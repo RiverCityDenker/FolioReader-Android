@@ -156,5 +156,9 @@ public class LibraryTable {
     public static List<Ebook> getAllToResumeFromNetwork() {
         return EbookTable.getAllToResumeFromNetwork(TABLE_NAME);
     }
+
+    public static List<Ebook> getEbooksNeedToResumeFromNetwork() {
+        return EbookTable.getEbooksNeedToResumeFromNetwork(TABLE_NAME);
+    }
 }
 

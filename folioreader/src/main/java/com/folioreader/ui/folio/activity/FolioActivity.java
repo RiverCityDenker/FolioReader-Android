@@ -66,6 +66,7 @@ import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.dialog.DialogCreator;
 import com.sap_press.rheinwerk_reader.download.events.DownloadBasicFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
+import com.sap_press.rheinwerk_reader.download.events.OnDownloadInterruptedBookEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
@@ -87,6 +88,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
+import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createPausedDownloadDialog;
 
 public class FolioActivity
         extends AppCompatActivity
@@ -95,7 +97,7 @@ public class FolioActivity
         MainMvpView,
         MediaControllerCallback,
         FolioToolbarCallback,
-        DialogInterface.OnDismissListener{
+        DialogInterface.OnDismissListener {
 
     private static final String LOG_TAG = "FolioActivity";
 
@@ -403,6 +405,30 @@ public class FolioActivity
         FolioPageFragment folioPageFragment = (FolioPageFragment)
                 mFolioPageFragmentAdapter.getItem(highlightImpl.getPageNumber());
         folioPageFragment.scrollToHighlightId(highlightImpl.getRangy());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDownloadInterruptedBookEvent(OnDownloadInterruptedBookEvent event) {
+        if (event.getEbook().isDownloadFailed()) {
+            Log.e(TAG, "onDownloadInterruptedBookEvent: >>>>>>");
+            createPausedDownloadDialog(this,
+                    getResources().getString(R.string.text_failed_dialog_title),
+                    getResources().getString(R.string.text_failed_dialog_message),
+                    getResources().getString(R.string.cancel),
+                    getResources().getString(R.string.delete),
+                    getResources().getString(R.string.try_again),
+                    new DialogCreator.PausedDialogCallback() {
+                        @Override
+                        public void onAbort() {
+                            getPresenter().handleAbortDownload(FolioActivity.this, event.getEbook());
+                        }
+
+                        @Override
+                        public void onResume() {
+                            getPresenter().resumeEbook(FolioActivity.this, event.getEbook());
+                        }
+                    });
+        }
     }
 
     private void initBook(String mEpubFileName, int mEpubRawId, String mEpubFilePath, EpubSourceType mEpubSourceType) {

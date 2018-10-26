@@ -344,5 +344,10 @@ public class EbookTable {
         Cursor cursor = EbookDbAdapter.getAllToResumeFromNetwork(tableName);
         return getEbooksFromQuery(cursor);
     }
+
+    static List<Ebook> getEbooksNeedToResumeFromNetwork(String tableName) {
+        Cursor cursor = EbookDbAdapter.getEbooksNeedToResumeFromNetwork(tableName);
+        return getEbooksFromQuery(cursor);
+    }
 }
 

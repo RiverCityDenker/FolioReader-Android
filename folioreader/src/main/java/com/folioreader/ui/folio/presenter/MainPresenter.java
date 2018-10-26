@@ -184,12 +184,18 @@ public class MainPresenter implements ManifestCallBack {
     }
 
 
-    private void handleAbortDownload(Context context, Ebook mEbook) {
+    public void handleAbortDownload(Context context, Ebook mEbook) {
         deleteEbook(context, mEbook, mGoogleAnalytics, mDownloadInfo.getmBookPosition());
     }
 
     private void handlePausedDownload(Context context, Ebook ebook) {
-        createPausedDownloadDialog(context, new DialogCreator.PausedDialogCallback() {
+        createPausedDownloadDialog(context,
+                context.getResources().getString(R.string.text_paused_dialog_title),
+                context.getResources().getString(R.string.text_paused_dialog_message),
+                context.getResources().getString(R.string.back),
+                context.getResources().getString(R.string.abort),
+                context.getResources().getString(R.string.resume),
+                new DialogCreator.PausedDialogCallback() {
             @Override
             public void onAbort() {
                 handleAbortDownload(context, ebook);
@@ -202,7 +208,7 @@ public class MainPresenter implements ManifestCallBack {
         });
     }
 
-    private void resumeEbook(Context context, Ebook ebook) {
+    public void resumeEbook(Context context, Ebook ebook) {
         if (!isOnline(context)) {
             createMessageDialog(context,
                     context.getString(R.string.download_offline_title),
