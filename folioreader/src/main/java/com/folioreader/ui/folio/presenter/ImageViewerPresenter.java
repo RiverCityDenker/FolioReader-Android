@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.folioreader.R;
 import com.folioreader.ui.folio.views.ImageViewerView;
 import com.sap_press.rheinwerk_reader.download.DownloadService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
@@ -21,11 +22,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
+import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
+import java.net.UnknownHostException;
 
 import static com.sap_press.rheinwerk_reader.download.DownloadService.downloadFile;
+import static com.sap_press.rheinwerk_reader.download.DownloadService.onDownloadSingleFileError;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
+import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class ImageViewerPresenter {
     private static final String TAG = ImageViewerPresenter.class.getSimpleName();
@@ -83,43 +88,65 @@ public class ImageViewerPresenter {
             } catch (EpubParserException e) {
                 e.printStackTrace();
             }
-            NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
-            if (itemNodes != null) {
-                for (int i = 0; i < itemNodes.getLength(); i++) {
-                    Element itemElement = (Element) itemNodes.item(i);
+            if (document != null && contextWeakReference != null) {
+                NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
+                if (itemNodes != null) {
+                    for (int i = 0; i < itemNodes.getLength(); i++) {
+                        Element itemElement = (Element) itemNodes.item(i);
 
-                    NamedNodeMap nodeMap = itemElement.getAttributes();
-                    for (int j = 0; j < nodeMap.getLength(); j++) {
-                        Attr attr = (Attr) nodeMap.item(j);
-                        if (attr.getNodeName().equalsIgnoreCase("src")) {
-                            final String src = attr.getNodeValue();
-                            final String href = FileUtil.reformatHref(src);
-                            if (!isFileExist(contextWeakReference.get(), eBookId, href)) {
-                                try {
-                                    final String fileUrl = downloadInfo.getmBaseUrl() + "ebooks/" + eBookId
-                                            + "/download?app_version=" + downloadInfo.getmAppVersion()
-                                            + "&file_path=" + href;
-                                    final String folderPath = getEbookPath(contextWeakReference.get(), eBookId);
-                                    downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
+                        NamedNodeMap nodeMap = itemElement.getAttributes();
+                        for (int j = 0; j < nodeMap.getLength(); j++) {
+                            Attr attr = (Attr) nodeMap.item(j);
+                            if (attr.getNodeName().equalsIgnoreCase("src")) {
+                                final String src = attr.getNodeValue();
+                                final String href = FileUtil.reformatHref(src);
+                                if (!isFileExist(contextWeakReference.get(), eBookId, href)) {
+                                    try {
+                                        final String fileUrl = downloadInfo.getmBaseUrl() + "ebooks/" + eBookId
+                                                + "/download?app_version=" + downloadInfo.getmAppVersion()
+                                                + "&file_path=" + href;
+                                        final String folderPath = getEbookPath(contextWeakReference.get(), eBookId);
+                                        downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
+                                        return DOWNLOAD_IMAGE_SUCCESS;
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
+                                        showErrorPage(e);
+                                        return null;
+                                    }
+                                } else {
+                                    Log.e(TAG, "doInBackground: >>>File is already exist");
                                     return DOWNLOAD_IMAGE_SUCCESS;
-                                } catch (Exception e) {
-                                    Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
-                                    return null;
                                 }
-                            } else {
-                                Log.e(TAG, "doInBackground: >>>File is already exist");
-                                return DOWNLOAD_IMAGE_SUCCESS;
-                            }
 
+                            }
                         }
                     }
                 }
+                NodeList tableNodes = document.getElementsByTagNameNS("*", "table");
+                if (tableNodes != null && tableNodes.getLength() > 0) {
+                    return TABLE_TYPE;
+                }
+            } else {
+                showErrorPage(new FileNotFoundException());
             }
-            NodeList tableNodes = document.getElementsByTagNameNS("*", "table");
-            if (tableNodes != null && tableNodes.getLength() > 0) {
-                return TABLE_TYPE;
-            }
+
             return null;
+        }
+
+        private void showErrorPage(Exception e) {
+            String title;
+            String message;
+            final Context context = contextWeakReference.get();
+            if (e instanceof UnknownHostException) {
+                title = context.getResources().getString(R.string.download_error_from_offline_title);
+                message = context.getResources().getString(R.string.download_error_from_offline_message);
+            } else {
+                title = context.getResources().getString(R.string.download_error_from_file_title);
+                message = context.getResources().getString(R.string.download_error_from_file_message);
+            }
+            if (mvpView != null) {
+                mvpView.showErrorWhenLoadImage(title, message);
+            }
         }
 
         @Override

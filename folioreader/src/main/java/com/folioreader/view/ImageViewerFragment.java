@@ -167,13 +167,24 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         loadPage();
     }
 
+    @Override
+    public void showErrorWhenLoadImage(String title, String message) {
+        configedHtml = getErrorHtml(getContext(), mConfig, title, message);
+        baseUrl = URL_PREFIX + "/";
+        mMimeType = "text/html";
+        loadPage();
+    }
+
     private void loadPage() {
-        imageWebView.loadDataWithBaseURL(
-                baseUrl,
-                configedHtml,
-                mMimeType,
-                "UTF-8",
-                null);
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> imageWebView.loadDataWithBaseURL(
+                    baseUrl,
+                    configedHtml,
+                    mMimeType,
+                    "UTF-8",
+                    null));
+        }
+
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -181,11 +192,8 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         Log.e(TAG, "onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
-                if (event != null && event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
-                    configedHtml = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
-                    baseUrl = URL_PREFIX + "/";
-                    mMimeType = "text/html";
-                    loadPage();
+                if (event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
+                    showErrorWhenLoadImage(event.getTitle(), event.getMessage());
                 }
             });
         }
