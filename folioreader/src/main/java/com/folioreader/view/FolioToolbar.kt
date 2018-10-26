@@ -37,6 +37,7 @@ class FolioToolbar : RelativeLayout {
         if (!config.isShowTts) btn_speaker.visibility = View.GONE
         initColors(if (config.isNightMode) R.color.app_gray else R.color.black)
         initListeners()
+        showOrHideIfVisible()
     }
 
     private fun initColors(color: Int) {
@@ -110,12 +111,12 @@ class FolioToolbar : RelativeLayout {
     }
 
     fun hide() {
-        post({
+        post {
             this.animate().translationY((-this.height)
                     .toFloat())
                     .setInterpolator(AccelerateInterpolator(2f))
                     .start()
-        })
+        }
     }
 
     fun setEbook(ebook: Ebook) {
