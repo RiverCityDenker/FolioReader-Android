@@ -261,6 +261,11 @@ public class DownloadService extends Service {
             if (ebookList.isEmpty()) {
                 mIsNetworkResume = false;
             }
+            else {
+                for (Ebook ebook: ebookList) {
+                    updateDownloadStatusFailed(ebook, false);
+                }
+            }
         }
         if (!mIsNetworkResume) {
             ebookList = dataManager.getNeedDownloadBooks();

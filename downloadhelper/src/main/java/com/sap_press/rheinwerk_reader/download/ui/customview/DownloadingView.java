@@ -189,17 +189,22 @@ public abstract class DownloadingView extends RelativeLayout {
             Log.e(TAG, "onResetDownloadBookEvent: >>>reset to default");
             resetProgressBar();
             final int progress = mProgressBar.getProgress();
-            if (progress >= 80) {
-                tvBookSize.setTextColor(mActiveColor);
+            if (progress == 0) {
+                showHideContent(false);
+                showHideWaitingProgressBar(true);
             } else {
-                tvBookSize.setTextColor(mTextColorDefault);
-            }
-            if (progress >= 50) {
-                mImageView.setImageDrawable(mActiveDownloadIcon);
-                mImageView.setColorFilter(mActiveColor);
-            } else {
-                mImageView.setImageDrawable(mDefaultDownloadIcon);
-                mImageView.setColorFilter(mDefaultColor);
+                if (progress >= 80) {
+                    tvBookSize.setTextColor(mActiveColor);
+                } else {
+                    tvBookSize.setTextColor(mTextColorDefault);
+                }
+                if (progress >= 50) {
+                    mImageView.setImageDrawable(mActiveDownloadIcon);
+                    mImageView.setColorFilter(mActiveColor);
+                } else {
+                    mImageView.setImageDrawable(mDefaultDownloadIcon);
+                    mImageView.setColorFilter(mDefaultColor);
+                }
             }
         } else {
             Log.e(TAG, "onResetDownloadBookEvent: >>>");
