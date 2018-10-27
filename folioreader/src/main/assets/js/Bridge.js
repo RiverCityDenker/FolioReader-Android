@@ -574,6 +574,17 @@ function postInitHorizontalDirection() {
     //console.log("-> pageCount = " + pageCount);
 
     FolioPageFragment.setHorizontalPageCount(pageCount);
+
+    // add dummy class for table to re-style the page
+    console.log("this is run re-style");
+    var tableEleList = document.getElementsByTagName('table');
+        if(tableEleList.length > 0) {
+            for(var i of tableEleList) {
+                i.setAttribute('style', 'border-spacing: 1px !important');
+                console.log("this is table re-style");
+            }
+        }
+
 }
 
 /**
