@@ -27,10 +27,8 @@ import java.lang.ref.WeakReference;
 import java.net.UnknownHostException;
 
 import static com.sap_press.rheinwerk_reader.download.DownloadService.downloadFile;
-import static com.sap_press.rheinwerk_reader.download.DownloadService.onDownloadSingleFileError;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
-import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 public class ImageViewerPresenter {
     private static final String TAG = ImageViewerPresenter.class.getSimpleName();
