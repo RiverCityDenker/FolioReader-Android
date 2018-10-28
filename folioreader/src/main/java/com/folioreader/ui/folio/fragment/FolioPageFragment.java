@@ -252,7 +252,7 @@ public class FolioPageFragment
 
         mConfig = AppUtil.getSavedConfig(getContext());
         mIsOnlineReading = ((FolioActivity) getActivity()).isOnlineReading();
-        loadingView = mActivityCallback.getLoadingView();
+        loadingView = mRootView.findViewById(R.id.loadingView);
         showLoading();
         initSeekbar();
         initAnimations();
