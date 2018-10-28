@@ -561,9 +561,9 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.e(TAG, "onDownloadFileSuccess: >>> event href = " + event.getEbook().getHref());
+        Log.e(TAG, "onDownloadFileSuccess: >>> event href = " + event.getHref());
         Log.e(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
-        if (event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+        if (event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
             Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0,20) : "rong"));
             if (getActivity() != null) {

@@ -33,7 +33,7 @@ public class FolioPagePresenter {
                 downloadInfo.getmAppVersion());
 
         final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
-        new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, false).execute(href);
+        new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, false).executeParallel(href);
     }
 
     private void showLoading() {
