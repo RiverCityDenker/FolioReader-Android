@@ -36,7 +36,6 @@ import com.sap_press.rheinwerk_reader.downloadhelper.R;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
-import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
@@ -674,6 +673,7 @@ public class DownloadService extends Service {
     }
 
     public static class DownloadFileTask extends ParallelExecutorTask<String, Integer, Ebook> {
+        private final Context context;
         private WeakReference<Context> contextWeakReference;
         private String appVersion;
         private String token;
@@ -688,6 +688,7 @@ public class DownloadService extends Service {
                                 boolean isBasicData) {
             super(ParallelExecutorTask.createPool());
             this.contextWeakReference = new WeakReference<>(context);
+            this.context = contextWeakReference.get();
             this.ebook = ebook;
             this.token = apiInfo.getmToken();
             this.ebookId = String.valueOf(ebook.getId());
@@ -700,13 +701,22 @@ public class DownloadService extends Service {
 
         @Override
         protected Ebook doInBackground(String... originalHrefs) {
-
-
             String originalHref = originalHrefs[0];
             Log.e(TAG, "doInBackground:test >>>" + originalHref);
             final String href = FileUtil.reformatHref(originalHref);
             final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
             ebook.setHref(href);
+
+            if (!isOnline(context)) {
+                if (FileUtil.isFileExist(context, ebookId, href))
+                    FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
+                if (!isBasicData) {
+                    onDownloadSingleFileError(context, null, ebook, false);
+                } else {
+                    onDownloadBasicFileError(context, null, ebook, false);
+                }
+                return null;
+            }
 
             final String contentKey = downloadSingleFile(contextWeakReference.get(), fileUrl, href, appVersion, RETRY_COUNT);
             if (href.contains(".html") && !href.contains("toc.html")) {
@@ -760,24 +770,38 @@ public class DownloadService extends Service {
                 contentKey = downloadFile(fileUrl, token, folderPath, href, appVersion);
             } catch (Exception e) {
                 e.printStackTrace();
-                if (--retryCount == 0) {
-                    if (FileUtil.isFileExist(context, ebookId, href))
-                        FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
-                    if (!isBasicData) {
-                        onDownloadSingleFileError(context, e, ebook, isOnline(context));
+                synchronized (DownloadFileTask.class) {
+                    if (isOnline(context)) {
+                        if (--retryCount == 0) {
+                            if (FileUtil.isFileExist(context, ebookId, href))
+                                FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
+                            if (!isBasicData) {
+                                onDownloadSingleFileError(context, e, ebook, true);
+                            } else {
+                                onDownloadBasicFileError(context, e, ebook, true);
+                            }
+                            return ERROR_DOWNLOAD_FILE;
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        Log.e(TAG, "downloadSingleFile: >>>retryCount = " + retryCount + ", href = " + href);
+                        return downloadSingleFile(context, fileUrl, href, appVersion, retryCount);
                     } else {
-                        onDownloadBasicFileError(context, e, ebook, isOnline(context));
+                        if (FileUtil.isFileExist(context, ebookId, href))
+                            FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
+                        if (!isBasicData) {
+                            onDownloadSingleFileError(context, e, ebook, false);
+                        } else {
+                            onDownloadBasicFileError(context, e, ebook, false);
+                        }
+                        return ERROR_DOWNLOAD_FILE;
                     }
-                    return ERROR_DOWNLOAD_FILE;
                 }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-                Log.e(TAG, "downloadSingleFile: >>>retryCount = " + retryCount + ", href = " + href);
-                return downloadSingleFile(context, fileUrl, href, appVersion, retryCount);
             }
+
             return contentKey;
         }
 

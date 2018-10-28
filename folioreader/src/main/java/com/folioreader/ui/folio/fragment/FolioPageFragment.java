@@ -72,6 +72,7 @@ import com.folioreader.view.WebViewPager;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
+import com.sap_press.rheinwerk_reader.download.events.UpdateReaderPageWhenOnlineEvent;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -87,6 +88,7 @@ import java.util.regex.Pattern;
 
 import static com.folioreader.ui.base.HtmlUtil.getErrorHtml;
 import static com.folioreader.ui.folio.activity.FolioActivity.EpubSourceType.ENCRYPTED_FILE;
+import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
 /**
  * Created by mahavir on 4/2/16.
@@ -465,6 +467,7 @@ public class FolioPageFragment
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToLast -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
+            loadingView.show();
             mWebview.loadPage("javascript:scrollToLast()");
         }
     }
@@ -473,6 +476,7 @@ public class FolioPageFragment
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToFirst -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
+            loadingView.show();
             mWebview.loadPage("javascript:scrollToFirst()");
         }
     }
@@ -544,13 +548,25 @@ public class FolioPageFragment
         if (mEpubSourceType.equals(ENCRYPTED_FILE.name())) {
             if (mIsOnlineReading) {
                 final FolioActivity activity = (FolioActivity) getActivity();
-                if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
-                        || mContentKey == null || mContentKey.isEmpty()) {
-                    mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
-                            activity.getEbook(),
-                            spineItem.href);
-                } else
-                    onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+                if (isOnline(activity)) {
+                    if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
+                            || mContentKey == null || mContentKey.isEmpty()) {
+                        mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+                                activity.getEbook(),
+                                spineItem.href);
+                    } else
+                        onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+                } else {
+                    if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
+                            || mContentKey == null || mContentKey.isEmpty()) {
+                        mIsErrorPage = true;
+                        String title = getResources().getString(com.sap_press.rheinwerk_reader.downloadhelper.R.string.download_error_from_offline_title);
+                        String message = getResources().getString(com.sap_press.rheinwerk_reader.downloadhelper.R.string.download_error_from_offline_message);
+                        final String html = getErrorHtml(getContext(), mConfig, title, message);
+                        onReceiveHtml(html);
+                    } else
+                        onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+                }
             } else {
                 onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
             }
@@ -568,6 +584,7 @@ public class FolioPageFragment
             Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0,20) : "rong"));
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
+                    mIsErrorPage = false;
                     mActivityCallback.updateEbook(event.getEbook());
                     onReceiveHtml(html);
 
@@ -583,12 +600,27 @@ public class FolioPageFragment
         if (event != null && event.getEbook() != null
                 && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
+            Log.e(TAG, "onDownloadSingleFileErrorEvent: >>>" + html);
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = true;
                     onReceiveHtml(html);
                 });
             }
+        }
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUpdateReaderPageWhenOnlineEvent(UpdateReaderPageWhenOnlineEvent event) {
+        Log.e(TAG, "onUpdateReaderPageWhenOnlineEvent: >>>" + spineItem.href);
+        mIsErrorPage = false;
+        if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
+                || mContentKey == null || mContentKey.isEmpty()) {
+            final FolioActivity activity = (FolioActivity) getActivity();
+            mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+                    activity.getEbook(),
+                    spineItem.href);
         }
     }
 
