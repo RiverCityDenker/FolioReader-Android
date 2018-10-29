@@ -99,6 +99,7 @@ public class DownloadService extends Service {
     private static final int CONTENT_KEY_LENGTH = 16;
     static final int RETRY_COUNT = 3;
     private static final Object LOCK_OBJECT = new Object();
+    private static final int NUMBER_OF_BASIC_FILE = 2;
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
     DownloadDataManager dataManager;
@@ -241,6 +242,7 @@ public class DownloadService extends Service {
             for (int i = 0; i < downloadingEbookList.size(); i++) {
                 Ebook ebook = downloadingEbookList.get(i);
                 ebook.setDownloadFailed(true);
+                ebook.setNeedResume(true);
                 LibraryTable.updateEbook(ebook);
             }
             EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, DISCONNECTED));
@@ -370,18 +372,42 @@ public class DownloadService extends Service {
         if (dataManager == null)
             dataManager = DownloadDataManager.getInstance();
         final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, dataManager.getApiKey(), mAppVersion);
-        final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
-                .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
-                .map(FileUtil::parseContentFileToObject)
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
-                    handleError(throwable, ebookId, null, isOnlineReading);
-                });
+        if (isOnlineReading) {
+            if (!isFileExist(context, String.valueOf(ebook.getId()), mContentFileDefault)) {
+                final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
+                        .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
+                        .map(FileUtil::parseContentFileToObject)
+                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
+                            handleError(throwable, ebookId, null, isOnlineReading);
+                        });
 
-        if (compositeSubscription == null)
-            compositeSubscription = new CompositeDisposable();
-        compositeSubscription.add(subscription);
+                if (compositeSubscription == null)
+                    compositeSubscription = new CompositeDisposable();
+                compositeSubscription.add(subscription);
+            } else {
+                final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
+                final String contentPath = folderPath + "/" + mContentFileDefault;
+                new FileUtil.ContentParserAsyn(epubBook -> {
+                    downloadContentSuccess(context, ebook, epubBook, apiInfo, isOnlineReading);
+                }).execute(contentPath);
+            }
+        } else {
+            final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
+                    .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
+                    .map(FileUtil::parseContentFileToObject)
+                    .observeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
+                        handleError(throwable, ebookId, null, isOnlineReading);
+                    });
+
+            if (compositeSubscription == null)
+                compositeSubscription = new CompositeDisposable();
+            compositeSubscription.add(subscription);
+        }
+
     }
 
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
@@ -447,12 +473,20 @@ public class DownloadService extends Service {
             dataManager.updateEbookPath(ebook.getId(), filePath);
             final String folderPath = getEbookPath(context, ebookId);
 
-            deleteBasicFilesBeforeDownload(context, ebookId, folderPath);
+            //deleteBasicFilesBeforeDownload(context, ebookId, folderPath);
 
+            int count = NUMBER_OF_BASIC_FILE;
             for (EpubBook.Manifest manifest : epub.manifestList) {
                 if (manifest.getId().equalsIgnoreCase(CSS_ID)
                         || manifest.getId().equalsIgnoreCase(TOC_ID)) {
-                    new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, true).executeParallel(manifest.getHref());
+                    count--;
+                    if (!isFileExist(context, String.valueOf(ebook.getId()), manifest.getHref())) {
+                        new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, true).executeParallel(manifest.getHref());
+                        if (count == 0) return;
+                    } else if (count == 0) {
+                        EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+                        return;
+                    }
                 }
             }
         } else {

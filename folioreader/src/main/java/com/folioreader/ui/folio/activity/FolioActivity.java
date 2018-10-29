@@ -64,9 +64,11 @@ import com.folioreader.view.LoadingView;
 import com.folioreader.view.MediaControllerCallback;
 import com.folioreader.view.MediaControllerView;
 import com.sap_press.rheinwerk_reader.dialog.DialogCreator;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.DownloadBasicFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnDownloadInterruptedBookEvent;
+import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
@@ -269,6 +271,7 @@ public class FolioActivity
                 if (mEbook != null) {
                     mBookId = String.valueOf(mEbook.getId());
                     titleEbook = mEbook.getTitle();
+                    contentKey = mEbook.getContentKey();
                 }
             }
 
@@ -428,6 +431,15 @@ public class FolioActivity
                             getPresenter().resumeEbook(FolioActivity.this, event.getEbook());
                         }
                     });
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUnableDownloadEvent(UnableDownloadEvent event) {
+        if (event.getErrorType().equals(UnableDownloadEvent.DownloadErrorType.DISCONNECTED)) {
+            final Ebook ebook = LibraryTable.getEbook(Integer.valueOf(mBookId));
+            toolbar.setEbook(ebook);
+            toolbar.updateDownloadView(ebook.getId(), ebook.getDownloadProgress());
         }
     }
 

@@ -78,7 +78,9 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
         if (fragment == null) {
             if (mEpubSourceType.equals(FolioActivity.EpubSourceType.ENCRYPTED_FILE)) {
                 Log.e(TAG, "getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
-                fragment = FolioPageFragment.newInstance(position, mEbookFilePath, mSpineReferences.get(position), mBookId, mEpubFileName, contentKey, userKey, mEpubSourceType);
+                fragment = FolioPageFragment.newInstance(position, mEbookFilePath,
+                        mSpineReferences.get(position), mBookId, mEpubFileName,
+                        contentKey, userKey, mEpubSourceType);
             } else {
                 Log.e(TAG, "getItem: NORMAL>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position,

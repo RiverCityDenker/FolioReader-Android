@@ -240,11 +240,11 @@ public class FolioPageFragment
 
         if (spineItem != null) {
             if (spineItem.properties.contains("media-overlay")) {
-                mediaController = new MediaController(getContext(), MediaController.MediaType.SMIL, this);
+                mediaController = new MediaController(getActivity().getApplicationContext(), MediaController.MediaType.SMIL, this);
                 hasMediaOverlay = true;
             } else {
-                mediaController = new MediaController(getContext(), MediaController.MediaType.TTS, this);
-                mediaController.setTextToSpeech(getContext());
+                mediaController = new MediaController(getActivity().getApplicationContext(), MediaController.MediaType.TTS, this);
+                mediaController.setTextToSpeech(getActivity().getApplicationContext());
             }
         }
         highlightStyle = HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal);
@@ -579,7 +579,7 @@ public class FolioPageFragment
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
         Log.e(TAG, "onDownloadFileSuccess: >>> event href = " + event.getHref());
         Log.e(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
-        if (event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
+        if (spineItem != null && event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
             Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0,20) : "rong"));
             if (getActivity() != null) {
