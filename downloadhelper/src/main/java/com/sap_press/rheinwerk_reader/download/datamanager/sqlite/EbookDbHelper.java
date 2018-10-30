@@ -18,7 +18,7 @@ public class EbookDbHelper extends SQLiteOpenHelper {
     private static EbookDbHelper mInstance;
 
     private static final String DB_NAME = "EbookDB";
-    private static final int VERSION = 22;
+    private static final int VERSION = 23;
 
     public EbookDbHelper(Context context) {
         super(context, DB_NAME, null, VERSION);
