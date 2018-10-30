@@ -105,7 +105,7 @@ public class MainPresenter implements ManifestCallBack {
     public void downloadEbook(Context context, Ebook ebook) {
         if (ebook.getDownloadProgress() < 0)
             ebook.setDownloadProgress(0);
-        updateDownloadProgress(ebook.getId(), ebook.getDownloadProgress());
+        updateDownloadProgress(ebook);
         EventBus.getDefault().post(new UpdateBookUIEvent(mDownloadInfo.getmBookPosition(), ebook));
         downloadManager.startDownload(context,
                 ebook,
@@ -120,9 +120,9 @@ public class MainPresenter implements ManifestCallBack {
         }
     }
 
-    private void updateDownloadProgress(int id, int downloadProgress) {
+    private void updateDownloadProgress(Ebook ebook) {
         if (mainMvpView != null) {
-            mainMvpView.updateDownloadProgress(id, downloadProgress);
+            mainMvpView.updateDownloadProgress(ebook);
         }
     }
 

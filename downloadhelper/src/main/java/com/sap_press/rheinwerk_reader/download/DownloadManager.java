@@ -6,6 +6,7 @@ import com.sap_press.rheinwerk_reader.R;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
+import com.sap_press.rheinwerk_reader.download.events.ResumeDownloadUpdateViewEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
@@ -61,6 +62,7 @@ public class DownloadManager {
     public synchronized void startResume(Context context, Ebook ebook, int iconId,
                                          String appVersion, String baseUrl) {
         updateBookResumeState(ebook);
+        EventBus.getDefault().post(new ResumeDownloadUpdateViewEvent(ebook));
         if (!isMyServiceRunning(context, DownloadService.class)) {
             DownloadService.startDownloadService(context, iconId,
                     context.getResources().getString(R.string.app_name),

@@ -158,7 +158,8 @@ public class EbookDbAdapter {
     public static Cursor getDownloadingBooks(String tableName) {
         return mDatabase.rawQuery("SELECT * FROM " + tableName + " WHERE " +
                 EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT + " >= " + 0 + " and " +
-                EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT + " < " + 100, null);
+                EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT + " < " + 100 + " and " +
+                EbookTable.COLUMN_IS_DOWNLOAD_FAILED + " = '" + false + "'", null);
     }
 
     public static Cursor getNeedDownloadBooks(String tableName) {

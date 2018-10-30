@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
+import com.sap_press.rheinwerk_reader.download.events.ResumeDownloadUpdateViewEvent;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
@@ -145,7 +146,7 @@ public abstract class DownloadingView extends RelativeLayout {
         return R.layout.layout_download_base;
     }
 
-    protected abstract void updateUI(int progress, int ebookId);
+    protected abstract void updateUI(Ebook ebook);
 
     protected abstract void showViewNomal();
 
@@ -178,7 +179,19 @@ public abstract class DownloadingView extends RelativeLayout {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadingEvent(DownloadingEvent event) {
-        updateUI(event.getProgress(), event.getEbookId());
+        updateUI(event.getEbook());
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onResumeDownloadUpdateViewEvent(ResumeDownloadUpdateViewEvent event) {
+        final Ebook ebook = event.getEbook();
+        if (ebook.getId() == mEbook.getId()) {
+            mEbook.setDownloadFailed(false);
+            ebook.setDownloadFailed(false);
+            ebook.setDownloadProgress(0);
+            updateUI(event.getEbook());
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

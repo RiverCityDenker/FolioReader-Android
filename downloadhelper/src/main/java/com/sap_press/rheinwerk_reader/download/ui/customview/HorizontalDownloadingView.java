@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
+import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 
 /**
@@ -44,7 +45,10 @@ public class HorizontalDownloadingView extends DownloadingView {
     }
 
     @Override
-    public synchronized void updateUI(int progress, int ebookId) {
+    public synchronized void updateUI(Ebook ebook) {
+        final int ebookId = ebook.getId();
+        final int progress = ebook.getDownloadProgress();
+        final boolean isDownloadFailed = ebook.isDownloadFailed();
         if (ebookId != getEbook().getId()) return;
         if (progress >= 100) {
             showViewFinish();
@@ -57,7 +61,7 @@ public class HorizontalDownloadingView extends DownloadingView {
         } else if (progress < 0) {
             showViewNomal();
         } else if (progress == 0) {
-            if (mEbook.isDownloadFailed()) {
+            if (mEbook.isDownloadFailed() || isDownloadFailed) {
                 onPaused(progress);
                 tvBookSize.setText(String.format("%d%%", progress));
                 showHideContent(true);
@@ -66,7 +70,7 @@ public class HorizontalDownloadingView extends DownloadingView {
                 showHideWaitingProgressBar(true);
             }
         } else {
-            if (mEbook.isDownloadFailed()) {
+            if (mEbook.isDownloadFailed() || isDownloadFailed) {
                 onPaused(progress);
             } else {
                 if (progress >= 45) {
@@ -83,7 +87,7 @@ public class HorizontalDownloadingView extends DownloadingView {
             showHideContent(true);
         }
 
-        showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed());
+        showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed() && !isDownloadFailed);
         mProgressBar.setProgress(progress);
     }
 

@@ -159,14 +159,14 @@ public class FolioActivity
     @Override
     public void updateUIAfterDelete(Ebook ebook) {
         runOnUiThread(() -> {
-            toolbar.updateDownloadView(ebook.getId(), ebook.getDownloadProgress());
+            toolbar.updateDownloadView(ebook);
         });
     }
 
     @Override
-    public void updateDownloadProgress(int ebookId, int progress) {
+    public void updateDownloadProgress(Ebook ebook) {
         runOnUiThread(() -> {
-            toolbar.updateDownloadView(ebookId, progress);
+            toolbar.updateDownloadView(ebook);
         });
     }
 
@@ -348,7 +348,7 @@ public class FolioActivity
             getWindow().setNavigationBarColor(color);
         }
         toolbar.setEbook(mEbook);
-        updateDownloadProgress(mEbook.getId(), mEbook.getDownloadProgress());
+        updateDownloadProgress(mEbook);
     }
 
     @Override
@@ -439,7 +439,7 @@ public class FolioActivity
         if (event.getErrorType().equals(UnableDownloadEvent.DownloadErrorType.DISCONNECTED)) {
             final Ebook ebook = LibraryTable.getEbook(Integer.valueOf(mBookId));
             toolbar.setEbook(ebook);
-            toolbar.updateDownloadView(ebook.getId(), ebook.getDownloadProgress());
+            toolbar.updateDownloadView(ebook);
         }
     }
 

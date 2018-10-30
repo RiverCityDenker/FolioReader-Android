@@ -115,6 +115,8 @@ public class DownloadService extends Service {
     private String mContentFileDefault = FILE_PATH_DEFAULT;
     private ApiService mApiService;
     private boolean mIsNetworkResume;
+    private List<String> failedDownloadFiles = new ArrayList<>();
+    private boolean mIsTryAgain;
 
     public DownloadService() {
     }
@@ -276,7 +278,7 @@ public class DownloadService extends Service {
             if (hasErrorInPreviousBook) {
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
-            if (currentEbook == null) {
+            if (currentEbook == null || currentEbook.getId() == currentEbookId) {
                 destroyService();
                 return;
             }
@@ -424,7 +426,7 @@ public class DownloadService extends Service {
                 Log.e(TAG, "handleError: >>>isOnline");
                 updateDownloadStatus(Integer.parseInt(ebookId), true, false);
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
-                EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
+                EventBus.getDefault().post(new DownloadingEvent(ebook));
                 downloadNextOrStop(true, Integer.parseInt(ebookId));
             } else {
                 stopSelf();
@@ -516,6 +518,7 @@ public class DownloadService extends Service {
         int totalFileListNeedToDownload = fileListForDownload.size();
         executor = ParallelExecutorTask.createPool();
         final String folderPath = getEbookPath(this, ebookId);
+        mIsTryAgain = totalFileListNeedToDownload > 0 && totalFileListNeedToDownload < ebook.getTotal();
         if (totalFileListNeedToDownload > 0) {
             for (int i = 0; i < totalFileListNeedToDownload; i++) {
                 final EpubBook.Manifest manifest = fileListForDownload.get(i);
@@ -559,14 +562,14 @@ public class DownloadService extends Service {
                 ebook.setContentKey(contentKey);
             }
 
-            if (contentKey != null) {
-                if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
-                    synchronized (DownloadService.class) {
+            synchronized (DownloadService.class) {
+                if (contentKey != null) {
+                    if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
                         downloadSingleSucscess(ebook, ++progress);
+                    } else {
+                        downloadSingleSucscess(ebook, progress);
                     }
-                }
-            } else {
-                synchronized (DownloadService.class) {
+                } else {
                     downloadSingleSucscess(ebook, ++progress);
                 }
             }
@@ -581,18 +584,8 @@ public class DownloadService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
                 if (isOnline(DownloadService.this)) {
-                    if (--retryCount == 0) {
-                        handleError(e, ebookId, getPoolExecutor(), DownloadUtil.OFFLINE);
-                        if (FileUtil.isFileExist(DownloadService.this, ebookId, manifest.getHref()))
-                            FileUtil.deleteFile(FileUtil.getFile(folderPath, manifest.getHref()));
-                        return ERROR_DOWNLOAD_FILE;
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    return downloadSingleFile(manifest, fileUrl, retryCount);
+                    failedDownloadFiles.add(manifest.getHref());
+                    return ERROR_DOWNLOAD_FILE;
                 }
             }
             return contentKey;
@@ -914,31 +907,64 @@ public class DownloadService extends Service {
         }
     }
 
-    private synchronized void downloadSingleSucscess(Ebook ebook, long fileCount) {
-        final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
+    private void downloadSingleSucscess(Ebook ebook, long fileCount) {
+        synchronized (DownloadService.class) {
+            final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
-        int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
-        if (progressPercent > 100 || downloadedPercent < 0) return;
-        if (progressPercent >= downloadedPercent) {
-            ebook.setDownloadProgress(progressPercent);
-            dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
-        }
-
-        if (fileCount == ebook.getTotal()) {
-            if (executor != null) {
-                shutdownAndAwaitTermination(executor);
+            int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
+            if (progressPercent > 100 || downloadedPercent < 0) return;
+            if (progressPercent >= downloadedPercent) {
+                ebook.setDownloadProgress(progressPercent);
+                dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
             }
-            resetDownloadState(ebook);
-            dataManager.saveNumberDownloadsEbook();
-            downloadNextOrStop(false, ebook.getId());
-        }
 
-        EventBus.getDefault().post(new DownloadingEvent(ebook.getId(), ebook.getDownloadProgress()));
+            if ((fileCount + failedDownloadFiles.size()) == ebook.getTotal()) {
+                Log.e(TAG, "downloadSingleSucscess:2 >>>" + fileCount + " : " + failedDownloadFiles.size() + " : " + ebook.getTotal());
+                if (!failedDownloadFiles.isEmpty()) {
+                    if (executor != null) {
+                        shutdownAndAwaitTermination(executor);
+                    }
+                    int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
+                    ebook.setDownloadFailed(true);
+                    ebook.setDownloadProgress(successProgressPercent);
+                    ebook.setNeedResume(false);
+                    dataManager.updateEbook(ebook);
+                    downloadNextOrStop(true, ebook.getId());
+                    EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
+                } else {
+                    if (executor != null) {
+                        shutdownAndAwaitTermination(executor);
+                    }
+                    resetDownloadState(ebook);
+                    dataManager.saveNumberDownloadsEbook();
+                    downloadNextOrStop(false, ebook.getId());
+                }
+            } else if ((fileCount + failedDownloadFiles.size()) > ebook.getTotal()) {
+                if (!failedDownloadFiles.isEmpty()) {
+                    int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
+                    ebook.setDownloadFailed(true);
+                    ebook.setDownloadProgress(successProgressPercent);
+                    ebook.setNeedResume(false);
+                    dataManager.updateEbook(ebook);
+                    resetDownloadFailedByFile();
+                    downloadNextOrStop(true, ebook.getId());
+                    EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
+                }
+                EventBus.getDefault().post(new DownloadingEvent(ebook));
+                return;
+            }
+
+            EventBus.getDefault().post(new DownloadingEvent(ebook));
+        }
     }
 
     private void resetDownloadState(Ebook ebook) {
         ebook.setDownloadFailed(false);
         ebook.setNeedResume(false);
         dataManager.updateEbook(ebook);
+    }
+
+    private void resetDownloadFailedByFile() {
+        failedDownloadFiles.clear();
     }
 }

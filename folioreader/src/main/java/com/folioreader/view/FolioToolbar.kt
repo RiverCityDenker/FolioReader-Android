@@ -123,16 +123,16 @@ class FolioToolbar : RelativeLayout {
         download_view.setEbook(ebook)
     }
 
-    fun updateDownloadView(ebookId: Int, progress: Int) {
-        enableUpdateProgress(progress >= 0)
-        updateUI(ebookId, progress)
+    fun updateDownloadView(ebook: Ebook) {
+        enableUpdateProgress(ebook.downloadProgress >= 0)
+        updateUI(ebook)
     }
 
     fun enableUpdateProgress(progress: Boolean) {
         download_view.enableUpdateProgress(progress)
     }
 
-    fun updateUI(ebookId: Int, progress: Int) {
-        download_view.updateUI(progress, ebookId)
+    fun updateUI(ebook: Ebook) {
+        download_view.updateUI(ebook)
     }
 }
