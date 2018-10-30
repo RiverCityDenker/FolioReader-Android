@@ -20,15 +20,6 @@ public class LoadingView extends FrameLayout {
 
     private ConstraintLayout rootView;
     private ProgressBar progressBar;
-    private static final int VISIBLE_DURATION = 6000;
-    private Handler handler;
-
-    private Runnable hideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
 
     private static final String LOG_TAG = LoadingView.class.getSimpleName();
 
@@ -54,7 +45,6 @@ public class LoadingView extends FrameLayout {
         if (isInEditMode())
             return;
 
-        handler = new Handler();
         rootView = findViewById(R.id.rootView);
         progressBar = findViewById(R.id.progressBar);
 
@@ -79,18 +69,13 @@ public class LoadingView extends FrameLayout {
     @JavascriptInterface
     public void show() {
         //Log.d(LOG_TAG, "-> show");
-
-        handler.removeCallbacks(hideRunnable);
         setVisibility(VISIBLE);
-        handler.postDelayed(hideRunnable, VISIBLE_DURATION);
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void hide() {
         //Log.d(LOG_TAG, "-> hide");
-
-        handler.removeCallbacks(hideRunnable);
         setVisibility(INVISIBLE);
     }
 

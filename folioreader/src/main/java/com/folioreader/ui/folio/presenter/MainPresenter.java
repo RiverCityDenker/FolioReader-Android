@@ -196,16 +196,16 @@ public class MainPresenter implements ManifestCallBack {
                 context.getResources().getString(R.string.abort),
                 context.getResources().getString(R.string.resume),
                 new DialogCreator.PausedDialogCallback() {
-            @Override
-            public void onAbort() {
-                handleAbortDownload(context, ebook);
-            }
+                    @Override
+                    public void onAbort() {
+                        handleAbortDownload(context, ebook);
+                    }
 
-            @Override
-            public void onResume() {
-                resumeEbook(context, ebook);
-            }
-        });
+                    @Override
+                    public void onResume() {
+                        resumeEbook(context, ebook);
+                    }
+                });
     }
 
     public void resumeEbook(Context context, Ebook ebook) {
