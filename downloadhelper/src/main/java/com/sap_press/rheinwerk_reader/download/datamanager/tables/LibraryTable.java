@@ -90,6 +90,14 @@ public class LibraryTable {
         }
     }
 
+    public static void updateEbookDownloadFailed(int id, boolean isFailed) {
+        Ebook ebook = getEbook(id);
+        if (ebook != null) {
+            ebook.setDownloadFailed(isFailed);
+            EbookTable.update(ebook, TABLE_NAME);
+        }
+    }
+
     public static synchronized void updateEbookDownloadProgress(Ebook ebook, int downloadProgressPercent) {
         Ebook ebookFromDatabase = getEbook(ebook.getId());
         if (ebookFromDatabase != null) {

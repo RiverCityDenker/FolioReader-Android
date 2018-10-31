@@ -218,9 +218,6 @@ public class DownloadService extends Service {
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onPausedDownloading(PausedDownloadingEvent event) {
-        if (executor != null) {
-            shutdownAndAwaitTermination(executor);
-        }
         List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
         if (!downloadingEbookList.isEmpty()) {
             for (int i = 0; i < downloadingEbookList.size(); i++) {
@@ -230,6 +227,9 @@ public class DownloadService extends Service {
                 LibraryTable.updateEbook(ebook);
             }
             EventBus.getDefault().post(new UnableDownloadEvent(downloadingEbookList, DISCONNECTED));
+        }
+        if (executor != null) {
+            shutdownAndAwaitTermination(executor);
         }
         stopSelf();
     }

@@ -242,7 +242,7 @@ public class EbookTable {
         return EbookDbAdapter.updateEbook(tableName, getEbookContentValues(ebook), String.valueOf(ebook.getId()));
     }
 
-    public static synchronized Ebook updateEbook(Ebook ebook, String tableName) {
+    public static Ebook updateEbook(Ebook ebook, String tableName) {
         final int ebookId = ebook.getId();
         if (isEbookExist(ebookId, tableName)) {
             if (ebookId != -1 && update(ebook, tableName)) {
