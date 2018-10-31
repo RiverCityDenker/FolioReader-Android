@@ -7,7 +7,8 @@ import android.util.Log;
 
 import com.folioreader.R;
 import com.folioreader.ui.folio.views.ImageViewerView;
-import com.sap_press.rheinwerk_reader.download.DownloadService;
+import com.sap_press.rheinwerk_reader.download.DownloadFileTask;
+import com.sap_press.rheinwerk_reader.download.HTTPDownloader;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
@@ -26,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 import java.net.UnknownHostException;
 
-import static com.sap_press.rheinwerk_reader.download.DownloadService.downloadFile;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.getEbookPath;
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
 
@@ -55,7 +55,7 @@ public class ImageViewerPresenter {
                 downloadInfo.getmAppVersion());
 
         final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
-        new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, false).executeParallel(href);
+        new DownloadFileTask(context, ebook, apiInfo, folderPath, false).executeParallel(href);
     }
 
     private void showLoading() {
@@ -104,7 +104,7 @@ public class ImageViewerPresenter {
                                                 + "/download?app_version=" + downloadInfo.getmAppVersion()
                                                 + "&file_path=" + href;
                                         final String folderPath = getEbookPath(contextWeakReference.get(), eBookId);
-                                        downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
+                                        HTTPDownloader.downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
                                         return DOWNLOAD_IMAGE_SUCCESS;
                                     } catch (Exception e) {
                                         Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());

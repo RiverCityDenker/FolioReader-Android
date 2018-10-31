@@ -1,11 +1,10 @@
 package com.folioreader.ui.folio.presenter;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.folioreader.ui.folio.views.FolioPageMvpView;
+import com.sap_press.rheinwerk_reader.download.DownloadFileTask;
 import com.sap_press.rheinwerk_reader.download.DownloadManager;
-import com.sap_press.rheinwerk_reader.download.DownloadService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
@@ -33,7 +32,7 @@ public class FolioPagePresenter {
                 downloadInfo.getmAppVersion());
 
         final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
-        new DownloadService.DownloadFileTask(context, ebook, apiInfo, folderPath, false).executeParallel(href);
+        new DownloadFileTask(context, ebook, apiInfo, folderPath, false).executeParallel(href);
     }
 
     private void showLoading() {
