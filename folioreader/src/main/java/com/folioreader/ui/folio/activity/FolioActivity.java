@@ -73,6 +73,7 @@ import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.utils.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -253,7 +254,7 @@ public class FolioActivity
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mEbook = getIntent().getParcelableExtra(INTENT_EBOOK);
             mDownloadInfo = getIntent().getParcelableExtra(INTENT_DOWNLOAD_INFO);
-            if (!mIsOnlineReading) {
+            if (!mIsOnlineReading || !Util.isOnline(this)) {
                 if (mEbook != null) {
                     mBookId = String.valueOf(mEbook.getId());
                     ebookFilePath = mEbook.getFilePath();
@@ -857,7 +858,7 @@ public class FolioActivity
     }
 
     private void setupBook() {
-        if (!mIsOnlineReading) {
+        if (!mIsOnlineReading || !Util.isOnline(this)) {
             if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
                 bookFileName = mBookId;
                 initBook();

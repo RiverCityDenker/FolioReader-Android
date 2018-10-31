@@ -355,14 +355,14 @@ table.informaltable td {
     vertical-align: top !important;
 }
 
-table {
+table.standardtable {
   table-layout: fixed !important;
   width: 100% !important;
 }
 
-table ul {
+table.standardtable ul {
     margin-left: 0 !important;
 }
-table ol {
+table.standardtable ol {
     margin-left: 0 !important;
 }
