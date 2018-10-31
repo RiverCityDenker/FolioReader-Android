@@ -265,7 +265,7 @@ public class DownloadService extends Service {
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
             if (availableSize > currentEbook.getFileSize()) {
                 updateDownloadStatusFailed(currentEbook, false);
-                checkFileExist(DownloadService.this, currentEbook);
+                startDownloadIfNotExist(DownloadService.this, currentEbook);
             } else {
                 DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
             }
@@ -319,7 +319,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private void checkFileExist(Context context, Ebook ebook) {
+    private void startDownloadIfNotExist(Context context, Ebook ebook) {
         currentEbookId = ebook.getId();
         if (!isFileExist(context, String.valueOf(ebook.getId()), mContentFileDefault)) {
             downloadEbook(ebook);
@@ -356,18 +356,7 @@ public class DownloadService extends Service {
         final ApiInfo apiInfo = new ApiInfo(mBaseUrl, token, dataManager.getApiKey(), mAppVersion);
         if (isOnlineReading) {
             if (!isFileExist(context, String.valueOf(ebook.getId()), mContentFileDefault)) {
-                final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
-                        .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
-                        .map(FileUtil::parseContentFileToObject)
-                        .observeOn(Schedulers.io())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
-                            handleError(throwable, ebookId, null, isOnlineReading);
-                        });
-
-                if (compositeSubscription == null)
-                    compositeSubscription = new CompositeDisposable();
-                compositeSubscription.add(subscription);
+                composeSubscription(context, ebook, token, mAppVersion, isOnlineReading, ebookId, apiInfo);
             } else {
                 final String folderPath = getEbookPath(context, String.valueOf(ebook.getId()));
                 final String contentPath = folderPath + "/" + mContentFileDefault;
@@ -376,20 +365,23 @@ public class DownloadService extends Service {
                 }).execute(contentPath);
             }
         } else {
-            final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
-                    .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
-                    .map(FileUtil::parseContentFileToObject)
-                    .observeOn(Schedulers.io())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
-                        handleError(throwable, ebookId, null, isOnlineReading);
-                    });
-
-            if (compositeSubscription == null)
-                compositeSubscription = new CompositeDisposable();
-            compositeSubscription.add(subscription);
+            composeSubscription(context, ebook, token, mAppVersion, isOnlineReading, ebookId, apiInfo);
         }
+    }
 
+    private void composeSubscription(Context context, Ebook ebook, String token, String mAppVersion, boolean isOnlineReading, String ebookId, ApiInfo apiInfo) {
+        final Disposable subscription = mApiService.download(ebookId, token, mAppVersion, mAppVersion, mContentFileDefault)
+                .map(responseBody -> FileUtil.writeResponseBodyToDisk(context, responseBody, ebookId, mContentFileDefault))
+                .map(FileUtil::parseContentFileToObject)
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading), throwable -> {
+                    handleError(throwable, ebookId, null, isOnlineReading);
+                });
+
+        if (compositeSubscription == null)
+            compositeSubscription = new CompositeDisposable();
+        compositeSubscription.add(subscription);
     }
 
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
