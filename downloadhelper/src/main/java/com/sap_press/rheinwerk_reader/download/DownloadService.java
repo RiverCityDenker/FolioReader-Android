@@ -447,21 +447,7 @@ public class DownloadService extends Service {
             if (dataManager == null)
                 dataManager = DownloadDataManager.getInstance();
             dataManager.updateEbookPath(ebook.getId(), filePath);
-            final String folderPath = getEbookPath(context, ebookId);
-
-            //deleteBasicFilesBeforeDownload(context, ebookId, folderPath);
-
-            int count = NUMBER_OF_BASIC_FILE;
-            for (EpubBook.Manifest manifest : epub.manifestList) {
-                if (manifest.getId().equalsIgnoreCase(CSS_ID) || manifest.getId().equalsIgnoreCase(TOC_ID)
-                        || manifest.getId().equalsIgnoreCase(COVER_ID) || manifest.getId().equalsIgnoreCase(COVER_IMAGE_ID)) {
-                    count--;
-                    if (!isFileExist(context, String.valueOf(ebook.getId()), manifest.getHref())) {
-                        new DownloadFileTaskSync(context, ebook, apiInfo, folderPath, true).downloadSync(manifest.getHref());
-                    }
-                    if (count == 0) break;
-                }
-            }
+            downloadBasicFile(context, ebook, apiInfo, epub, ebookId);
             EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
 
         } else {
@@ -470,7 +456,28 @@ public class DownloadService extends Service {
             final String filePath = getEbookPath(this, String.valueOf(ebook.getId()));
             ebook.setFilePath(filePath);
             dataManager.updateEbookPath(ebook.getId(), filePath);
+
+            downloadBasicFile(context, ebook, apiInfo, epub, ebookId);
+
             downloadAllFiles(epub, apiInfo.getmToken(), ebook);
+        }
+    }
+
+    private void downloadBasicFile(Context context, Ebook ebook, ApiInfo apiInfo, EpubBook epub, String ebookId) {
+        final String folderPath = getEbookPath(context, ebookId);
+
+        //deleteBasicFilesBeforeDownload(context, ebookId, folderPath);
+
+        int count = NUMBER_OF_BASIC_FILE;
+        for (EpubBook.Manifest manifest : epub.manifestList) {
+            if (manifest.getId().equalsIgnoreCase(CSS_ID) || manifest.getId().equalsIgnoreCase(TOC_ID)
+                    || manifest.getId().equalsIgnoreCase(COVER_ID) || manifest.getId().equalsIgnoreCase(COVER_IMAGE_ID)) {
+                count--;
+                if (!isFileExist(context, String.valueOf(ebook.getId()), manifest.getHref())) {
+                    new DownloadFileTaskSync(context, ebook, apiInfo, folderPath, true).downloadSync(manifest.getHref());
+                }
+                if (count == 0) break;
+            }
         }
     }
 
