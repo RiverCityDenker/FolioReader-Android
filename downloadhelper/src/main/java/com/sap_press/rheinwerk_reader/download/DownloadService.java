@@ -458,10 +458,8 @@ public class DownloadService extends Service {
                     count--;
                     if (!isFileExist(context, String.valueOf(ebook.getId()), manifest.getHref())) {
                         new DownloadFileTaskSync(context, ebook, apiInfo, folderPath, true).downloadSync(manifest.getHref());
-                        if (count == 0) return;
-                    } else if (count == 0) {
-                        return;
                     }
+                    if (count == 0) break;
                 }
             }
             EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));

@@ -23,7 +23,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-
     <com.folioreader.view.LoadingView
         android:id="@+id/loadingView"
         android:layout_marginTop="?android:attr/actionBarSize"

@@ -1,7 +1,6 @@
 package com.folioreader.view;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -20,7 +19,6 @@ public class LoadingView extends FrameLayout {
 
     private ConstraintLayout rootView;
     private ProgressBar progressBar;
-
     private static final String LOG_TAG = LoadingView.class.getSimpleName();
 
     public LoadingView(Context context) {
@@ -68,28 +66,24 @@ public class LoadingView extends FrameLayout {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void show() {
-        //Log.d(LOG_TAG, "-> show");
         setVisibility(VISIBLE);
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void hide() {
-        //Log.d(LOG_TAG, "-> hide");
         setVisibility(INVISIBLE);
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void visible() {
-        //Log.d(LOG_TAG, "-> visible");
         setVisibility(VISIBLE);
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void invisible() {
-        //Log.d(LOG_TAG, "-> invisible");
         setVisibility(INVISIBLE);
     }
 }
