@@ -182,6 +182,7 @@ public class FolioWebView extends WebView
                     webViewPager = ((View) getParent()).findViewById(R.id.webViewPager);
 
                 webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
+                loadPage("javascript:scrollToLast()");
             }
         });
     }
@@ -284,7 +285,7 @@ public class FolioWebView extends WebView
         if (android.os.Build.VERSION.SDK_INT < 19) {
             loadUrl(javaScript);
         } else {
-            evaluateJavascript(javaScript,null);
+            evaluateJavascript(javaScript, null);
         }
     }
 }

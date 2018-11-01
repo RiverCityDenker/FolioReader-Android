@@ -15,6 +15,8 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by hale on 11/1/2018.
@@ -27,7 +29,13 @@ public class ParseAndDownloadFileSync {
     private String ebookId;
     private String token;
     private String appVersion;
+    private AtomicInteger downloadedCount = new AtomicInteger();
+    private ThreadPoolExecutor poolExecutor = ParallelExecutorTask.createPool();
     private static final String TAG = ParseAndDownloadFileAsyn.class.getSimpleName();
+
+    public interface DownloadFinishCallback {
+        void downloadFinish();
+    }
 
     ParseAndDownloadFileSync(String apiKey, String folderPath,
                              String originalHref, String baseUrl,
@@ -42,20 +50,22 @@ public class ParseAndDownloadFileSync {
         this.appVersion = appVersion;
     }
 
-    public void parseAndDownload(String contentKey) {
+    public void parseAndDownload(String contentKey, DownloadFinishCallback callback) {
         final String html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
         try {
-            parseHtml(html);
+            parseHtml(html, callback);
         } catch (EpubParserException e) {
             e.printStackTrace();
         }
     }
 
-    private void parseHtml(String html) throws EpubParserException {
+    private void parseHtml(String html, DownloadFinishCallback callback) throws EpubParserException {
         Document document = EpubParser.xmlParser(html);
         if (document == null) {
             throw new EpubParserException("Error while parsing");
         }
+        ArrayList<String> filesToLoad = new ArrayList<>();
+
         NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
         if (itemNodes != null) {
             for (int i = 0; i < itemNodes.getLength(); i++) {
@@ -68,14 +78,7 @@ public class ParseAndDownloadFileSync {
                         case "src":
                             final String src = attr.getNodeValue();
                             final String href = FileUtil.reformatHref(src);
-                            try {
-                                final String fileUrl = baseUrl + "ebooks/" + ebookId
-                                        + "/download?app_version=" + appVersion
-                                        + "&file_path=" + href;
-                                HTTPDownloader.downloadFile(fileUrl, token, folderPath, href, appVersion);
-                            } catch (Exception e) {
-                                Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
-                            }
+                            filesToLoad.add(href);
                             break;
                     }
                 }
@@ -95,19 +98,46 @@ public class ParseAndDownloadFileSync {
                         if (!srcList.contains(src) && src.contains(".html")) {
                             final String href = FileUtil.reformatHref(src);
                             srcList.add(src);
-                            try {
-                                final String fileUrl = baseUrl + "ebooks/" + ebookId
-                                        + "/download?app_version=" + appVersion
-                                        + "&file_path=" + href;
-                                HTTPDownloader.downloadFile(fileUrl, token, folderPath, href, appVersion);
-                            } catch (Exception e) {
-                                Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
-                            }
+                            filesToLoad.add(href);
                         }
                         break;
                     }
                 }
             }
+        }
+
+        Log.e("todoHa", "filesToLoad: " + filesToLoad.size());
+        if (filesToLoad.isEmpty()) {
+            callback.downloadFinish();
+            return;
+        }
+
+        for (String s : filesToLoad) {
+            ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
+                @Override
+                protected Object doInBackground(Object[] objects) {
+                    try {
+                        final String fileUrl = baseUrl + "ebooks/" + ebookId
+                                + "/download?app_version=" + appVersion
+                                + "&file_path=" + s;
+                        HTTPDownloader.downloadFile(fileUrl, token, folderPath, s, appVersion);
+                        int current = downloadedCount.incrementAndGet();
+                        Log.e("todoHa", "downloadedCount: " + current);
+                        if (current == filesToLoad.size()) {
+                            //all download finished
+                            Log.e("todoHa", "downloadFinish");
+                            callback.downloadFinish();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
+                        Log.e("todoHa", "", e);
+                    }
+
+                    return null;
+                }
+            };
+
+            task.executeParallel();
         }
     }
 

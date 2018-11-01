@@ -69,7 +69,12 @@ public class DownloadFileTaskSync {
         if (href.contains(".html") && !href.contains("toc.html")) {
             if (contentKey != null && !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
                 new ParseAndDownloadFileSync(apiKey, folderPath, originalHref,
-                        baseUrl, ebookId, token, appVersion).parseAndDownload(contentKey);
+                        baseUrl, ebookId, token, appVersion).parseAndDownload(contentKey, new ParseAndDownloadFileSync.DownloadFinishCallback() {
+                    @Override
+                    public void downloadFinish() {
+                        EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook, href));
+                    }
+                });
             }
         }
         if (!TextUtils.isEmpty(contentKey)
@@ -85,8 +90,6 @@ public class DownloadFileTaskSync {
                             || isFileExist(context, ebookId, DownloadService.HREF_STYLE_COMMON))) {
                         EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
                     }
-                } else {
-                    EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook, href));
                 }
             }
         }

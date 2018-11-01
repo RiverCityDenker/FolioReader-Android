@@ -956,7 +956,7 @@ public class FolioPageFragment
 
         mWebview.setHorizontalPageCount(horizontalPageCount);
         isHorizontalPaging = false;
-        mWebview.loadPage("javascript:scrollToLast()");
+
     }
 
     private void loadRangy(final WebView view, final String rangy) {
