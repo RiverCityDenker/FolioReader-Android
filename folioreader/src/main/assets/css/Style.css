@@ -327,6 +327,10 @@ p.tabellentext
     margin: 0 !important;
 }
 
+table {
+    overflow-x: hidden;
+}
+
 table tr {
     vertical-align: middle !important;
 }

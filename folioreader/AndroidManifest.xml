@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.folioreader">
 
     <application>
         <activity
             android:name=".ui.folio.activity.ContentHighlightActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".ui.folio.activity.FolioActivity"
+            android:configChanges="orientation|screenSize"/>
     </application>
 
 </manifest>
