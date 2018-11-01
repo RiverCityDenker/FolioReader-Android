@@ -16,8 +16,6 @@ import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.lang.ref.WeakReference;
-
 import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
 import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
 
@@ -26,21 +24,19 @@ import static com.sap_press.rheinwerk_reader.utils.Util.isOnline;
  */
 public class DownloadFileTaskSync {
     private final Context context;
-    private WeakReference<Context> contextWeakReference;
-    private String appVersion;
-    private String token;
-    private String ebookId;
-    private Ebook ebook;
-    private String baseUrl;
-    private boolean isBasicData;
-    private String folderPath;
-    private String apiKey;
+    private final String appVersion;
+    private final String token;
+    private final String ebookId;
+    private final Ebook ebook;
+    private final String baseUrl;
+    private final boolean isBasicData;
+    private final String folderPath;
+    private final String apiKey;
     private static final String TAG = DownloadFileTask.class.getSimpleName();
 
     public DownloadFileTaskSync(Context context, Ebook ebook, ApiInfo apiInfo, String folderPath,
-                            boolean isBasicData) {
-        this.contextWeakReference = new WeakReference<>(context);
-        this.context = contextWeakReference.get();
+                                boolean isBasicData) {
+        this.context = context;
         this.ebook = ebook;
         this.token = apiInfo.getmToken();
         this.ebookId = String.valueOf(ebook.getId());
@@ -69,12 +65,11 @@ public class DownloadFileTaskSync {
             return null;
         }
 
-        final String contentKey = downloadSingleFile(contextWeakReference.get(), fileUrl, href, appVersion, DownloadService.RETRY_COUNT);
+        final String contentKey = downloadSingleFile(context, fileUrl, href, appVersion, DownloadService.RETRY_COUNT);
         if (href.contains(".html") && !href.contains("toc.html")) {
             if (contentKey != null && !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
-                new ParseAndDownloadFileAsyn(apiKey, folderPath, originalHref,
-                        baseUrl, ebookId, token, appVersion,
-                        ParallelExecutorTask.createPool()).executeParallel(contentKey);
+                new ParseAndDownloadFileSync(apiKey, folderPath, originalHref,
+                        baseUrl, ebookId, token, appVersion).parseAndDownload(contentKey);
             }
         }
         if (!TextUtils.isEmpty(contentKey)
@@ -85,9 +80,9 @@ public class DownloadFileTaskSync {
         synchronized (DownloadFileTask.class) {
             if (contentKey == null || !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
                 if (isBasicData) {
-                    if (isFileExist(contextWeakReference.get(), ebookId, DownloadService.HREF_TOC)
-                            && (isFileExist(contextWeakReference.get(), ebookId, DownloadService.HREF_STYLE)
-                            || isFileExist(contextWeakReference.get(), ebookId, DownloadService.HREF_STYLE_COMMON))) {
+                    if (isFileExist(context, ebookId, DownloadService.HREF_TOC)
+                            && (isFileExist(context, ebookId, DownloadService.HREF_STYLE)
+                            || isFileExist(context, ebookId, DownloadService.HREF_STYLE_COMMON))) {
                         EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
                     }
                 } else {
