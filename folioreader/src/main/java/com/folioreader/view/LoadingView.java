@@ -2,7 +2,6 @@ package com.folioreader.view;
 
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.webkit.JavascriptInterface;
@@ -56,11 +55,6 @@ public class LoadingView extends FrameLayout {
         if (config == null)
             config = new Config();
         UiUtil.setColorToImage(getContext(), config.getThemeColor(), progressBar.getIndeterminateDrawable());
-        if (config.isNightMode()) {
-            rootView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.webview_night));
-        } else {
-            rootView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
-        }
     }
 
     @SuppressWarnings("unused")

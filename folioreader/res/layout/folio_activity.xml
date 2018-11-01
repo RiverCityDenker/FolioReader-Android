@@ -29,5 +29,6 @@
         android:layout_height="match_parent"
         android:focusableInTouchMode="false"
         android:clickable="false"
+        android:background="@android:color/transparent"
         tools:visibility="invisible" />
 </RelativeLayout>
