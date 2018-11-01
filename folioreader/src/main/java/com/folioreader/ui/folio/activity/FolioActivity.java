@@ -642,6 +642,8 @@ public class FolioActivity
         mFolioPageViewPager = (DirectionalViewpager) findViewById(R.id.folioPageViewPager);
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
+            int lastPage;
+
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
@@ -659,22 +661,6 @@ public class FolioActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
-                if (state == DirectionalViewpager.SCROLL_STATE_IDLE) {
-                    int position = mFolioPageViewPager.getCurrentItem();
-                    Log.v(LOG_TAG, "-> onPageScrollStateChanged -> DirectionalViewpager -> " +
-                            "position = " + position);
-
-                    FolioPageFragment folioPageFragment =
-                            (FolioPageFragment) mFolioPageFragmentAdapter.getItem(position - 1);
-                    if (folioPageFragment != null)
-                        folioPageFragment.scrollToLast();
-
-                    folioPageFragment =
-                            (FolioPageFragment) mFolioPageFragmentAdapter.getItem(position + 1);
-                    if (folioPageFragment != null)
-                        folioPageFragment.scrollToFirst();
-                }
             }
         });
 
@@ -806,7 +792,9 @@ public class FolioActivity
     public void updateEbook(Ebook ebook) {
         contentKey = ebook.getContentKey();
         mEbook = ebook;
-        mFolioPageFragmentAdapter.setContentKey(ebook.getContentKey());
+        if (mFolioPageFragmentAdapter != null) {
+            mFolioPageFragmentAdapter.setContentKey(ebook.getContentKey());
+        }
     }
 
     private void setConfig(Bundle savedInstanceState) {

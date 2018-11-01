@@ -421,6 +421,7 @@ function test() {
 }
 
 function scrollToLast() {
+    console.log("todoHa -> scrollToLast");
     console.log("-> scrollToLast");
 
     var direction = FolioPageFragment.getDirection();
@@ -436,11 +437,15 @@ function scrollToLast() {
         WebViewPager.setPageToLast();
     }
 
-    
-    FolioPageFragment.hideLoading();
+    console.log("todoHa -> hideLoading");
+    setTimeout(function(){
+        FolioPageFragment.hideLoading();
+    }, 500 )
+
 }
 
 function scrollToFirst() {
+    console.log("todoHa -> scrollToFirst");
     console.log("-> scrollToFirst");
 
     var direction = FolioPageFragment.getDirection();
@@ -454,8 +459,10 @@ function scrollToFirst() {
         WebViewPager.setPageToFirst();
     }
 
-    
+    setTimeout(function(){
         FolioPageFragment.hideLoading();
+    }, 500 )
+    console.log("todoHa -> hideLoading");
 }
 
 function getCompatMode() {
@@ -470,7 +477,7 @@ var horizontalIntervalCounter = 0;
 var horizontalIntervalLimit = 3000;
 
 function horizontalRecheck() {
-
+    console.log("todoHa -> horizontalRecheck");
     horizontalIntervalCounter += horizontalIntervalPeriod;
 
     if (window.scrollWidth != document.documentElement.scrollWidth) {
@@ -488,6 +495,7 @@ function horizontalRecheck() {
 }
 
 function initHorizontalDirection() {
+    console.log("todoHa -> initHorizontalDirection");
     console.log("-->> initHorizontalDirection")
     preInitHorizontalDirection();
     postInitHorizontalDirection();
@@ -538,7 +546,7 @@ function preInitHorizontalDirection() {
 }
 
 function postInitHorizontalDirection() {
-
+    console.log("todoHa -> postInitHorizontalDirection");
     var htmlElement = document.getElementsByTagName('html')[0];
     var bodyElement = document.getElementsByTagName('body')[0];
     var bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
@@ -562,6 +570,7 @@ function postInitHorizontalDirection() {
 
     // pageCount deliberately rounded instead of ceiling to avoid any unexpected error
     var pageCount = Math.round(scrollWidth / clientWidth);
+    console.log("todoHa scrollWidth = " + scrollWidth + ", clientWidth = " + clientWidth + ",pageCount = " + pageCount);
     var pageCountFloat = scrollWidth / clientWidth;
 
     if (pageCount != pageCountFloat) {

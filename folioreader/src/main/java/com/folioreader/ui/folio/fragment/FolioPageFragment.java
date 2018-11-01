@@ -171,6 +171,7 @@ public class FolioPageFragment
     private boolean mIsOnlineReading;
     private FolioPagePresenter mPresenter;
     private boolean mIsErrorPage;
+    private boolean isHorizontalPaging;
 
     public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
@@ -262,6 +263,14 @@ public class FolioPageFragment
         //updatePagesLeftTextBg();
 
         return mRootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isHorizontalPaging) {
+            showLoading();
+        }
     }
 
     private String getWebviewUrl() {
@@ -454,22 +463,24 @@ public class FolioPageFragment
     @JavascriptInterface
     public void hideLoading() {
         if (getActivity() != null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loadingView.hide();
-                }
-            });
+            getActivity().runOnUiThread(() -> loadingView.hide());
         }
     }
 
     public void scrollToLast() {
+        Log.e("todoHa", "scrollToLast");
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToLast -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
+            Log.e("todoHa", "loadingView.show");
             loadingView.show();
             mWebview.loadPage("javascript:scrollToLast()");
         }
+    }
+
+    public void horizontalPaging() {
+        isHorizontalPaging = true;
+        mWebview.loadPage("javascript:initHorizontalDirection()");
     }
 
     public void scrollToFirst() {
@@ -581,13 +592,12 @@ public class FolioPageFragment
         Log.e(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
         if (spineItem != null && event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
-            Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0,20) : "rong"));
+            Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0, 20) : "rong"));
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = false;
                     mActivityCallback.updateEbook(event.getEbook());
                     onReceiveHtml(html);
-
                 });
             }
         }
@@ -644,7 +654,8 @@ public class FolioPageFragment
                     mWebview.loadPage("javascript:wrappingSentencesWithinPTags()");
 
                 if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
-                    mWebview.loadPage("javascript:initHorizontalDirection()");
+                    Log.e("todoHa", "onPageFinished: " + url);
+                    horizontalPaging();
                 }
 
                 mWebview.loadPage(String.format(getString(R.string.setmediaoverlaystyle),
@@ -944,6 +955,8 @@ public class FolioPageFragment
                 + " -> " + spineItem.originalHref);
 
         mWebview.setHorizontalPageCount(horizontalPageCount);
+        isHorizontalPaging = false;
+        mWebview.loadPage("javascript:scrollToLast()");
     }
 
     private void loadRangy(final WebView view, final String rangy) {
