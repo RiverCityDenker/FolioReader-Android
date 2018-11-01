@@ -437,11 +437,7 @@ function scrollToLast() {
         WebViewPager.setPageToLast();
     }
 
-    console.log("todoHa -> hideLoading");
-    setTimeout(function(){
-        FolioPageFragment.hideLoading();
-    }, 500 )
-
+    FolioPageFragment.hideLoading();
 }
 
 function scrollToFirst() {
@@ -459,10 +455,7 @@ function scrollToFirst() {
         WebViewPager.setPageToFirst();
     }
 
-    setTimeout(function(){
-        FolioPageFragment.hideLoading();
-    }, 500 )
-    console.log("todoHa -> hideLoading");
+    FolioPageFragment.hideLoading();
 }
 
 function getCompatMode() {
