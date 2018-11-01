@@ -48,13 +48,13 @@ class FolioToolbar : RelativeLayout {
     }
 
     private fun initListeners() {
-        btn_drawer.setOnClickListener {
+        btn_drawer_container.setOnClickListener {
             callback.startContentHighlightActivity()
         }
-        btn_close.setOnClickListener {
+        btn_close_container.setOnClickListener {
             (context as Activity).finish()
         }
-        btn_config.setOnClickListener {
+        btn_config_container.setOnClickListener {
             callback.showConfigBottomSheetDialogFragment()
         }
         btn_speaker.setOnClickListener {
