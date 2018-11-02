@@ -175,15 +175,12 @@ public class FolioWebView extends WebView
     public void setHorizontalPageCount(int horizontalPageCount) {
         this.horizontalPageCount = horizontalPageCount;
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (webViewPager == null)
-                    webViewPager = ((View) getParent()).findViewById(R.id.webViewPager);
-
-                webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
-                loadPage("javascript:scrollToLast()");
+        handler.post(() -> {
+            if (webViewPager == null) {
+                webViewPager = ((View) getParent()).findViewById(R.id.webViewPager);
             }
+
+            webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
         });
     }
 
