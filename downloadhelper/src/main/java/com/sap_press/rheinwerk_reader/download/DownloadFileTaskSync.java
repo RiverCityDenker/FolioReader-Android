@@ -70,9 +70,17 @@ public class DownloadFileTaskSync {
             if (contentKey != null && !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
                 new ParseAndDownloadFileSync(apiKey, folderPath, originalHref,
                         baseUrl, ebookId, token, appVersion).parseAndDownload(contentKey,
-                        () -> EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook, href)));
+                        () -> downloadContentFinished(href, contentKey));
+            } else {
+                downloadContentFinished(href, contentKey);
             }
+        } else {
+            downloadContentFinished(href, contentKey);
         }
+        return ebook;
+    }
+
+    private void downloadContentFinished(String href, String contentKey) {
         if (!TextUtils.isEmpty(contentKey)
                 && !contentKey.equals(ebook.getContentKey())
                 && !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
@@ -86,10 +94,11 @@ public class DownloadFileTaskSync {
                             || isFileExist(context, ebookId, DownloadService.HREF_STYLE_COMMON))) {
                         EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
                     }
+                } else {
+                    EventBus.getDefault().post(new DownloadFileSuccessEvent(ebook, href));
                 }
             }
         }
-        return ebook;
     }
 
     private String downloadSingleFile(Context context,

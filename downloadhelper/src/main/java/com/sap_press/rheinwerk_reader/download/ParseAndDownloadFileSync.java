@@ -1,5 +1,6 @@
 package com.sap_press.rheinwerk_reader.download;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
@@ -113,7 +114,7 @@ public class ParseAndDownloadFileSync {
         }
 
         for (String s : filesToLoad) {
-            ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
+            @SuppressLint("StaticFieldLeak") ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
                 @Override
                 protected Object doInBackground(Object[] objects) {
                     try {
@@ -121,19 +122,24 @@ public class ParseAndDownloadFileSync {
                                 + "/download?app_version=" + appVersion
                                 + "&file_path=" + s;
                         HTTPDownloader.downloadFile(fileUrl, token, folderPath, s, appVersion);
-                        int current = downloadedCount.incrementAndGet();
-                        Log.e("todoHa", "downloadedCount: " + current);
-                        if (current == filesToLoad.size()) {
-                            //all download finished
-                            Log.e("todoHa", "downloadFinish");
-                            callback.downloadFinish();
-                        }
+                        checkDownloadFinished();
                     } catch (Exception e) {
+                        checkDownloadFinished();
                         Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
                         Log.e("todoHa", "", e);
                     }
 
                     return null;
+                }
+
+                private void checkDownloadFinished() {
+                    int current = downloadedCount.incrementAndGet();
+                    Log.e("todoHa", "downloadedCount: " + current);
+                    if (current == filesToLoad.size()) {
+                        //all download finished
+                        Log.e("todoHa", "downloadFinish");
+                        callback.downloadFinish();
+                    }
                 }
             };
 

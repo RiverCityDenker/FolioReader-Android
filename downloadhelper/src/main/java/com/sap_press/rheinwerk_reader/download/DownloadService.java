@@ -81,7 +81,7 @@ public class DownloadService extends Service {
     private static final int CONTENT_KEY_LENGTH = 16;
     public static final int RETRY_COUNT = 3;
     private static final Object LOCK_OBJECT = new Object();
-    private static final int NUMBER_OF_BASIC_FILE = 4;
+    private static final int NUMBER_OF_BASIC_FILE = 2;
     GoogleAnalyticManager googleAnalyticManager;
     CompositeDisposable compositeSubscription;
     DownloadDataManager dataManager;
@@ -470,8 +470,7 @@ public class DownloadService extends Service {
 
         int count = NUMBER_OF_BASIC_FILE;
         for (EpubBook.Manifest manifest : epub.manifestList) {
-            if (manifest.getId().equalsIgnoreCase(CSS_ID) || manifest.getId().equalsIgnoreCase(TOC_ID)
-                    || manifest.getId().equalsIgnoreCase(COVER_ID) || manifest.getId().equalsIgnoreCase(COVER_IMAGE_ID)) {
+            if (manifest.getId().equalsIgnoreCase(CSS_ID) || manifest.getId().equalsIgnoreCase(TOC_ID)) {
                 count--;
                 if (!isFileExist(context, String.valueOf(ebook.getId()), manifest.getHref())) {
                     new DownloadFileTaskSync(context, ebook, apiInfo, folderPath, true).downloadSync(manifest.getHref());
