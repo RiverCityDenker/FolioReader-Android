@@ -557,15 +557,15 @@ public class DownloadService extends Service {
         }
 
         private String downloadSingleFile(EpubBook.Manifest manifest, String fileUrl, int retryCount) {
-            String contentKey = null;
+            String contentKey;
             try {
                 contentKey = HTTPDownloader.downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (Exception e) {
                 e.printStackTrace();
                 if (isOnline(DownloadService.this)) {
                     failedDownloadFiles.add(manifest.getHref());
-                    return ERROR_DOWNLOAD_FILE;
                 }
+                return ERROR_DOWNLOAD_FILE;
             }
             return contentKey;
         }
