@@ -108,7 +108,7 @@ public class DownloadDataManager {
     }
 
     public List<Ebook> getAllToResumeFromNetwork() {
-        final List<Ebook> ebookList = LibraryTable.getAllToResumeFromNetwork();
+        final List<Ebook> ebookList = LibraryTable.getEbooksNeedToResumeFromNetwork();
         Collections.sort(ebookList, (ebook1, ebook2) -> Long.compare(ebook1.getDownloadTimeStamp(), ebook2.getDownloadTimeStamp()));
         return ebookList;
     }
