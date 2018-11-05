@@ -271,10 +271,10 @@ function goToElement(element) {
         scrollingElement.scrollTop = newScrollTop;
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
-        console.log(">>> Scroll Horizontal");
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
+        console.log(">>> Scroll Horizontal pageIndex = " + pageIndex + " --- newScrollLeft = " + newScrollLeft);
         WebViewPager.setCurrentPage(pageIndex);
         scrollingElement.scrollLeft = newScrollLeft;
     }

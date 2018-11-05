@@ -381,10 +381,10 @@ public class FolioPageFragment
 
         if (!TextUtils.isEmpty(href) && href.indexOf('#') != -1) {
             mAnchorId = href.substring(href.lastIndexOf('#') + 1);
+            mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
+            mAnchorId = null;
             if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
                 loadingView.show();
-                mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
-                mAnchorId = null;
             }
         }
     }
