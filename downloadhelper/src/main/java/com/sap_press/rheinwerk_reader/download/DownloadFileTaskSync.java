@@ -118,6 +118,7 @@ public class DownloadFileTaskSync {
                         if (FileUtil.isFileExist(context, ebookId, href))
                             FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
                         if (!isBasicData) {
+                            ebook.setHref(href);
                             onDownloadSingleFileError(context, e, ebook, true);
                         } else {
                             onDownloadBasicFileError(context, e, ebook, true);
@@ -135,6 +136,7 @@ public class DownloadFileTaskSync {
                     if (FileUtil.isFileExist(context, ebookId, href))
                         FileUtil.deleteFile(FileUtil.getFile(folderPath, href));
                     if (!isBasicData) {
+                        ebook.setHref(href);
                         onDownloadSingleFileError(context, e, ebook, false);
                     } else {
                         onDownloadBasicFileError(context, e, ebook, false);

@@ -409,9 +409,10 @@ public class FolioPageFragment
         if (mIsErrorPage) {
             final String baseUrl = URL_PREFIX + "/";
             String mimeType = "text/html";
+            mConfigedHtml = HtmlUtil.reformatHtml(getContext(), mHtmlString, mConfig);
             mWebview.loadDataWithBaseURL(
                     baseUrl,
-                    mHtmlString,
+                    mConfigedHtml,
                     mimeType,
                     "UTF-8",
                     null);
@@ -488,8 +489,8 @@ public class FolioPageFragment
         Log.v(LOG_TAG, "-> scrollToFirst -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
             loadingView.show();
-            mWebview.loadPage("javascript:scrollToFirst()");
         }
+        mWebview.loadPage("javascript:scrollToFirst()");
     }
 
     private void initWebView() {
