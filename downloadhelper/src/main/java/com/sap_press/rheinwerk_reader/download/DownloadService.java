@@ -185,7 +185,6 @@ public class DownloadService extends Service {
         EventBus.getDefault().unregister(this);
         compositeSubscription.dispose();
         stopForeground(true);
-        Log.d(TAG, "todoDung onDestroy: stopSelf");
         this.stopSelf();
         super.onDestroy();
     }
@@ -220,7 +219,6 @@ public class DownloadService extends Service {
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onPausedDownloading(PausedDownloadingEvent event) {
         List<Ebook> downloadingEbookList = LibraryTable.getDownloadingEbooks();
-        Log.d(TAG, "todoDung onPausedDownloading: " + downloadingEbookList.size());
         if (!downloadingEbookList.isEmpty()) {
             for (int i = 0; i < downloadingEbookList.size(); i++) {
                 Ebook ebook = downloadingEbookList.get(i);
@@ -233,13 +231,11 @@ public class DownloadService extends Service {
         if (executor != null) {
             shutdownAndAwaitTermination(executor);
         }
-        Log.d(TAG, "todoDung onPausedDownloading: stopSelf");
         stopSelf();
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDestroyDownloadServiceEvent(DestroyDownloadServiceEvent event) {
-        Log.d(TAG, "todoDung onDestroyDownloadServiceEvent: stopSelf");
         this.stopSelf();
         onDestroy();
     }
@@ -255,11 +251,9 @@ public class DownloadService extends Service {
                     updateDownloadStatusFailed(ebook, false);
                 }
             }
-            Log.d(TAG, "todoDung downloadNextOrStop: mIsNetworkResume = true" + ebookList.size());
         }
         if (!mIsNetworkResume) {
             ebookList = dataManager.getNeedDownloadBooks();
-            Log.d(TAG, "todoDung downloadNextOrStop: mIsNetworkResume = false" + ebookList.size());
         }
 
         if (!ebookList.isEmpty()) {
@@ -267,11 +261,7 @@ public class DownloadService extends Service {
             if (hasErrorInPreviousBook) {
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
-            if (currentEbook == null) Log.d(TAG, "todoDung downloadNextOrStop: currentEbook = null");
-            else if (currentEbook.getId() == currentEbookId) Log.d(TAG, "todoDung downloadNextOrStop: " + currentEbook.getId());
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
-                Log.d(TAG, "todoDung downloadNextOrStop: stopSelf");
-//                destroyService();
                 return;
             }
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
@@ -282,7 +272,6 @@ public class DownloadService extends Service {
                 DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
             }
         } else {
-            Log.d(TAG, "todoDung downloadNextOrStop: stopSelf");
             this.stopSelf();
         }
     }
@@ -291,7 +280,6 @@ public class DownloadService extends Service {
         if (executor != null) {
             shutdownAndAwaitTermination(executor);
         }
-        Log.d(TAG, "todoDung destroyService: stopSelf");
         this.stopSelf();
     }
 
@@ -329,7 +317,6 @@ public class DownloadService extends Service {
             Ebook ebook = dataManager.getEbookById(ebookId);
             ebook = updateDownloadStatus(ebook, isDownloadFailed, isNeedResume);
             EventBus.getDefault().post(new OnResetDownloadBookEvent(ebook));
-            Log.e(TAG, "todoDung updateDownloadStatus: event");
             EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
         }
     }
@@ -424,7 +411,6 @@ public class DownloadService extends Service {
                     ebookList = dataManager.getNeedDownloadBooks();
                 }
                 if (ebookList.isEmpty()) {
-                    Log.d(TAG, "todoDung handleError: stopSelf");
                     stopSelf();
                 }
 
@@ -639,7 +625,6 @@ public class DownloadService extends Service {
                     ebook.setNeedResume(false);
                     dataManager.updateEbook(ebook);
                     downloadNextOrStop(true, ebook.getId());
-                    Log.e(TAG, "todoDung downloadSingleSucscess 1: event");
                     EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
                 } else {
                     if (executor != null) {
@@ -658,7 +643,6 @@ public class DownloadService extends Service {
                     dataManager.updateEbook(ebook);
                     resetDownloadFailedByFile();
                     downloadNextOrStop(true, ebook.getId());
-                    Log.e(TAG, "todoDung downloadSingleSucscess 2: event");
                     EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
                 }
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
