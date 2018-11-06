@@ -469,11 +469,9 @@ public class FolioPageFragment
     }
 
     public void scrollToLast() {
-        Log.e("todoHa", "scrollToLast");
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToLast -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
-            Log.e("todoHa", "loadingView.show");
             loadingView.show();
             mWebview.loadPage("javascript:scrollToLast()");
         }
@@ -655,7 +653,6 @@ public class FolioPageFragment
                     mWebview.loadPage("javascript:wrappingSentencesWithinPTags()");
 
                 if (mActivityCallback.getDirection() == Config.Direction.HORIZONTAL) {
-                    Log.e("todoHa", "onPageFinished: " + url);
                     horizontalPaging();
                 }
 
