@@ -281,15 +281,20 @@ public class FileUtil {
     }
 
     public static long getFilesCount(String directoryPath) {
-        File file = new File(directoryPath);
-        File[] files = file.listFiles();
         int count = 0;
-        if (files != null) {
-            for (File f : files)
-                if (f.isDirectory())
-                    count += getFilesCount(f.getAbsolutePath());
-                else
-                    count++;
+        try {
+            File file = new File(directoryPath);
+            File[] files = file.listFiles();
+
+            if (files != null) {
+                for (File f : files)
+                    if (f.isDirectory())
+                        count += getFilesCount(f.getAbsolutePath());
+                    else
+                        count++;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return count;
     }

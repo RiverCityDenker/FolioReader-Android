@@ -2,6 +2,7 @@ package com.sap_press.rheinwerk_reader.download.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 
 import com.sap_press.rheinwerk_reader.download.DownloadService;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
@@ -55,9 +56,5 @@ public class DownloadUtil {
 
     public static void onPauseDownloads(Context context, UnableDownloadEvent.DownloadErrorType errorType) {
         EventBus.getDefault().post(new PausedDownloadingEvent());
-        if (context != null && isMyServiceRunning(context, DownloadService.class)) {
-            Intent serviceIntent = new Intent(context, DownloadService.class);
-            context.stopService(serviceIntent);
-        }
     }
 }
