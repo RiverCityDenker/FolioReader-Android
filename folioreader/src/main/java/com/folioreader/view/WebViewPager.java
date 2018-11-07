@@ -103,15 +103,12 @@ public class WebViewPager extends ViewPager {
     public void setCurrentPage(final int pageIndex) {
         Log.v(LOG_TAG, "-> setCurrentItem -> pageIndex = " + pageIndex);
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (folioWebView != null)
-                    folioWebView.postInvalidate();
-                setCurrentItem(pageIndex, false);
-                postInvalidate();
-            }
-        }, 200);
+        handler.postDelayed(() -> {
+            if (folioWebView != null)
+                folioWebView.postInvalidate();
+            setCurrentItem(pageIndex, false);
+            postInvalidate();
+        }, 300);
     }
 
     @SuppressWarnings("unused")

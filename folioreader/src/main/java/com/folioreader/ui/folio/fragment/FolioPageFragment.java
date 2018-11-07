@@ -381,11 +381,14 @@ public class FolioPageFragment
 
         if (!TextUtils.isEmpty(href) && href.indexOf('#') != -1) {
             mAnchorId = href.substring(href.lastIndexOf('#') + 1);
+            Log.e(TAG, "scrollToAnchorId: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
             if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
-                loadingView.show();
+                getActivity().runOnUiThread(() -> loadingView.show());
             }
+        } else {
+            scrollToFirst();
         }
     }
 
@@ -488,7 +491,8 @@ public class FolioPageFragment
         boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
         Log.v(LOG_TAG, "-> scrollToFirst -> isPageLoading = " + isPageLoading);
         if (!isPageLoading) {
-            loadingView.show();
+            if (getActivity() != null)
+                getActivity().runOnUiThread(() -> loadingView.show());
         }
         mWebview.loadPage("javascript:scrollToFirst()");
     }
@@ -776,6 +780,7 @@ public class FolioPageFragment
             mIsPageReloaded = false;
 
         } else if (!TextUtils.isEmpty(mAnchorId)) {
+            Log.e(TAG, "loadContent: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
 
@@ -799,6 +804,11 @@ public class FolioPageFragment
                 Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
                 mWebview.loadPage(String.format(getString(R.string.go_to_span),
                         readPosition.isUsingId(), readPosition.getValue()));
+            } else if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                Log.e(TAG, "loadContent: >>>selectedChapterHref = " + selectedChapterHref);
+                scrollToFirst();
+                scrollToAnchorId(selectedChapterHref);
             } else {
                 loadingView.hide();
                 setEnableDirectionConfig();
@@ -958,16 +968,20 @@ public class FolioPageFragment
         mWebview.setHorizontalPageCount(horizontalPageCount);
         isHorizontalPaging = false;
 
+        if (isCurrentFragment())
+            new Handler().post(() -> {
+                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                    scrollToAnchorId(selectedChapterHref);
+                }
+            });
     }
 
     private void loadRangy(final WebView view, final String rangy) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (FolioPageFragment.this) {
-                    ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} else {console.log(\">>>>>>ssReader is undefined !\")}", rangy));
-                    loadContent();
-                }
+        new Handler().postDelayed(() -> {
+            synchronized (FolioPageFragment.this) {
+                ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} else {console.log(\">>>>>>ssReader is undefined !\")}", rangy));
+                loadContent();
             }
         }, 600);
     }
@@ -1355,7 +1369,7 @@ public class FolioPageFragment
         if (mWebview != null) mWebview.destroy();
     }
 
-    private boolean isCurrentFragment() {
+    public boolean isCurrentFragment() {
         return isAdded() && mActivityCallback.getChapterPosition() == mPosition;
     }
 
