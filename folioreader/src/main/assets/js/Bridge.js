@@ -275,7 +275,7 @@ function goToElement(element) {
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
         console.log(">>> Scroll Horizontal pageIndex = " + pageIndex + " --- newScrollLeft = " + newScrollLeft);
-        //WebViewPager.setCurrentPage(pageIndex);
+        WebViewPager.setCurrentPage(pageIndex);
         scrollingElement.scrollLeft = newScrollLeft;
     }
 
