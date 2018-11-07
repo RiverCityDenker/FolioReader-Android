@@ -107,7 +107,6 @@ public class ParseAndDownloadFileSync {
             }
         }
 
-        Log.e("todoHa", "filesToLoad: " + filesToLoad.size());
         if (filesToLoad.isEmpty()) {
             callback.downloadFinish();
             return;
@@ -126,7 +125,6 @@ public class ParseAndDownloadFileSync {
                     } catch (Exception e) {
                         checkDownloadFinished();
                         Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
-                        Log.e("todoHa", "", e);
                     }
 
                     return null;
@@ -134,10 +132,8 @@ public class ParseAndDownloadFileSync {
 
                 private void checkDownloadFinished() {
                     int current = downloadedCount.incrementAndGet();
-                    Log.e("todoHa", "downloadedCount: " + current);
                     if (current == filesToLoad.size()) {
                         //all download finished
-                        Log.e("todoHa", "downloadFinish");
                         callback.downloadFinish();
                     }
                 }

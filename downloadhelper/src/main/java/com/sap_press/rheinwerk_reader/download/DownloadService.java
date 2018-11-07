@@ -255,13 +255,13 @@ public class DownloadService extends Service {
         if (!mIsNetworkResume) {
             ebookList = dataManager.getNeedDownloadBooks();
         }
+
         if (!ebookList.isEmpty()) {
             Ebook currentEbook = ebookList.get(0);
             if (hasErrorInPreviousBook) {
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
-                destroyService();
                 return;
             }
             final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
@@ -402,8 +402,18 @@ public class DownloadService extends Service {
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
                 downloadNextOrStop(true, Integer.parseInt(ebookId));
-            } else {
-                stopSelf();
+            }
+            else {
+                List<Ebook> ebookList;
+                if (mIsNetworkResume) {
+                    ebookList = dataManager.getAllToResumeFromNetwork();
+                } else {
+                    ebookList = dataManager.getNeedDownloadBooks();
+                }
+                if (ebookList.isEmpty()) {
+                    stopSelf();
+                }
+
             }
             // Comment this line because this ticket : https://2denker.atlassian.net/browse/RE-431
             //listener.handleDownloadError(throwable);
