@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -399,22 +398,15 @@ public class FolioActivity
             if (selectedChapterHref.contains(spine.href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                Log.e(TAG, "onTOCClickedEvent: >>>mChapterPosition = " + mChapterPosition);
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
                         mFolioPageFragmentAdapter.getItem(mChapterPosition);
                 folioPageFragment.showLoading();
-                if (mIsOnlineReading) {
-                    if (folioPageFragment.isCurrentFragment()) {
-                        Log.e(TAG, "onTOCClickedEvent: >>> fragment isAdded.");
-                        mSelectedChapterHref = selectedChapterHref;
-                        folioPageFragment.scrollToAnchorId(selectedChapterHref);
-                    } else {
-                        mSelectedChapterHref = selectedChapterHref;
-                        Log.e(TAG, "onTOCClickedEvent: >>>mSelectedChapterHref = " + mSelectedChapterHref);
-                    }
-                } else {
-                    folioPageFragment.scrollToFirst();
+
+                if (folioPageFragment.isCurrentFragment()) {
+                    mSelectedChapterHref = selectedChapterHref;
                     folioPageFragment.scrollToAnchorId(selectedChapterHref);
+                } else {
+                    mSelectedChapterHref = selectedChapterHref;
                 }
                 break;
             }

@@ -756,7 +756,6 @@ public class FolioPageFragment
 
     private void loadContent() {
         if (mIsPageReloaded) {
-
             if (isCurrentFragment()) {
                 if (lastReadPosition == null) {
                     lastReadPosition = mActivityCallback.getLastReadPosition();
@@ -773,20 +772,14 @@ public class FolioPageFragment
                     setEnableDirectionConfig();
                 }
             }
-
             mIsPageReloaded = false;
-
         } else if (!TextUtils.isEmpty(mAnchorId)) {
-            Log.e(TAG, "loadContent: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
-
         } else if (!TextUtils.isEmpty(highlightId)) {
             mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
             highlightId = null;
-
         } else if (isCurrentFragment()) {
-
             ReadPosition readPosition;
             if (savedInstanceState == null) {
                 Log.v(LOG_TAG, "-> onPageFinished -> took from getEntryReadPosition");
@@ -796,7 +789,6 @@ public class FolioPageFragment
                 readPosition = savedInstanceState.getParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE);
                 savedInstanceState.remove(BUNDLE_READ_POSITION_CONFIG_CHANGE);
             }
-
             if (readPosition != null) {
                 Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
                 mWebview.loadPage(String.format(getString(R.string.go_to_span),
@@ -810,9 +802,7 @@ public class FolioPageFragment
                 loadingView.hide();
                 setEnableDirectionConfig();
             }
-
         } else {
-
             if (mPosition == mActivityCallback.getChapterPosition() - 1) {
                 // Scroll to last, the page before current page
                 mWebview.loadPage("javascript:scrollToLast()");
@@ -965,13 +955,15 @@ public class FolioPageFragment
         mWebview.setHorizontalPageCount(horizontalPageCount);
         isHorizontalPaging = false;
 
-        if (isCurrentFragment())
+        if (isCurrentFragment()) {
+            Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
             new Handler().post(() -> {
                 if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
                     final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
                     scrollToAnchorId(selectedChapterHref);
                 }
             });
+        }
     }
 
     private void loadRangy(final WebView view, final String rangy) {
