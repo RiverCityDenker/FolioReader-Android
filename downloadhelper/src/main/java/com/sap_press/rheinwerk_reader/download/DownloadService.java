@@ -402,8 +402,7 @@ public class DownloadService extends Service {
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
                 downloadNextOrStop(true, Integer.parseInt(ebookId));
-            }
-            else {
+            } else {
                 List<Ebook> ebookList;
                 if (mIsNetworkResume) {
                     ebookList = dataManager.getAllToResumeFromNetwork();
@@ -572,10 +571,9 @@ public class DownloadService extends Service {
                 contentKey = HTTPDownloader.downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (Exception e) {
                 e.printStackTrace();
-                if (isOnline(DownloadService.this)) {
-                    Log.e(TAG, "downloadSingleFile: failed " + e.getMessage());
-                    failedDownloadFiles.add(manifest.getHref());
-                }
+                Log.e(TAG, "downloadSingleFile: failed " + e.getMessage());
+                failedDownloadFiles.add(manifest.getHref());
+                
                 return ERROR_DOWNLOAD_FILE;
             }
             return contentKey;
