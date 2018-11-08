@@ -573,6 +573,7 @@ public class DownloadService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
                 if (isOnline(DownloadService.this)) {
+                    Log.e(TAG, "downloadSingleFile: failed " + e.getMessage());
                     failedDownloadFiles.add(manifest.getHref());
                 }
                 return ERROR_DOWNLOAD_FILE;
@@ -624,6 +625,7 @@ public class DownloadService extends Service {
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
                     dataManager.updateEbook(ebook);
+                    resetDownloadFailedByFile();
                     downloadNextOrStop(true, ebook.getId());
                     EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
                 } else {

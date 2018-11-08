@@ -21,7 +21,6 @@ import io.reactivex.schedulers.Schedulers;
 import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createDeleteEbookDialog;
 import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createDeleteEbookInReaderDialog;
 import static com.sap_press.rheinwerk_reader.mod.aping.BookApi.FILE_PATH_DEFAULT;
-import static com.sap_press.rheinwerk_reader.utils.Util.isMyServiceRunning;
 
 public class DownloadManager {
 
@@ -52,22 +51,18 @@ public class DownloadManager {
     public synchronized void startDownload(Context context, Ebook ebook, int iconId,
                                            String appVersion, String baseUrl) {
         updateBookDownloadTime(ebook);
-        if (!isMyServiceRunning(context, DownloadService.class)) {
-            DownloadService.startDownloadService(context, iconId,
-                    context.getResources().getString(R.string.app_name),
-                    baseUrl, appVersion, FILE_PATH_DEFAULT);
-        }
+        DownloadService.startDownloadService(context, iconId,
+                context.getResources().getString(R.string.app_name),
+                baseUrl, appVersion, FILE_PATH_DEFAULT);
     }
 
     public synchronized void startResume(Context context, Ebook ebook, int iconId,
                                          String appVersion, String baseUrl) {
         updateBookResumeState(ebook);
         EventBus.getDefault().post(new ResumeDownloadUpdateViewEvent(ebook));
-        if (!isMyServiceRunning(context, DownloadService.class)) {
-            DownloadService.startDownloadService(context, iconId,
-                    context.getResources().getString(R.string.app_name),
-                    baseUrl, appVersion, FILE_PATH_DEFAULT);
-        }
+        DownloadService.startDownloadService(context, iconId,
+                context.getResources().getString(R.string.app_name),
+                baseUrl, appVersion, FILE_PATH_DEFAULT);
     }
 
     private void updateBookDownloadTime(Ebook ebook) {
@@ -86,9 +81,9 @@ public class DownloadManager {
         Ebook ebookAfterUpdate = LibraryTable.getEbook(ebook.getId());
         createDeleteEbookDialog(context, ebookAfterUpdate.getTitle(), isDownloading(ebookAfterUpdate), () -> {
             googleAnalyticManager.sendEvent(AnalyticViewName.delete_download,
-                                            AnalyticViewName.download_delete,
-                                            ebook.getTitle(),
-                                            (long) ebook.getFileSize());
+                    AnalyticViewName.download_delete,
+                    ebook.getTitle(),
+                    (long) ebook.getFileSize());
             listener.deleteEbookTriggered();
             //update UI
             if (!ebookAfterUpdate.isDownloaded()) {
