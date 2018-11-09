@@ -980,12 +980,10 @@ public class FolioPageFragment
 
         if (isCurrentFragment()) {
             Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
-            new Handler().post(() -> {
-                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                    scrollToAnchorId(selectedChapterHref);
-                }
-            });
+            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                scrollToAnchorId(selectedChapterHref);
+            }
         }
     }
 

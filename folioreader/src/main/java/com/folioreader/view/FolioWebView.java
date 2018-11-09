@@ -282,7 +282,7 @@ public class FolioWebView extends WebView
         if (android.os.Build.VERSION.SDK_INT < 19) {
             loadUrl(javaScript);
         } else {
-            post(() -> evaluateJavascript(javaScript, null));
+            evaluateJavascript(javaScript, null);
         }
     }
 }
