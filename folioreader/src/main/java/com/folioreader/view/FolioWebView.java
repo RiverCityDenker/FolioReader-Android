@@ -15,6 +15,7 @@ import android.webkit.WebView;
 import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
+import com.folioreader.util.ReadPositionUtil;
 
 /**
  * @author by mahavir on 3/31/16.
@@ -181,6 +182,21 @@ public class FolioWebView extends WebView
             }
 
             webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
+        });
+    }
+
+    public void setPageCountByLandspace(int horizontalPageCount) {
+        this.horizontalPageCount = horizontalPageCount;
+
+        handler.post(() -> {
+            if (webViewPager == null) {
+                webViewPager = ((View) getParent()).findViewById(R.id.webViewPager);
+            }
+
+            webViewPager.setPageCountLandscape(FolioWebView.this.horizontalPageCount);
+
+            loadPage(String.format(getContext().getString(R.string.go_to_span),
+                    ReadPositionUtil.getReadPosition().isUsingId(), ReadPositionUtil.getReadPosition().getValue()));
         });
     }
 

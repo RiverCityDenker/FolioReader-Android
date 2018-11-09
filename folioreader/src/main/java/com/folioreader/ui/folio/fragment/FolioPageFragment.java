@@ -31,8 +31,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +64,7 @@ import com.folioreader.ui.folio.presenter.FolioPagePresenter;
 import com.folioreader.ui.folio.views.FolioPageMvpView;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.HighlightUtil;
+import com.folioreader.util.ReadPositionUtil;
 import com.folioreader.util.SMILParser;
 import com.folioreader.util.UiUtil;
 import com.folioreader.view.FolioWebView;
@@ -599,15 +598,22 @@ public class FolioPageFragment
         Log.e(TAG, "onConfigurationChanged: " + newConfig.toString());
 
         if (getDirection().equals("HORIZONTAL")) {
+
+            if (isCurrentFragment()) {
+                getLastReadPosition();
+            }
+
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int height = displayMetrics.heightPixels;
             int width = displayMetrics.widthPixels;
             mWebview.setLayoutParams(new FrameLayout.LayoutParams(
                     width,
-                    height-100));
+                    height));
 
             mWebview.loadPage("javascript:preInitHorizontalDirection()");
+            mWebview.loadPage("javascript:resizeForLandScape()");
+
         }
 
     }
@@ -959,10 +965,12 @@ public class FolioPageFragment
     public void storeFirstVisibleSpan(boolean usingId, String value) {
 
         synchronized (this) {
+            Log.e(TAG, "todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
             lastReadPosition = new ReadPositionImpl(mBookId, spineItem.getId(),
                     spineItem.getOriginalHref(), mPosition, usingId, value);
             Intent intent = new Intent(FolioReader.ACTION_SAVE_READ_POSITION);
             intent.putExtra(FolioReader.EXTRA_READ_POSITION, lastReadPosition);
+            ReadPositionUtil.setReadPosition(lastReadPosition);
             LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
 
             notify();
@@ -984,6 +992,25 @@ public class FolioPageFragment
                 final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
                 scrollToAnchorId(selectedChapterHref);
             }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void setHorizontalPageCountByLandSpace(int horizontalPageCount) {
+        Log.v(LOG_TAG, "-> setHorizontalPageCount = " + horizontalPageCount
+                + " -> " + spineItem.originalHref);
+        mWebview.setPageCountByLandspace(horizontalPageCount);
+        isHorizontalPaging = false;
+
+        if (isCurrentFragment()) {
+            Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
+            new Handler().post(() -> {
+                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                    scrollToAnchorId(selectedChapterHref);
+                }
+            });
         }
     }
 

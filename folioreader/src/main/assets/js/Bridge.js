@@ -272,7 +272,7 @@ function goToElement(element) {
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
         var clientWidth = document.documentElement.clientWidth;
-        var pageIndex = Math.floor(element.offsetLeft / clientWidth);
+        var pageIndex = Math.round(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
         console.log(">>> Scroll Horizontal pageIndex = " + pageIndex + " --- newScrollLeft = " + newScrollLeft);
         WebViewPager.setCurrentPage(pageIndex);
@@ -570,6 +570,55 @@ function postInitHorizontalDirection() {
     //console.log("-> pageCount = " + pageCount);
 
     FolioPageFragment.setHorizontalPageCount(pageCount);
+
+    // add dummy class for table to re-style the page
+    console.log("this is run re-style");
+    var tableEleList = document.getElementsByTagName('table');
+        if(tableEleList.length > 0) {
+            for(var i of tableEleList) {
+                i.setAttribute('style', 'border-spacing: 1px !important');
+                console.log("this is table re-style");
+            }
+        }
+
+}
+
+function resizeForLandScape() {
+    var htmlElement = document.getElementsByTagName('html')[0];
+    var bodyElement = document.getElementsByTagName('body')[0];
+    var bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
+    var paddingTop = parseInt(bodyStyle.paddingTop, 10);
+    var paddingRight = parseInt(bodyStyle.paddingRight, 10);
+    var paddingBottom = parseInt(bodyStyle.paddingBottom, 10);
+    var paddingLeft = parseInt(bodyStyle.paddingLeft, 10);
+    var clientWidth = document.documentElement.clientWidth;
+
+    var scrollWidth = document.documentElement.scrollWidth;
+    //console.log("-> document.documentElement.offsetWidth = " + document.documentElement.offsetWidth);
+    if (scrollWidth > clientWidth
+        && scrollWidth > document.documentElement.offsetWidth) {
+        scrollWidth += paddingRight;
+    }
+    var newBodyWidth = scrollWidth - (paddingLeft + paddingRight);
+    window.scrollWidth = scrollWidth;
+
+    htmlElement.style.width = scrollWidth + 'px';
+    bodyElement.style.width = newBodyWidth + 'px';
+
+    // pageCount deliberately rounded instead of ceiling to avoid any unexpected error
+    var pageCount = Math.round(scrollWidth / clientWidth);
+    var pageCountFloat = scrollWidth / clientWidth;
+
+    if (pageCount != pageCountFloat) {
+        console.warn("-> pageCount = " + pageCount + ", pageCountFloat = " + pageCountFloat
+            + ", Something wrong in pageCount calculation");
+    }
+
+    console.log("-> scrollWidth = " + scrollWidth);
+    //console.log("-> newBodyWidth = " + newBodyWidth);
+    //console.log("-> pageCount = " + pageCount);
+
+    FolioPageFragment.setHorizontalPageCountByLandSpace(pageCount);
 
     // add dummy class for table to re-style the page
     console.log("this is run re-style");

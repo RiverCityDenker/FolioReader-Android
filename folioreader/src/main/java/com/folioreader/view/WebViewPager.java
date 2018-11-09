@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 
 import com.folioreader.R;
+import com.folioreader.util.ReadPositionUtil;
 
 public class WebViewPager extends ViewPager {
 
@@ -98,10 +99,25 @@ public class WebViewPager extends ViewPager {
             folioWebView = ((View) getParent()).findViewById(R.id.folioWebView);
     }
 
+    public void setPageCountLandscape(int horizontalPageCount) {
+        Log.d(LOG_TAG, "todoDung -> horizontalPageCount = " + horizontalPageCount);
+
+        this.horizontalPageCount = horizontalPageCount;
+        setAdapter(new WebViewPagerAdapter());
+
+        this.setCurrentPage(0);
+        if (folioWebView == null)
+            folioWebView = ((View) getParent()).findViewById(R.id.folioWebView);
+    }
+
+    public int getPageCount() {
+        return this.horizontalPageCount;
+    }
+
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void setCurrentPage(final int pageIndex) {
-        Log.v(LOG_TAG, "-> setCurrentItem -> pageIndex = " + pageIndex);
+        Log.v(LOG_TAG, "todoDung -> setCurrentItem -> pageIndex = " + pageIndex);
 
         handler.postDelayed(() -> {
             if (folioWebView != null)
