@@ -259,6 +259,7 @@ public class DownloadService extends Service {
         if (!ebookList.isEmpty()) {
             Ebook currentEbook = ebookList.get(0);
             if (hasErrorInPreviousBook) {
+                Log.e(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
@@ -555,7 +556,7 @@ public class DownloadService extends Service {
                     if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
                         downloadSingleSucscess(ebook, ++progress);
                     } else {
-                        downloadSingleSucscess(ebook, progress);
+                        downloadSingleSucscess(ebook, --progress);
                     }
                 } else {
                     downloadSingleSucscess(ebook, ++progress);
@@ -573,8 +574,8 @@ public class DownloadService extends Service {
                 e.printStackTrace();
                 Log.e(TAG, "downloadSingleFile: failed " + e.getMessage());
                 failedDownloadFiles.add(manifest.getHref());
-                
-                return ERROR_DOWNLOAD_FILE;
+
+                contentKey = ERROR_DOWNLOAD_FILE;
             }
             return contentKey;
         }
@@ -619,6 +620,7 @@ public class DownloadService extends Service {
                         shutdownAndAwaitTermination(executor);
                     }
                     int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
+                    Log.e(TAG, "downloadSingleSucscess: 2-1" + successProgressPercent);
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
@@ -636,10 +638,14 @@ public class DownloadService extends Service {
                 }
             } else if ((fileCount + failedDownloadFiles.size()) > ebook.getTotal()) {
                 if (!failedDownloadFiles.isEmpty()) {
+                    if (executor != null) {
+                        shutdownAndAwaitTermination(executor);
+                    }
                     int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
+                    Log.e(TAG, "downloadSingleSucscess: 2-2" + successProgressPercent);
                     dataManager.updateEbook(ebook);
                     resetDownloadFailedByFile();
                     downloadNextOrStop(true, ebook.getId());
