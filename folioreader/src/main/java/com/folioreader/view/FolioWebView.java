@@ -15,6 +15,7 @@ import android.webkit.WebView;
 import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
+import com.folioreader.ui.folio.fragment.FolioPageFragment;
 import com.folioreader.util.ReadPositionUtil;
 
 /**
@@ -62,6 +63,10 @@ public class FolioWebView extends WebView
         gestureDetector.setOnDoubleTapListener(this);
         density = getResources().getDisplayMetrics().density;
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    }
+
+    public interface ScrollToReadPositionCallback {
+        void finish();
     }
 
     @SuppressWarnings("unused")
@@ -185,7 +190,7 @@ public class FolioWebView extends WebView
         });
     }
 
-    public void setPageCountByLandspace(int horizontalPageCount) {
+    public void setPageCountByLandspace(int horizontalPageCount, ScrollToReadPositionCallback callback) {
         this.horizontalPageCount = horizontalPageCount;
 
         handler.post(() -> {
@@ -197,6 +202,8 @@ public class FolioWebView extends WebView
 
             loadPage(String.format(getContext().getString(R.string.go_to_span),
                     ReadPositionUtil.getReadPosition().isUsingId(), ReadPositionUtil.getReadPosition().getValue()));
+
+            callback.finish();
         });
     }
 
@@ -298,8 +305,7 @@ public class FolioWebView extends WebView
         if (android.os.Build.VERSION.SDK_INT < 19) {
             loadUrl(javaScript);
         } else {
-            post(() -> evaluateJavascript(javaScript, null));
-
+            evaluateJavascript(javaScript, null);
         }
     }
 }

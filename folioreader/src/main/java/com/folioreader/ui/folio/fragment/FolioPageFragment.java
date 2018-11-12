@@ -610,9 +610,10 @@ public class FolioPageFragment
             mWebview.setLayoutParams(new FrameLayout.LayoutParams(
                     width,
                     height));
-
-            mWebview.loadPage("javascript:preInitHorizontalDirection()");
-            mWebview.loadPage("javascript:resizeForLandScape()");
+            new Handler().post(() -> {
+                mWebview.loadPage("javascript:preInitHorizontalDirection()");
+                mWebview.loadPage("javascript:resizeForLandScape()");
+            });
 
         }
 
@@ -988,13 +989,10 @@ public class FolioPageFragment
 
         if (isCurrentFragment()) {
             Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
-            new Handler().post(() -> {
-                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                    scrollToAnchorId(selectedChapterHref);
-                }
-            });
-
+            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                scrollToAnchorId(selectedChapterHref);
+            }
         }
     }
 
@@ -1003,17 +1001,15 @@ public class FolioPageFragment
     public void setHorizontalPageCountByLandSpace(int horizontalPageCount) {
         Log.v(LOG_TAG, "-> setHorizontalPageCount = " + horizontalPageCount
                 + " -> " + spineItem.originalHref);
-        mWebview.setPageCountByLandspace(horizontalPageCount);
+        mWebview.setPageCountByLandspace(horizontalPageCount, this::hideLoading);
         isHorizontalPaging = false;
 
         if (isCurrentFragment()) {
             Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
-            new Handler().post(() -> {
-                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                    scrollToAnchorId(selectedChapterHref);
-                }
-            });
+            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                scrollToAnchorId(selectedChapterHref);
+            }
         }
     }
 
