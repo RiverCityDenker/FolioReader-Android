@@ -598,7 +598,7 @@ public class FolioPageFragment
         Log.e(TAG, "onConfigurationChanged: " + newConfig.toString());
 
         if (getDirection().equals("HORIZONTAL")) {
-
+            showLoading();
             if (isCurrentFragment()) {
                 getLastReadPosition();
             }
@@ -988,10 +988,13 @@ public class FolioPageFragment
 
         if (isCurrentFragment()) {
             Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
-            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                scrollToAnchorId(selectedChapterHref);
-            }
+            new Handler().post(() -> {
+                if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+                    final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+                    scrollToAnchorId(selectedChapterHref);
+                }
+            });
+
         }
     }
 

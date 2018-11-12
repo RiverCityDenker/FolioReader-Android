@@ -278,7 +278,7 @@ function goToElement(element) {
         WebViewPager.setCurrentPage(pageIndex);
         scrollingElement.scrollLeft = newScrollLeft;
     }
-
+    FolioPageFragment.hideLoading();
     return element;
 }
 
