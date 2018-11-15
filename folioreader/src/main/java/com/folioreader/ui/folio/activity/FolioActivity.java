@@ -542,21 +542,28 @@ public class FolioActivity
 
     }
 
-    public static String anchor = "";
-
     @Override
     public void setPagerToPosition(String href) {
+        String anchor = "";
         if (href.contains("#")) {
             anchor = href.substring(href.lastIndexOf("#") + 1);
             href = href.substring(0, href.indexOf("#"));
         }
 
         href = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1);
+
+        String selectedChapterHref = "/" + href + "#" + anchor;
         for (Link spine : mSpineReferenceList) {
-            if (spine.href.contains(href)) {
+            if (selectedChapterHref.contains(spine.href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
                 toolbar.setTitle(spine.getChapterTitle());
+
+                FolioPageFragment folioPageFragment = (FolioPageFragment)
+                        mFolioPageFragmentAdapter.getItem(mChapterPosition);
+                folioPageFragment.showLoading();
+
+                mSelectedChapterHref = selectedChapterHref;
                 break;
             }
         }
