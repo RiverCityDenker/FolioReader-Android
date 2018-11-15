@@ -505,8 +505,9 @@ public class FolioActivity
     public void onDirectionChange(@NonNull Config.Direction newDirection) {
         Log.v(LOG_TAG, "-> onDirectionChange");
 
-        FolioPageFragment folioPageFragment = (FolioPageFragment)
-                mFolioPageFragmentAdapter.getItem(mFolioPageViewPager.getCurrentItem());
+        FolioPageFragment folioPageFragment = getCurrentFragment();
+        if (folioPageFragment == null) return;
+
         entryReadPosition = folioPageFragment.getLastReadPosition();
 
         direction = newDirection;
@@ -522,7 +523,7 @@ public class FolioActivity
         }
         mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
         mFolioPageViewPager.setCurrentItem(mChapterPosition);
-
+        mFolioPageFragmentAdapter.notifyDataSetChanged();
 
     }
 
@@ -878,6 +879,16 @@ public class FolioActivity
 
     private void initBook() {
         addEbook(ebookFilePath);
+    }
+
+    private FolioPageFragment getCurrentFragment() {
+
+        if (mFolioPageFragmentAdapter != null && mFolioPageViewPager != null) {
+            return (FolioPageFragment) mFolioPageFragmentAdapter
+                    .getItem(mFolioPageViewPager.getCurrentItem());
+        } else {
+            return null;
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

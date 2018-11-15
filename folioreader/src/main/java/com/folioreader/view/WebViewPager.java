@@ -99,17 +99,6 @@ public class WebViewPager extends ViewPager {
             folioWebView = ((View) getParent()).findViewById(R.id.folioWebView);
     }
 
-    public void setPageCountLandscape(int horizontalPageCount) {
-        Log.d(LOG_TAG, "todoDung -> horizontalPageCount = " + horizontalPageCount);
-
-        this.horizontalPageCount = horizontalPageCount;
-        setAdapter(new WebViewPagerAdapter());
-
-        this.setCurrentPage(0);
-        if (folioWebView == null)
-            folioWebView = ((View) getParent()).findViewById(R.id.folioWebView);
-    }
-
     public int getPageCount() {
         return this.horizontalPageCount;
     }

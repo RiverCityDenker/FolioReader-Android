@@ -16,7 +16,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -175,6 +174,7 @@ public class FolioPageFragment
     private FolioPagePresenter mPresenter;
     private boolean mIsErrorPage;
     private boolean isHorizontalPaging;
+    private FrameLayout webViewLayout;
 
     public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
@@ -403,6 +403,7 @@ public class FolioPageFragment
         }
     }
 
+
     @Override
     public void onReceiveHtml(String html) {
         if (isAdded()) {
@@ -411,7 +412,7 @@ public class FolioPageFragment
         }
     }
 
-    private void setHtml(boolean reloaded) {
+    private synchronized void setHtml(boolean reloaded) {
         if (mIsErrorPage) {
             final String baseUrl = URL_PREFIX + "/";
             String mimeType = "text/html";
@@ -500,7 +501,7 @@ public class FolioPageFragment
 
     private void initWebView() {
 
-        FrameLayout webViewLayout = mRootView.findViewById(R.id.webViewLayout);
+        webViewLayout = mRootView.findViewById(R.id.webViewLayout);
         mWebview = webViewLayout.findViewById(R.id.folioWebView);
         webViewPager = webViewLayout.findViewById(R.id.webViewPager);
         if (getActivity() instanceof FolioActivityCallback)
@@ -595,29 +596,13 @@ public class FolioPageFragment
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        Log.e(TAG, "onConfigurationChanged: " + newConfig.toString());
-
         if (getDirection().equals("HORIZONTAL")) {
-            showLoading();
-            if (isCurrentFragment()) {
-                getLastReadPosition();
+            if (mHtmlString != null) {
+                reload(new ReloadDataEvent());
             }
-
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int height = displayMetrics.heightPixels;
-            int width = displayMetrics.widthPixels;
-            mWebview.setLayoutParams(new FrameLayout.LayoutParams(
-                    width,
-                    height));
-            new Handler().post(() -> {
-                mWebview.loadPage("javascript:preInitHorizontalDirection()");
-                mWebview.loadPage("javascript:resizeForLandScape()");
-            });
-
         }
-
     }
+
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
@@ -696,10 +681,8 @@ public class FolioPageFragment
 
                 String rangy = HighlightUtil.generateRangyString(getPageName());
                 FolioPageFragment.this.rangy = rangy;
-                if (!rangy.isEmpty())
-                    loadRangy(mWebview, rangy);
-                else
-                    loadContent();
+                if (!rangy.isEmpty()) loadRangy(mWebview, rangy);
+                loadContent();
             }
         }
 
@@ -788,10 +771,16 @@ public class FolioPageFragment
         if (mIsPageReloaded) {
             if (isCurrentFragment()) {
                 if (lastReadPosition == null) {
-                    lastReadPosition = mActivityCallback.getLastReadPosition();
+                    FolioReader folioReader = FolioReader.getInstance(getContext());
+                    lastReadPosition = folioReader.getReadPosition(mBookId);
                 }
-                mWebview.loadPage(String.format(getString(R.string.go_to_span),
-                        lastReadPosition.isUsingId(), lastReadPosition.getValue()));
+                if (lastReadPosition != null) {
+                    new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                            lastReadPosition.isUsingId(), lastReadPosition.getValue())));
+
+                } else {
+                    Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
+                }
             } else {
                 if (mPosition == mActivityCallback.getChapterPosition() - 1) {
                     // Scroll to last, the page before current page
@@ -799,7 +788,6 @@ public class FolioPageFragment
                 } else {
                     // Make loading view invisible for all other fragments
                     loadingView.hide();
-                    setEnableDirectionConfig();
                 }
             }
             mIsPageReloaded = false;
@@ -812,25 +800,20 @@ public class FolioPageFragment
         } else if (isCurrentFragment()) {
             ReadPosition readPosition;
             if (savedInstanceState == null) {
-                Log.v(LOG_TAG, "-> onPageFinished -> took from getEntryReadPosition");
                 readPosition = mActivityCallback.getEntryReadPosition();
             } else {
-                Log.v(LOG_TAG, "-> onPageFinished -> took from bundle");
                 readPosition = savedInstanceState.getParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE);
                 savedInstanceState.remove(BUNDLE_READ_POSITION_CONFIG_CHANGE);
             }
             if (readPosition != null) {
-                Log.v(LOG_TAG, "-> scrollToSpan -> " + readPosition.getValue());
-                mWebview.loadPage(String.format(getString(R.string.go_to_span),
-                        readPosition.isUsingId(), readPosition.getValue()));
+                new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                        readPosition.isUsingId(), readPosition.getValue())));
             } else if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
                 final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                Log.e(TAG, "loadContent: >>>selectedChapterHref = " + selectedChapterHref);
                 scrollToFirst();
                 scrollToAnchorId(selectedChapterHref);
             } else {
                 loadingView.hide();
-                setEnableDirectionConfig();
             }
         } else {
             if (mPosition == mActivityCallback.getChapterPosition() - 1) {
@@ -841,15 +824,10 @@ public class FolioPageFragment
                 loadingView.hide();
                 if (FolioActivity.mIsDirectionChanged) {
                     FolioActivity.mIsDirectionChanged = false;
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            setEnableDirectionConfig();
-                        }
-                    }, 1000);
                 }
             }
         }
+        setEnableDirectionConfig();
     }
 
     private void setEnableDirectionConfig() {
@@ -944,8 +922,7 @@ public class FolioPageFragment
                 boolean isHorizontal = mActivityCallback.getDirection() ==
                         Config.Direction.HORIZONTAL;
                 mWebview.loadPage("javascript:getFirstVisibleSpan(" + isHorizontal + ")");
-
-                wait(1000);
+                wait(2000);
             }
         } catch (InterruptedException e) {
             Log.e(LOG_TAG, "-> " + e);
@@ -996,30 +973,9 @@ public class FolioPageFragment
         }
     }
 
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void setHorizontalPageCountByLandSpace(int horizontalPageCount) {
-        Log.v(LOG_TAG, "-> setHorizontalPageCount = " + horizontalPageCount
-                + " -> " + spineItem.originalHref);
-        mWebview.setPageCountByLandspace(horizontalPageCount, this::hideLoading);
-        isHorizontalPaging = false;
-
-        if (isCurrentFragment()) {
-            Log.e(TAG, "setHorizontalPageCount: >>>horizontalPageCount = " + horizontalPageCount);
-            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                scrollToAnchorId(selectedChapterHref);
-            }
-        }
-    }
-
     private void loadRangy(final WebView view, final String rangy) {
-        new Handler().postDelayed(() -> {
-            synchronized (FolioPageFragment.this) {
-                ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} else {console.log(\">>>>>>ssReader is undefined !\")}", rangy));
-                loadContent();
-            }
-        }, 600);
+        ((FolioWebView) view).loadPage(String.format("javascript:if(typeof window.ssReader !== \"undefined\"){window.ssReader.setHighlights('%s');} " +
+                "else {initSSReaderAgain(); window.ssReader.setHighlights('%s');}", rangy, rangy));
     }
 
     private void setupScrollBar() {
@@ -1402,7 +1358,38 @@ public class FolioPageFragment
                 outState.putParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE, lastReadPosition);
             mActivityCallback.storeLastReadPosition(lastReadPosition);
         }
-        if (mWebview != null) mWebview.destroy();
+        if (mWebview != null) destroyWebView();
+    }
+
+    public void destroyWebView() {
+
+        // Make sure you remove the WebView from its parent view before doing anything.
+        webViewLayout.removeAllViews();
+
+        mWebview.clearHistory();
+
+        // NOTE: clears RAM cache, if you pass true, it will also clear the disk cache.
+        // Probably not a great idea to pass true if you have other WebViews still alive.
+        mWebview.clearCache(true);
+
+        // Loading a blank page is optional, but will ensure that the WebView isn't doing anything when you destroy it.
+        mWebview.loadUrl("about:blank");
+
+//        mWebview.onPause();
+        mWebview.removeAllViews();
+        mWebview.destroyDrawingCache();
+
+        // NOTE: This pauses JavaScript execution for ALL WebViews,
+        // do not use if you have other WebViews still alive.
+        // If you create another WebView after calling this,
+        // make sure to call mWebView.resumeTimers().
+//        mWebview.pauseTimers();
+
+        // NOTE: This can occasionally cause a segfault below API 17 (4.2)
+        mWebview.destroy();
+
+        // Null out the reference so that you don't end up re-using it.
+//        mWebview = null;
     }
 
     public boolean isCurrentFragment() {

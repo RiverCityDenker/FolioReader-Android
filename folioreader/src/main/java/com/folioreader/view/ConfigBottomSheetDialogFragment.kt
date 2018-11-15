@@ -175,6 +175,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         if (isAdded && isReloadNeeded) {
             AppUtil.saveConfig(activity, config)
             EventBus.getDefault().post(ReloadDataEvent())
+            dismiss()
         }
     }
 
@@ -207,6 +208,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 config.isNightMode = isNightMode
                 AppUtil.saveConfig(activity, config)
                 EventBus.getDefault().post(ReloadDataEvent())
+                dismiss()
             }
 
             override fun onAnimationCancel(animator: Animator) {}
@@ -251,6 +253,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 config.fontSize = progress
                 AppUtil.saveConfig(activity, config)
                 EventBus.getDefault().post(ReloadDataEvent())
+                dismiss()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}

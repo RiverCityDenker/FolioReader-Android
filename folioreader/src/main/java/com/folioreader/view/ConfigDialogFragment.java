@@ -235,6 +235,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 verticalText.setSelected(false);
                 verticalText.setTextColor(getActivity().getResources().getColor(mIsNightMode ? R.color.app_gray : R.color.black));
                 horizontalText.setTextColor(getActivity().getResources().getColor(R.color.colorPrimary));
+                dismiss();
             }
         });
 
@@ -255,6 +256,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 verticalText.setSelected(true);
                 verticalText.setTextColor(getActivity().getResources().getColor(R.color.colorPrimary));
                 horizontalText.setTextColor(getActivity().getResources().getColor(mIsNightMode ? R.color.app_gray : R.color.black));
+                dismiss();
             }
         });
     }
@@ -278,6 +280,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
             AppUtil.saveConfig(getActivity(), mConfig);
             EventBus.getDefault().post(new ReloadDataEvent());
         }
+        dismiss();
     }
 
     private void toggleBlackTheme() {
@@ -312,6 +315,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 mConfig = AppUtil.getSavedConfig(getActivity());
                 mConfig.setNightMode(mIsNightMode);
                 AppUtil.saveConfig(getActivity(), mConfig);
+                dismiss();
                 EventBus.getDefault().post(new ReloadDataEvent());
             }
 
@@ -350,6 +354,7 @@ public class ConfigDialogFragment extends AppCompatDialogFragment implements Vie
                 AppUtil.saveConfig(getActivity(), mConfig);
                 EventBus.getDefault().post(new ReloadDataEvent());
                 googleAnalyticManager.sendEvent(AnalyticViewName.select_font_size, AnalyticViewName.fontsize_select, "" + progress);
+                dismiss();
             }
 
             @Override
