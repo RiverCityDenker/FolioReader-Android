@@ -77,13 +77,13 @@
                 android:id="@+id/btn_config"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/icon_font" />
+                android:src="@drawable/icon_font_24dp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/btn_speaker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginBottom="16dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="16dp"
