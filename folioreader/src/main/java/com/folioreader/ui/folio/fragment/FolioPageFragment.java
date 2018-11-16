@@ -714,12 +714,6 @@ public class FolioPageFragment
                 } else {
                     if (url.contains("#")) {
                         mActivityCallback.setPagerToPosition(url);
-                        if (isCurrentFragment()) {
-                            if (!FolioActivity.anchor.isEmpty()) {
-                                mWebview.loadPage("javascript:scrollToElement(\"" + FolioActivity.anchor + "\")");
-                                FolioActivity.anchor = "";
-                            }
-                        }
                     } else if (url.endsWith(".xhtml") || url.endsWith(".html")) {
                         if (url.contains("img") || url.contains("tbl")) {
                             mActivityCallback.showSinglePage(url);
