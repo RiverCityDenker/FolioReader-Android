@@ -218,8 +218,10 @@ public class FolioActivity
 
     @Override
     public void updatePositionList(int position) {
-        Log.e(TAG, "updatePositionList: >>>" + position);
-        mPositionList.add(position);
+        if (!mPositionList.contains(Integer.valueOf(position))) {
+            mPositionList.add(position);
+            Log.e(TAG, "updatePositionList: >>>" + position);
+        }
     }
 
     public void doShouldHideLoading(int mPosition) {
@@ -228,9 +230,9 @@ public class FolioActivity
             if (mPositionList.contains(mPosition)) {
                 Log.e(TAG, "run: >>>remove " + mPosition);
                 mPositionList.remove(Integer.valueOf(mPosition));
-                if (mPositionList.isEmpty()) {
-                    hideLoading();
-                }
+            }
+            if (mPositionList.isEmpty()) {
+                hideLoading();
             }
         });
     }
@@ -596,8 +598,8 @@ public class FolioActivity
 
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
                         mFolioPageFragmentAdapter.getItem(mChapterPosition);
-                folioPageFragment.showLoading();
-
+                if (!folioPageFragment.isCurrentFragment())
+                    folioPageFragment.showLoading();
                 mSelectedChapterHref = selectedChapterHref;
                 break;
             }

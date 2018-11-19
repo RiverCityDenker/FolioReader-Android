@@ -42,7 +42,6 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
         this.mBookId = bookId;
         this.mEpubSourceType = epubSourceType;
         fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
-        Log.e(TAG, "FolioPageFragmentAdapter: >>>1");
         mListener = null;
     }
 
@@ -61,7 +60,6 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
         this.mEpubFileName = epubFileName;
         this.mEpubSourceType = epubSourceType;
         fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
-        Log.e(TAG, "FolioPageFragmentAdapter: >>>2");
     }
 
     @Override

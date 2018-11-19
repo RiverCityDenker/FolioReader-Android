@@ -353,7 +353,7 @@ public class FolioPageFragment
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void reload(ReloadDataEvent reloadDataEvent) {
-
+        showLoading();
         if (isCurrentFragment())
             getLastReadPosition();
 
@@ -777,7 +777,6 @@ public class FolioPageFragment
                 if (lastReadPosition != null) {
                     new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
                             lastReadPosition.isUsingId(), lastReadPosition.getValue())));
-
                 } else {
                     Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
                 }
@@ -787,8 +786,8 @@ public class FolioPageFragment
                     mWebview.loadPage("javascript:scrollToLast()");
                 } else {
                     // Make loading view invisible for all other fragments
-//                    loadingView.hide();
-                    hideLoading();
+                    if (!mIsOnlineReading)
+                        hideLoading();
                 }
             }
             mIsPageReloaded = false;
@@ -814,7 +813,6 @@ public class FolioPageFragment
                 scrollToFirst();
                 scrollToAnchorId(selectedChapterHref);
             } else {
-//                loadingView.hide();
                 hideLoading();
             }
         } else {
@@ -823,7 +821,6 @@ public class FolioPageFragment
                 mWebview.loadPage("javascript:scrollToLast()");
             } else {
                 // Make loading view invisible for all other fragments
-//                loadingView.hide();
                 hideLoading();
                 if (FolioActivity.mIsDirectionChanged) {
                     FolioActivity.mIsDirectionChanged = false;
