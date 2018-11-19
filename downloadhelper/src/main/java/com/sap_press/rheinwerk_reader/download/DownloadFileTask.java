@@ -8,7 +8,7 @@ import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import java.lang.ref.WeakReference;
 
 public class DownloadFileTask extends ParallelExecutorTask<String, Integer, Ebook> {
-    private final WeakReference<Context> contextWeakReference;
+    private final Context context;
     private final boolean isBasicData;
     private final String folderPath;
     private final ApiInfo apiInfo;
@@ -18,7 +18,7 @@ public class DownloadFileTask extends ParallelExecutorTask<String, Integer, Eboo
     public DownloadFileTask(Context context, Ebook ebook, ApiInfo apiInfo, String folderPath,
                             boolean isBasicData) {
         super(ParallelExecutorTask.createPool());
-        this.contextWeakReference = new WeakReference<>(context);
+        this.context = context;
         this.isBasicData = isBasicData;
         this.folderPath = folderPath;
         this.apiInfo = apiInfo;
@@ -27,7 +27,7 @@ public class DownloadFileTask extends ParallelExecutorTask<String, Integer, Eboo
 
     @Override
     protected Ebook doInBackground(String... originalHrefs) {
-        return new DownloadFileTaskSync(contextWeakReference.get(), ebook, apiInfo, folderPath, isBasicData).downloadSync(originalHrefs);
+        return new DownloadFileTaskSync(context, ebook, apiInfo, folderPath, isBasicData).downloadSync(originalHrefs);
     }
 
 }

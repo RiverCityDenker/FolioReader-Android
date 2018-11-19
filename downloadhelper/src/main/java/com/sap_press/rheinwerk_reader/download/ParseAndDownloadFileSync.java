@@ -72,7 +72,6 @@ public class ParseAndDownloadFileSync {
             throw new EpubParserException("Error while parsing");
         }
         ArrayList<String> filesToLoad = new ArrayList<>();
-        ArrayList<String> srcImageList = new ArrayList<>();
         NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
         if (itemNodes != null) {
             for (int i = 0; i < itemNodes.getLength(); i++) {
@@ -85,22 +84,15 @@ public class ParseAndDownloadFileSync {
                         case "src":
                             final String src = attr.getNodeValue();
                             final String href = FileUtil.reformatHref(src);
-                            srcImageList.add(src);
-
                             if (!isFileExist(context, ebookId, href)) {
                                 filesToLoad.add(href);
-                            } else {
-                                Log.e(TAG, "doInBackground: >>>is File Exist href = " + href);
                             }
                             break;
                     }
                 }
             }
         }
-        Log.e(TAG, "parseHtml: >>>total Image = " + srcImageList.size());
-        int imageSize = filesToLoad.size();
 
-        Log.e(TAG, "parseHtml: >>>download Image = " + imageSize);
         NodeList linkNodes = document.getElementsByTagNameNS("*", "a");
         List<String> srcList = new ArrayList<>();
         if (linkNodes != null) {
@@ -116,8 +108,6 @@ public class ParseAndDownloadFileSync {
                             srcList.add(src);
                             if (!isFileExist(context, ebookId, href)) {
                                 filesToLoad.add(href);
-                            } else {
-                                Log.e(TAG, "doInBackground: >>>is File Exist href = " + href);
                             }
                         }
                         break;
@@ -126,8 +116,6 @@ public class ParseAndDownloadFileSync {
             }
         }
 
-        Log.e(TAG, "parseHtml: >>> total Link = " + srcList.size());
-        Log.e(TAG, "parseHtml: >>> download Link = " + (filesToLoad.size() - imageSize));
         if (filesToLoad.isEmpty()) {
             callback.downloadFinish();
             return;
@@ -137,7 +125,7 @@ public class ParseAndDownloadFileSync {
             @SuppressLint("StaticFieldLeak") ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
                 @Override
                 protected Object doInBackground(Object[] objects) {
-                    Log.e(TAG, "doInBackground: >>>imageHref = " + s);
+                    Log.d(TAG, "doInBackground: >>>imageHref = " + s);
                     try {
                         final String fileUrl = baseUrl + "ebooks/" + ebookId
                                 + "/download?app_version=" + appVersion
@@ -156,7 +144,7 @@ public class ParseAndDownloadFileSync {
                     int current = downloadedCount.incrementAndGet();
                     if (current == filesToLoad.size()) {
                         //all download finished
-                        Log.e(TAG, "checkDownloadFinished: >>>all download finished, href = " + originalHref);
+                        Log.d(TAG, "checkDownloadFinished: >>>all download finished, href = " + originalHref);
                         callback.downloadFinish();
                     }
                 }

@@ -276,17 +276,6 @@ public class EbookTable {
         return progress;
     }
 
-    static String getContentKeyByEbookId(int ebookId, String tableName) {
-        Cursor cursor = EbookDbAdapter.getContentKeyById(ebookId, tableName);
-        String contentKey = null;
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            contentKey = cursor.getString(cursor.getColumnIndex(COLUMN_X_CONTENT_KEY));
-        }
-        cursor.close();
-        return contentKey;
-    }
-
     static int getDownloadedEbooksCount(String tableName) {
         int count;
         Cursor cursor = EbookDbAdapter.getDownloadedEbooks(tableName);

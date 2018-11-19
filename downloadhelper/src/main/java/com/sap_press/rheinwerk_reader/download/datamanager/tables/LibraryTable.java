@@ -6,7 +6,37 @@ import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import java.util.List;
 
-import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.*;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_AUTHORS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_CLAIM;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_COPYRIGHT_YEAR;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_COVERS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_DESCRIPTION;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_DOWNLOAD_PROGRESS_PERCENT;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_EDITION_NUMBER;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_EDITION_TEXT;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_ESBN;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_FILE_PATH;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_FILE_SIZE;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_HIGHLIGHTS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_ID;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_IS_DOWNLOAD_FAILED;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_IS_FAVORITEN;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_IS_STANDALONE;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_KEYWORDS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_LAST_READ;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_LAST_READ_TIME;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_LINKS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_NEED_SYNC_TO_SERVER;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_NEED_TO_RESUME;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_PAGE_NUMBER;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_PUBLISHER;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_RELEASE_DATE;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_SUBSCRIPTION_IDS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_SUBTITLE;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_TIME_STAMP_DOWNLOAD;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_TITLE;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_TOPIC_IDS;
+import static com.sap_press.rheinwerk_reader.download.datamanager.tables.EbookTable.COLUMN_X_CONTENT_KEY;
 
 
 public class LibraryTable {
@@ -116,10 +146,6 @@ public class LibraryTable {
 
     public static int getDownloadProgressEbook(int ebookId) {
         return EbookTable.getDownloadProgressEbook(ebookId, TABLE_NAME);
-    }
-
-    public static String getContentKeyByEbookId(String ebookId) {
-        return EbookTable.getContentKeyByEbookId(Integer.parseInt(ebookId), TABLE_NAME);
     }
 
     public static int getDownloadedEbooksCount() {

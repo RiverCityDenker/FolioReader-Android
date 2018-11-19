@@ -471,10 +471,7 @@ public class FolioPageFragment
     @JavascriptInterface
     public void hideLoading() {
         if (getActivity() != null) {
-            if (mIsOnlineReading)
-                ((FolioActivity) getActivity()).doShouldHideLoading(mPosition);
-            else
-                getActivity().runOnUiThread(() -> loadingView.hide());
+            getActivity().runOnUiThread(() -> loadingView.hide());
         }
     }
 
@@ -572,12 +569,10 @@ public class FolioPageFragment
                 if (isOnline(activity)) {
                     if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                             || mContentKey == null || mContentKey.isEmpty()) {
-                        Log.e(TAG, "initWebView: >>>" + spineItem.href);
-                        mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+                        mPresenter.downloadSingleFile(activity.getApplicationContext(), mActivityCallback.getDownloadInfo(),
                                 activity.getEbook(),
                                 spineItem.href);
                     } else {
-                        Log.e(TAG, "initWebView: >>>Html file is existed.");
                         onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
                     }
                 } else {
@@ -652,7 +647,7 @@ public class FolioPageFragment
         if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                 || mContentKey == null || mContentKey.isEmpty()) {
             final FolioActivity activity = (FolioActivity) getActivity();
-            mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+            mPresenter.downloadSingleFile(activity.getApplicationContext(), mActivityCallback.getDownloadInfo(),
                     activity.getEbook(),
                     spineItem.href);
         }

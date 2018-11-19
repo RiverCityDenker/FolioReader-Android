@@ -1,7 +1,6 @@
 package com.sap_press.rheinwerk_reader.download;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.R;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
@@ -51,7 +50,6 @@ public class DownloadManager {
 
     public synchronized void startDownload(Context context, Ebook ebook, int iconId,
                                            String appVersion, String baseUrl) {
-        Log.e("DownloadManager", "startDownload: >>>");
         updateBookDownloadTime(ebook);
         DownloadService.startDownloadService(context, iconId,
                 context.getResources().getString(R.string.app_name),

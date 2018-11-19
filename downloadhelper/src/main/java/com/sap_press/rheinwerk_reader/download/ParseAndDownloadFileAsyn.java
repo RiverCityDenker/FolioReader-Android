@@ -30,7 +30,6 @@ public class ParseAndDownloadFileAsyn extends ParallelExecutorTask<String, Void,
     private String ebookId;
     private String token;
     private String appVersion;
-    private WeakReference<Context> contextWeakReference;
     private static final String TAG = ParseAndDownloadFileAsyn.class.getSimpleName();
 
     ParseAndDownloadFileAsyn(Context context, String apiKey, String folderPath,
@@ -38,7 +37,6 @@ public class ParseAndDownloadFileAsyn extends ParallelExecutorTask<String, Void,
                              String ebookId, String token,
                              String appVersion, ThreadPoolExecutor poolExecutor) {
         super(poolExecutor);
-        contextWeakReference = new WeakReference<>(context);
         this.apiKey = apiKey;
         this.folderPath = folderPath;
         this.originalHref = originalHref;
