@@ -76,6 +76,9 @@ public class MainPresenter implements ManifestCallBack {
                     hideLoading();
                     updateDetailUIAfterDelete(ebook);
                     EventBus.getDefault().post(new UpdateBookUIEvent(currentPosition, ebook));
+                    if (mainMvpView != null) {
+                        mainMvpView.setOnlineReadingStatus(true);
+                    }
                 }
 
                 @Override

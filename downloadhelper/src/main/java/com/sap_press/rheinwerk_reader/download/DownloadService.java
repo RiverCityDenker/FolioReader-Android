@@ -42,6 +42,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -99,6 +100,8 @@ public class DownloadService extends Service {
     private boolean mIsNetworkResume;
     private List<String> failedDownloadFiles = new ArrayList<>();
     private boolean mIsTryAgain;
+    private ArrayList<EpubBook.Manifest> imageFileList;
+    private ArrayList<EpubBook.Manifest> otherFileList;
 
     public DownloadService() {
     }
@@ -458,7 +461,7 @@ public class DownloadService extends Service {
                 dataManager = DownloadDataManager.getInstance();
             dataManager.updateEbookPath(ebook.getId(), filePath);
             downloadBasicFile(context, ebook, apiInfo, epub, ebookId);
-            EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
+            //EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
 
         } else {
             long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
@@ -509,15 +512,33 @@ public class DownloadService extends Service {
         final String folderPath = getEbookPath(this, ebookId);
         mIsTryAgain = totalFileListNeedToDownload > 0 && totalFileListNeedToDownload < ebook.getTotal();
         if (totalFileListNeedToDownload > 0) {
-            for (int i = 0; i < totalFileListNeedToDownload; i++) {
-                final EpubBook.Manifest manifest = fileListForDownload.get(i);
-                DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(ebook, folderPath, token, i, executor);
-                downloadFileAsyn.executeParallel(manifest);
-            }
+            setFileListFromContent(fileListForDownload);
+            downloadFileList(DownloadService.this, imageFileList, token, ebook, folderPath);
         } else {
             ebook.setDownloadProgress(DOWNLOAD_COMPLETED);
-            downloadSingleSucscess(ebook, ++progress);
+            downloadSingleSucscess(ebook, ++progress, token, folderPath);
         }
+    }
+
+    private void downloadFileList(Context context, ArrayList<EpubBook.Manifest> fileList, String token, Ebook ebook, String folderPath) {
+        for (int i = 0; i < fileList.size(); i++) {
+            final EpubBook.Manifest manifest = fileList.get(i);
+            DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(context, ebook, folderPath, token, i, executor);
+            downloadFileAsyn.executeParallel(manifest);
+        }
+    }
+
+    private void setFileListFromContent(ArrayList<EpubBook.Manifest> fileListForDownload) {
+        imageFileList = new ArrayList<>();
+        otherFileList = new ArrayList<>();
+        for (EpubBook.Manifest manifest : fileListForDownload) {
+            if (manifest.getMediaType().contains("image")) {
+                imageFileList.add(manifest);
+            } else {
+                otherFileList.add(manifest);
+            }
+        }
+        Log.e(TAG, "setFileListFromContent: >>>" + imageFileList.size() + " : " + otherFileList.size());
     }
 
     class DownloadFileAsyn extends ParallelExecutorTask<EpubBook.Manifest, Integer, Ebook> {
@@ -526,9 +547,11 @@ public class DownloadService extends Service {
         String ebookId;
         int name;
         private String folderPath;
+        private WeakReference<Context> contextWeakReference;
 
-        DownloadFileAsyn(Ebook ebook, String folderPath, String token, int name, ThreadPoolExecutor executor) {
+        DownloadFileAsyn(Context context, Ebook ebook, String folderPath, String token, int name, ThreadPoolExecutor executor) {
             super(executor);
+            contextWeakReference = new WeakReference<>(context);
             this.ebook = ebook;
             this.folderPath = folderPath;
             this.token = token;
@@ -554,12 +577,12 @@ public class DownloadService extends Service {
             synchronized (DownloadService.class) {
                 if (contentKey != null) {
                     if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
-                        downloadSingleSucscess(ebook, ++progress);
+                        downloadSingleSucscess(ebook, ++progress, token, folderPath);
                     } else {
-                        downloadSingleSucscess(ebook, --progress);
+                        downloadSingleSucscess(ebook, --progress, token, folderPath);
                     }
                 } else {
-                    downloadSingleSucscess(ebook, ++progress);
+                    downloadSingleSucscess(ebook, ++progress, token, folderPath);
                 }
             }
 
@@ -602,7 +625,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private void downloadSingleSucscess(Ebook ebook, long fileCount) {
+    private void downloadSingleSucscess(Ebook ebook, long fileCount, String token, String folderPath) {
         synchronized (DownloadService.class) {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
@@ -653,6 +676,9 @@ public class DownloadService extends Service {
                 }
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
                 return;
+            } else if ((fileCount + failedDownloadFiles.size() == imageFileList.size())) {
+                Log.e(TAG, "downloadSingleSucscess: >>>Finish Download Image" + imageFileList.size() + " - " + otherFileList.size());
+                downloadFileList(DownloadService.this, otherFileList, token, ebook, folderPath);
             }
 
             EventBus.getDefault().post(new DownloadingEvent(ebook));

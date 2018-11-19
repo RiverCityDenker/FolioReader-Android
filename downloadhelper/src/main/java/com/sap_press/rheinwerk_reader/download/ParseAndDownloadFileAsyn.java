@@ -1,5 +1,6 @@
 package com.sap_press.rheinwerk_reader.download;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
@@ -13,6 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,13 +30,15 @@ public class ParseAndDownloadFileAsyn extends ParallelExecutorTask<String, Void,
     private String ebookId;
     private String token;
     private String appVersion;
+    private WeakReference<Context> contextWeakReference;
     private static final String TAG = ParseAndDownloadFileAsyn.class.getSimpleName();
 
-    ParseAndDownloadFileAsyn(String apiKey, String folderPath,
+    ParseAndDownloadFileAsyn(Context context, String apiKey, String folderPath,
                              String originalHref, String baseUrl,
                              String ebookId, String token,
                              String appVersion, ThreadPoolExecutor poolExecutor) {
         super(poolExecutor);
+        contextWeakReference = new WeakReference<>(context);
         this.apiKey = apiKey;
         this.folderPath = folderPath;
         this.originalHref = originalHref;

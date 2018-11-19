@@ -471,7 +471,10 @@ public class FolioPageFragment
     @JavascriptInterface
     public void hideLoading() {
         if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> loadingView.hide());
+            if (mIsOnlineReading)
+                ((FolioActivity) getActivity()).doShouldHideLoading(mPosition);
+            else
+                getActivity().runOnUiThread(() -> loadingView.hide());
         }
     }
 
@@ -569,11 +572,14 @@ public class FolioPageFragment
                 if (isOnline(activity)) {
                     if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                             || mContentKey == null || mContentKey.isEmpty()) {
+                        Log.e(TAG, "initWebView: >>>" + spineItem.href);
                         mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
                                 activity.getEbook(),
                                 spineItem.href);
-                    } else
+                    } else {
+                        Log.e(TAG, "initWebView: >>>Html file is existed.");
                         onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+                    }
                 } else {
                     if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                             || mContentKey == null || mContentKey.isEmpty()) {
@@ -662,7 +668,7 @@ public class FolioPageFragment
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            hideLoading();
+
             if (isAdded()) {
 
                 mWebview.loadPage("javascript:getCompatMode()");
@@ -781,7 +787,8 @@ public class FolioPageFragment
                     mWebview.loadPage("javascript:scrollToLast()");
                 } else {
                     // Make loading view invisible for all other fragments
-                    loadingView.hide();
+//                    loadingView.hide();
+                    hideLoading();
                 }
             }
             mIsPageReloaded = false;
@@ -807,7 +814,8 @@ public class FolioPageFragment
                 scrollToFirst();
                 scrollToAnchorId(selectedChapterHref);
             } else {
-                loadingView.hide();
+//                loadingView.hide();
+                hideLoading();
             }
         } else {
             if (mPosition == mActivityCallback.getChapterPosition() - 1) {
@@ -815,7 +823,8 @@ public class FolioPageFragment
                 mWebview.loadPage("javascript:scrollToLast()");
             } else {
                 // Make loading view invisible for all other fragments
-                loadingView.hide();
+//                loadingView.hide();
+                hideLoading();
                 if (FolioActivity.mIsDirectionChanged) {
                     FolioActivity.mIsDirectionChanged = false;
                 }

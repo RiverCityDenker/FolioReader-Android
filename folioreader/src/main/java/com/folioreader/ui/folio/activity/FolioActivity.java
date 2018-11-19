@@ -100,7 +100,7 @@ public class FolioActivity
         MainMvpView,
         MediaControllerCallback,
         FolioToolbarCallback,
-        DialogInterface.OnDismissListener {
+        DialogInterface.OnDismissListener, FolioPageFragmentAdapter.FolioPageAdapterListener {
 
     private static final String LOG_TAG = "FolioActivity";
 
@@ -128,6 +128,7 @@ public class FolioActivity
     private LoadingView loadingView;
     private boolean mImageClicked;
     private String mSelectedChapterHref;
+    private ArrayList<Integer> mPositionList = new ArrayList<>();
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -193,6 +194,11 @@ public class FolioActivity
     }
 
     @Override
+    public void setOnlineReadingStatus(boolean isOnlineReading) {
+        mIsOnlineReading = true;
+    }
+
+    @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
     }
@@ -208,6 +214,32 @@ public class FolioActivity
 
     public String getSelectedChapterHref() {
         return mSelectedChapterHref;
+    }
+
+    @Override
+    public void updatePositionList(int position) {
+        Log.e(TAG, "updatePositionList: >>>" + position);
+        mPositionList.add(position);
+    }
+
+    public void doShouldHideLoading(int mPosition) {
+        runOnUiThread(() -> {
+            refreshPositionList();
+            if (mPositionList.contains(mPosition)) {
+                Log.e(TAG, "run: >>>remove " + mPosition);
+                mPositionList.remove(Integer.valueOf(mPosition));
+                if (mPositionList.isEmpty()) {
+                    hideLoading();
+                }
+            }
+        });
+    }
+
+    private void refreshPositionList() {
+        if (mPositionList.size() > 3) {
+            mPositionList.remove(0);
+            refreshPositionList();
+        }
     }
 
     public enum EpubSourceType {
@@ -396,6 +428,7 @@ public class FolioActivity
         String selectedChapterHref = event.getHref();
         for (Link spine : mSpineReferenceList) {
             if (selectedChapterHref.contains(spine.href)) {
+                Log.e(TAG, "onTOCClickedEvent: >>>" + selectedChapterHref);
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
@@ -516,7 +549,8 @@ public class FolioActivity
         mFolioPageViewPager.setDirection(newDirection);
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                    mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+                    mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
+                    mEpubSourceType, this);
         } else {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                     mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
@@ -688,7 +722,8 @@ public class FolioActivity
             mFolioPageViewPager.setDirection(direction);
             if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                        mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+                        mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
+                        mEpubSourceType, this);
             } else {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                         mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);

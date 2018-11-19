@@ -22,4 +22,6 @@ public interface MainMvpView extends BaseMvpView {
     void hideLoading();
 
     void exitReader();
+
+    void setOnlineReadingStatus(boolean isOnlineReading);
 }

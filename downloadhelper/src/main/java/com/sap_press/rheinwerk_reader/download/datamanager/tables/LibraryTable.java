@@ -118,6 +118,10 @@ public class LibraryTable {
         return EbookTable.getDownloadProgressEbook(ebookId, TABLE_NAME);
     }
 
+    public static String getContentKeyByEbookId(String ebookId) {
+        return EbookTable.getContentKeyByEbookId(Integer.parseInt(ebookId), TABLE_NAME);
+    }
+
     public static int getDownloadedEbooksCount() {
         return EbookTable.getDownloadedEbooksCount(TABLE_NAME);
     }
