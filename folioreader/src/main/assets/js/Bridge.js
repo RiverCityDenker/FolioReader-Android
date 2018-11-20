@@ -157,7 +157,6 @@ var getAnchorOffset = function(target, horizontal) {
 }
 
 function scrollAnchor(id) {
-    console.log("LOG id === " + id)
     window.location.hash = id;
 }
 
@@ -261,20 +260,20 @@ function goToElement(element) {
     //console.log("-> elementTop = " + elementTop);
     //console.log("-> bottom = " + bottom);
     //console.log("-> elementBottom = " + elementBottom);
-    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection() + "element = " + element.id);
+//    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection() + "element = " + element.id);
 
     if (FolioPageFragment.getDirection() == "VERTICAL" &&
             (elementBottom > bottom || elementTop < top)) {
 
         var newScrollTop = elementTop;
-        console.log("-> newScrollTop = " + newScrollTop);
+//        console.log("-> newScrollTop = " + newScrollTop);
         scrollingElement.scrollTop = newScrollTop;
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
-        console.log(">>> Scroll Horizontal pageIndex = " + pageIndex + " --- newScrollLeft = " + newScrollLeft);
+//        console.log(">>> Scroll Horizontal pageIndex = " + pageIndex + " --- newScrollLeft = " + newScrollLeft);
         WebViewPager.setCurrentPage(pageIndex);
         scrollingElement.scrollLeft = newScrollLeft;
     }
@@ -297,17 +296,17 @@ function goToImageElement(element) {
     //console.log("-> elementTop = " + elementTop);
     //console.log("-> bottom = " + bottom);
     //console.log("-> elementBottom = " + elementBottom);
-    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection());
+//    console.log("-> FolioPageFragment.getDirection() = " + FolioPageFragment.getDirection());
 
     if (FolioPageFragment.getDirection() == "VERTICAL" &&
             (elementBottom > bottom || elementTop < top)) {
 
         var newScrollTop = elementTop;
-        console.log("-> newScrollTop = " + newScrollTop);
+//        console.log("-> newScrollTop = " + newScrollTop);
         scrollingElement.scrollTop = newScrollTop;
 
     } else if (FolioPageFragment.getDirection() == "HORIZONTAL" && top == 0) {
-        console.log(">>> Scroll Horizontal");
+//        console.log(">>> Scroll Horizontal");
         var clientWidth = document.documentElement.clientWidth;
         var pageIndex = Math.floor(element.offsetLeft / clientWidth);
         var newScrollLeft = clientWidth * pageIndex;
@@ -318,11 +317,11 @@ function goToImageElement(element) {
 }
 
 function scrollToElement(id) {
-    console.log("---->>>>" + id)
+//    console.log("---->>>>" + id)
     //document.getElementById(id).scrollIntoView()
 
     var element = document.getElementById(id);
-    console.log("---->>>>" + element)
+//    console.log("---->>>>" + element)
         if (element)
             goToImageElement(element);
 
@@ -420,7 +419,7 @@ function test() {
 }
 
 function scrollToLast() {
-    console.log("-> scrollToLast");
+//    console.log("-> scrollToLast");
 
     var direction = FolioPageFragment.getDirection();
     var scrollingElement = bodyOrHtml();
@@ -439,7 +438,7 @@ function scrollToLast() {
 }
 
 function scrollToFirst() {
-    console.log("-> scrollToFirst");
+//    console.log("-> scrollToFirst");
 
     var direction = FolioPageFragment.getDirection();
     var scrollingElement = bodyOrHtml();
@@ -456,7 +455,7 @@ function scrollToFirst() {
 }
 
 function getCompatMode() {
-    console.log("-> getCompatMode")
+//    console.log("-> getCompatMode")
     FolioWebView.setCompatMode(document.compatMode);
 }
 
@@ -484,7 +483,7 @@ function horizontalRecheck() {
 }
 
 function initHorizontalDirection() {
-    console.log("-->> initHorizontalDirection")
+//    console.log("-->> initHorizontalDirection")
     preInitHorizontalDirection();
     postInitHorizontalDirection();
 
@@ -564,22 +563,11 @@ function postInitHorizontalDirection() {
             + ", Something wrong in pageCount calculation");
     }
 
-    console.log("-> scrollWidth = " + scrollWidth);
+//    console.log("-> scrollWidth = " + scrollWidth);
     //console.log("-> newBodyWidth = " + newBodyWidth);
     //console.log("-> pageCount = " + pageCount);
 
     FolioPageFragment.setHorizontalPageCount(pageCount);
-
-    // add dummy class for table to re-style the page
-    console.log("this is run re-style");
-    var tableEleList = document.getElementsByTagName('table');
-        if(tableEleList.length > 0) {
-            for(var i of tableEleList) {
-                i.setAttribute('style', 'border-spacing: 1px !important');
-                console.log("this is table re-style");
-            }
-        }
-
 }
 
 /**
@@ -661,7 +649,7 @@ function getSentenceWithIndex(className) {
 
     // Check for a selected text, if found start reading from it
     if (sel.toString() != "") {
-        console.log(sel.anchorNode.parentNode);
+//        console.log(sel.anchorNode.parentNode);
         node = sel.anchorNode.parentNode;
 
         if (node.className == "sentence") {
@@ -912,9 +900,9 @@ function getFirstVisibleSpan(isHorizontal) {
     }
 
     var usingId = spanElement.id ? true : false;
-    console.log("usingId = " + usingId);
-    console.log("spanElement.id = " + spanElement.id);
-    console.log("spanIndex = " + spanIndex);
+//    console.log("usingId = " + usingId);
+//    console.log("spanElement.id = " + spanElement.id);
+//    console.log("spanIndex = " + spanIndex);
     var value = usingId ? spanElement.id : spanIndex;
     FolioPageFragment.storeFirstVisibleSpan(usingId, value);
 }
@@ -926,11 +914,11 @@ Scrolls the web page to particular span using id or index
 @param {number} value - if usingId true then span id else span index
 */
 function scrollToSpan(usingId, value) {
-    console.log(">>>scrollToSpan1");
+//    console.log(">>>scrollToSpan1");
     var usingIdType = typeof usingId;
 
-    console.log(">>>usingId type = " + usingIdType);
-    console.log(">>>usingId " + usingId);
+//    console.log(">>>usingId type = " + usingIdType);
+//    console.log(">>>usingId " + usingId);
 
     if(usingId == "false") {
         usingId = false;
@@ -942,15 +930,15 @@ function scrollToSpan(usingId, value) {
             goToElement(spanElement);
     } else {
         var spanCollection = document.getElementsByTagName("span");
-        console.log("spanCollection = " + spanCollection.length);
-        console.log("value = " + value);
+//        console.log("spanCollection = " + spanCollection.length);
+//        console.log("value = " + value);
         if (spanCollection.length == 0 || value < 0 || value >= spanCollection.length
             || value == null) {
-            console.log("bug case >>>>>>>>>>");
+//            console.log("bug case >>>>>>>>>>");
                 FolioPageFragment.hideLoading();
             return;
         }
-        console.log(">>>scrollToSpan2");
+//        console.log(">>>scrollToSpan2");
         goToElement(spanCollection[value]);
     }
 
@@ -1026,7 +1014,7 @@ function goToHighlight(highlightId){
 
 function goToAnchor(anchorId) {
     var element = document.getElementById(anchorId);
-    console.log("=====>element = " + element)
+//    console.log("=====>element = " + element)
     if (element)
         goToElement(element);
     FolioPageFragment.hideLoading();

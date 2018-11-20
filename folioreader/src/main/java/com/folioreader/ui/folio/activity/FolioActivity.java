@@ -128,6 +128,7 @@ public class FolioActivity
     private LoadingView loadingView;
     private boolean mImageClicked;
     private String mSelectedChapterHref;
+    private boolean wasScrollLeft;
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -195,6 +196,11 @@ public class FolioActivity
     @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
+    }
+
+    @Override
+    public boolean wasScrollLeft() {
+        return wasScrollLeft;
     }
 
     public Ebook getEbook() {
@@ -661,16 +667,24 @@ public class FolioActivity
         mFolioPageViewPager = (DirectionalViewpager) findViewById(R.id.folioPageViewPager);
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
-            int lastPage;
+            int lastPage = 0;
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                if (lastPage > position) {
+                    //User Move to left
+                    wasScrollLeft = true;
+                } else if (lastPage < position) {
+                    //User Move to right
+                    wasScrollLeft = false;
+                }
+                lastPage = position;
             }
 
             @Override
             public void onPageSelected(int position) {
                 Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
-
+                showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
                 mediaControllerView.setPlayButtonDrawable();
@@ -680,6 +694,7 @@ public class FolioActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
+
             }
         });
 

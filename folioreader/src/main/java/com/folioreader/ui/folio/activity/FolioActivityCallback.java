@@ -31,4 +31,6 @@ public interface FolioActivityCallback {
     void updateEbook(Ebook ebook);
 
     DownloadInfo getDownloadInfo();
+
+    boolean wasScrollLeft();
 }
