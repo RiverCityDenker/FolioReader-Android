@@ -5,6 +5,8 @@ import android.content.Context;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
+import java.lang.ref.WeakReference;
+
 public class DownloadFileTask extends ParallelExecutorTask<String, Integer, Ebook> {
     private final Context context;
     private final boolean isBasicData;

@@ -373,3 +373,13 @@ table.standardtable ul {
 table.standardtable ol {
     margin-left: 0 !important;
 }
+
+h1.inhalt1 {
+    margin: 1.3em 0 1.5em 0;
+}
+h2.inhalt2 {
+    margin: 1.3em 0 1.5em 0;
+}
+h3.inhalt3 {
+    margin: 1.3em 0 1.5em 0;
+}

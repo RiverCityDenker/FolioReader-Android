@@ -353,7 +353,7 @@ public class FolioPageFragment
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void reload(ReloadDataEvent reloadDataEvent) {
-
+        showLoading();
         if (isCurrentFragment())
             getLastReadPosition();
 
@@ -565,11 +565,12 @@ public class FolioPageFragment
                 if (isOnline(activity)) {
                     if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                             || mContentKey == null || mContentKey.isEmpty()) {
-                        mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+                        mPresenter.downloadSingleFile(activity.getApplicationContext(), mActivityCallback.getDownloadInfo(),
                                 activity.getEbook(),
                                 spineItem.href);
-                    } else
+                    } else {
                         onReceiveHtml(CryptoManager.decryptContentKey(mContentKey, mUserKey, getFilePath()));
+                    }
                 } else {
                     if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                             || mContentKey == null || mContentKey.isEmpty()) {
@@ -642,7 +643,7 @@ public class FolioPageFragment
         if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                 || mContentKey == null || mContentKey.isEmpty()) {
             final FolioActivity activity = (FolioActivity) getActivity();
-            mPresenter.downloadSingleFile(activity, mActivityCallback.getDownloadInfo(),
+            mPresenter.downloadSingleFile(activity.getApplicationContext(), mActivityCallback.getDownloadInfo(),
                     activity.getEbook(),
                     spineItem.href);
         }
@@ -767,7 +768,6 @@ public class FolioPageFragment
                 if (lastReadPosition != null) {
                     new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
                             lastReadPosition.isUsingId(), lastReadPosition.getValue())));
-
                 } else {
                     Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
                 }
@@ -777,7 +777,8 @@ public class FolioPageFragment
                     mWebview.loadPage("javascript:scrollToLast()");
                 } else {
                     // Make loading view invisible for all other fragments
-                    loadingView.hide();
+                    if (!mIsOnlineReading)
+                        hideLoading();
                 }
             }
             mIsPageReloaded = false;
@@ -803,7 +804,7 @@ public class FolioPageFragment
                 scrollToFirst();
                 scrollToAnchorId(selectedChapterHref);
             } else {
-                loadingView.hide();
+                hideLoading();
             }
         } else {
             if (mPosition == mActivityCallback.getChapterPosition() - 1) {
@@ -811,7 +812,7 @@ public class FolioPageFragment
                 mWebview.loadPage("javascript:scrollToLast()");
             } else {
                 // Make loading view invisible for all other fragments
-                loadingView.hide();
+                hideLoading();
                 if (FolioActivity.mIsDirectionChanged) {
                     FolioActivity.mIsDirectionChanged = false;
                 }

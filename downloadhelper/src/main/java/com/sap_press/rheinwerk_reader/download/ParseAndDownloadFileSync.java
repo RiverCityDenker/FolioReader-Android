@@ -1,6 +1,7 @@
 package com.sap_press.rheinwerk_reader.download;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.sap_press.rheinwerk_reader.utils.FileUtil.isFileExist;
+
 /**
  * Created by hale on 11/1/2018.
  */
@@ -32,16 +35,18 @@ public class ParseAndDownloadFileSync {
     private String appVersion;
     private AtomicInteger downloadedCount = new AtomicInteger();
     private ThreadPoolExecutor poolExecutor = ParallelExecutorTask.createPool();
-    private static final String TAG = ParseAndDownloadFileAsyn.class.getSimpleName();
+    private Context context;
+    private static final String TAG = ParseAndDownloadFileSync.class.getSimpleName();
 
     public interface DownloadFinishCallback {
         void downloadFinish();
     }
 
-    ParseAndDownloadFileSync(String apiKey, String folderPath,
+    ParseAndDownloadFileSync(Context context, String apiKey, String folderPath,
                              String originalHref, String baseUrl,
                              String ebookId, String token,
                              String appVersion) {
+        this.context = context;
         this.apiKey = apiKey;
         this.folderPath = folderPath;
         this.originalHref = originalHref;
@@ -53,6 +58,7 @@ public class ParseAndDownloadFileSync {
 
     public void parseAndDownload(String contentKey, DownloadFinishCallback callback) {
         final String html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
+        Log.e(TAG, "parseAndDownload: >>>>>>>>>>>>>>>>>" + originalHref);
         try {
             parseHtml(html, callback);
         } catch (EpubParserException e) {
@@ -66,7 +72,6 @@ public class ParseAndDownloadFileSync {
             throw new EpubParserException("Error while parsing");
         }
         ArrayList<String> filesToLoad = new ArrayList<>();
-
         NodeList itemNodes = document.getElementsByTagNameNS("*", "img");
         if (itemNodes != null) {
             for (int i = 0; i < itemNodes.getLength(); i++) {
@@ -79,7 +84,9 @@ public class ParseAndDownloadFileSync {
                         case "src":
                             final String src = attr.getNodeValue();
                             final String href = FileUtil.reformatHref(src);
-                            filesToLoad.add(href);
+                            if (!isFileExist(context, ebookId, href)) {
+                                filesToLoad.add(href);
+                            }
                             break;
                     }
                 }
@@ -87,8 +94,8 @@ public class ParseAndDownloadFileSync {
         }
 
         NodeList linkNodes = document.getElementsByTagNameNS("*", "a");
+        List<String> srcList = new ArrayList<>();
         if (linkNodes != null) {
-            List<String> srcList = new ArrayList<>();
             for (int i = 0; i < linkNodes.getLength(); i++) {
                 Element itemElement = (Element) linkNodes.item(i);
                 NamedNodeMap nodeMap = itemElement.getAttributes();
@@ -99,7 +106,9 @@ public class ParseAndDownloadFileSync {
                         if (!srcList.contains(src) && src.contains(".html")) {
                             final String href = FileUtil.reformatHref(src);
                             srcList.add(src);
-                            filesToLoad.add(href);
+                            if (!isFileExist(context, ebookId, href)) {
+                                filesToLoad.add(href);
+                            }
                         }
                         break;
                     }
@@ -116,6 +125,7 @@ public class ParseAndDownloadFileSync {
             @SuppressLint("StaticFieldLeak") ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
                 @Override
                 protected Object doInBackground(Object[] objects) {
+                    Log.d(TAG, "doInBackground: >>>imageHref = " + s);
                     try {
                         final String fileUrl = baseUrl + "ebooks/" + ebookId
                                 + "/download?app_version=" + appVersion
@@ -123,8 +133,8 @@ public class ParseAndDownloadFileSync {
                         HTTPDownloader.downloadFile(fileUrl, token, folderPath, s, appVersion);
                         checkDownloadFinished();
                     } catch (Exception e) {
-                        checkDownloadFinished();
                         Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
+                        checkDownloadFinished();
                     }
 
                     return null;
@@ -134,6 +144,7 @@ public class ParseAndDownloadFileSync {
                     int current = downloadedCount.incrementAndGet();
                     if (current == filesToLoad.size()) {
                         //all download finished
+                        Log.d(TAG, "checkDownloadFinished: >>>all download finished, href = " + originalHref);
                         callback.downloadFinish();
                     }
                 }

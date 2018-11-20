@@ -68,7 +68,7 @@ public class DownloadFileTaskSync {
         final String contentKey = downloadSingleFile(context, fileUrl, href, appVersion, DownloadService.RETRY_COUNT);
         if (href.contains(".html") && !href.contains("toc.html")) {
             if (contentKey != null && !contentKey.equalsIgnoreCase(DownloadService.ERROR_DOWNLOAD_FILE)) {
-                new ParseAndDownloadFileSync(apiKey, folderPath, originalHref,
+                new ParseAndDownloadFileSync(context, apiKey, folderPath, originalHref,
                         baseUrl, ebookId, token, appVersion).parseAndDownload(contentKey,
                         () -> downloadContentFinished(href, contentKey));
             } else {

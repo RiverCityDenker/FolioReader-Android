@@ -195,6 +195,11 @@ public class FolioActivity
     }
 
     @Override
+    public void setOnlineReadingStatus(boolean isOnlineReading) {
+        mIsOnlineReading = true;
+    }
+
+    @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
     }
@@ -413,6 +418,7 @@ public class FolioActivity
         String selectedChapterHref = event.getHref();
         for (Link spine : mSpineReferenceList) {
             if (selectedChapterHref.contains(spine.href)) {
+                Log.e(TAG, "onTOCClickedEvent: >>>" + selectedChapterHref);
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
@@ -533,7 +539,8 @@ public class FolioActivity
         mFolioPageViewPager.setDirection(newDirection);
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                    mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+                    mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
+                    mEpubSourceType);
         } else {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                     mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
@@ -579,8 +586,8 @@ public class FolioActivity
 
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
                         mFolioPageFragmentAdapter.getItem(mChapterPosition);
-                folioPageFragment.showLoading();
-
+                if (!folioPageFragment.isCurrentFragment())
+                    folioPageFragment.showLoading();
                 mSelectedChapterHref = selectedChapterHref;
                 break;
             }
@@ -715,7 +722,8 @@ public class FolioActivity
             mFolioPageViewPager.setDirection(direction);
             if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                        mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey, mEpubSourceType);
+                        mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
+                        mEpubSourceType);
             } else {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                         mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
@@ -908,7 +916,7 @@ public class FolioActivity
     }
 
     private void downloadContent() {
-        getPresenter().downloadContent(this, mEbook, mDownloadInfo);
+        getPresenter().downloadContent(this.getApplicationContext(), mEbook, mDownloadInfo);
     }
 
     private void initBook() {

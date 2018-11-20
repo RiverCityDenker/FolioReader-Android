@@ -122,7 +122,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         if (isFileExist(getActivity(), mBookName, href)) {
             configAndDownloadImage();
         } else {
-            getPresenter().downloadLinkedFile(getActivity(), mDownloadInfo, mBookName, href);
+            getPresenter().downloadLinkedFile(getActivity().getApplicationContext(), mDownloadInfo, mBookName, href);
         }
 
         return view;

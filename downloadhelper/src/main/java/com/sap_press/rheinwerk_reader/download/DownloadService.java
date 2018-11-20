@@ -23,7 +23,6 @@ import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.events.DestroyDownloadServiceEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadBasicFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
-import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnDownloadInterruptedBookEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
 import com.sap_press.rheinwerk_reader.download.events.PausedDownloadingEvent;
@@ -99,6 +98,8 @@ public class DownloadService extends Service {
     private boolean mIsNetworkResume;
     private List<String> failedDownloadFiles = new ArrayList<>();
     private boolean mIsTryAgain;
+    private ArrayList<EpubBook.Manifest> imageFileList;
+    private ArrayList<EpubBook.Manifest> otherFileList;
 
     public DownloadService() {
     }
@@ -342,7 +343,7 @@ public class DownloadService extends Service {
                 AnalyticViewName.download_start, ebook.getTitle(), (long) ebook.getFileSize());
         dataManager.saveTimestampDownload(ebook.getTitle());
         final String token = dataManager.getAccessToken();
-        downloadContent(this, ebook, token, mAppVersion, mBaseUrl, DownloadUtil.OFFLINE);
+        downloadContent(this.getApplicationContext(), ebook, token, mAppVersion, mBaseUrl, DownloadUtil.OFFLINE);
     }
 
     public void downloadContent(Context context,
@@ -458,8 +459,6 @@ public class DownloadService extends Service {
                 dataManager = DownloadDataManager.getInstance();
             dataManager.updateEbookPath(ebook.getId(), filePath);
             downloadBasicFile(context, ebook, apiInfo, epub, ebookId);
-            EventBus.getDefault().post(new FinishDownloadContentEvent(ebook));
-
         } else {
             long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
             googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
@@ -509,14 +508,31 @@ public class DownloadService extends Service {
         final String folderPath = getEbookPath(this, ebookId);
         mIsTryAgain = totalFileListNeedToDownload > 0 && totalFileListNeedToDownload < ebook.getTotal();
         if (totalFileListNeedToDownload > 0) {
-            for (int i = 0; i < totalFileListNeedToDownload; i++) {
-                final EpubBook.Manifest manifest = fileListForDownload.get(i);
-                DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(ebook, folderPath, token, i, executor);
-                downloadFileAsyn.executeParallel(manifest);
-            }
+            splitToFileListFromContent(fileListForDownload);
+            downloadFileList(imageFileList, token, ebook, folderPath);
         } else {
             ebook.setDownloadProgress(DOWNLOAD_COMPLETED);
-            downloadSingleSucscess(ebook, ++progress);
+            downloadSingleSucscess(ebook, ++progress, token, folderPath);
+        }
+    }
+
+    private void downloadFileList(ArrayList<EpubBook.Manifest> fileList, String token, Ebook ebook, String folderPath) {
+        for (int i = 0; i < fileList.size(); i++) {
+            final EpubBook.Manifest manifest = fileList.get(i);
+            DownloadFileAsyn downloadFileAsyn = new DownloadFileAsyn(ebook, folderPath, token, i, executor);
+            downloadFileAsyn.executeParallel(manifest);
+        }
+    }
+
+    private void splitToFileListFromContent(ArrayList<EpubBook.Manifest> fileListForDownload) {
+        imageFileList = new ArrayList<>();
+        otherFileList = new ArrayList<>();
+        for (EpubBook.Manifest manifest : fileListForDownload) {
+            if (manifest.getMediaType().contains("image")) {
+                imageFileList.add(manifest);
+            } else {
+                otherFileList.add(manifest);
+            }
         }
     }
 
@@ -554,12 +570,12 @@ public class DownloadService extends Service {
             synchronized (DownloadService.class) {
                 if (contentKey != null) {
                     if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
-                        downloadSingleSucscess(ebook, ++progress);
+                        downloadSingleSucscess(ebook, ++progress, token, folderPath);
                     } else {
-                        downloadSingleSucscess(ebook, --progress);
+                        downloadSingleSucscess(ebook, --progress, token, folderPath);
                     }
                 } else {
-                    downloadSingleSucscess(ebook, ++progress);
+                    downloadSingleSucscess(ebook, ++progress, token, folderPath);
                 }
             }
 
@@ -602,7 +618,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private void downloadSingleSucscess(Ebook ebook, long fileCount) {
+    private void downloadSingleSucscess(Ebook ebook, long fileCount, String token, String folderPath) {
         synchronized (DownloadService.class) {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
@@ -614,13 +630,13 @@ public class DownloadService extends Service {
             }
 
             if ((fileCount + failedDownloadFiles.size()) == ebook.getTotal()) {
-                Log.e(TAG, "downloadSingleSucscess:2 >>>" + fileCount + " : " + failedDownloadFiles.size() + " : " + ebook.getTotal());
+                Log.d(TAG, "downloadSingleSucscess:2 >>>" + fileCount + " : " + failedDownloadFiles.size() + " : " + ebook.getTotal());
                 if (!failedDownloadFiles.isEmpty()) {
                     if (executor != null) {
                         shutdownAndAwaitTermination(executor);
                     }
                     int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
-                    Log.e(TAG, "downloadSingleSucscess: 2-1" + successProgressPercent);
+                    Log.d(TAG, "downloadSingleSucscess: 2-1" + successProgressPercent);
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
@@ -645,7 +661,7 @@ public class DownloadService extends Service {
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
-                    Log.e(TAG, "downloadSingleSucscess: 2-2" + successProgressPercent);
+                    Log.d(TAG, "downloadSingleSucscess: 2-2" + successProgressPercent);
                     dataManager.updateEbook(ebook);
                     resetDownloadFailedByFile();
                     downloadNextOrStop(true, ebook.getId());
@@ -653,10 +669,16 @@ public class DownloadService extends Service {
                 }
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
                 return;
+            } else if (isFinishedDownloadImage(fileCount)) {
+                downloadFileList(otherFileList, token, ebook, folderPath);
             }
 
             EventBus.getDefault().post(new DownloadingEvent(ebook));
         }
+    }
+
+    private boolean isFinishedDownloadImage(long fileCount) {
+        return fileCount + failedDownloadFiles.size() == imageFileList.size();
     }
 
     private void resetDownloadState(Ebook ebook) {
