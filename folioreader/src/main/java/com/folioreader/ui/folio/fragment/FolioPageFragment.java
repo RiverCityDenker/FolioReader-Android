@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -766,8 +765,13 @@ public class FolioPageFragment
                     lastReadPosition = folioReader.getReadPosition(mBookId);
                 }
                 if (lastReadPosition != null) {
-                    new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
-                            lastReadPosition.isUsingId(), lastReadPosition.getValue())));
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                                    lastReadPosition.isUsingId(), lastReadPosition.getValue()));
+                        }
+                    });
                 } else {
                     Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
                 }
@@ -797,8 +801,8 @@ public class FolioPageFragment
                 savedInstanceState.remove(BUNDLE_READ_POSITION_CONFIG_CHANGE);
             }
             if (readPosition != null) {
-                new Handler().post(() -> mWebview.loadPage(String.format(getString(R.string.go_to_span),
-                        readPosition.isUsingId(), readPosition.getValue())));
+                mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                        readPosition.isUsingId(), readPosition.getValue()));
             } else if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
                 final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
                 scrollToFirst();
@@ -950,12 +954,12 @@ public class FolioPageFragment
     @JavascriptInterface
     public void setHorizontalPageCount(int horizontalPageCount) {
         mWebview.setHorizontalPageCount(horizontalPageCount);
-        if (isCurrentFragment()) {
-            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-                getActivity().runOnUiThread(() -> scrollToAnchorId(selectedChapterHref));
-            }
-        }
+//        if (isCurrentFragment()) {
+//            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
+//                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
+//                getActivity().runOnUiThread(() -> scrollToAnchorId(selectedChapterHref));
+//            }
+//        }
         isHorizontalPaging = false;
         if (mActivityCallback.isScrolling()) {
             if (mActivityCallback.wasScrollLeft()) {

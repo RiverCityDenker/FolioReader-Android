@@ -91,6 +91,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
+import static com.folioreader.view.DirectionalViewpager.SCROLL_STATE_DRAGGING;
 import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createPausedDownloadDialog;
 
 public class FolioActivity
@@ -697,7 +698,6 @@ public class FolioActivity
                     wasScrollLeft = false;
                 }
                 lastPage = position;
-                isScrolling = true;
             }
 
             @Override
@@ -713,7 +713,10 @@ public class FolioActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                Toast.makeText(FolioActivity.this, "state " + state, Toast.LENGTH_SHORT).show();
+                if (state == SCROLL_STATE_DRAGGING) {
+                    isScrolling = true;
+                }
             }
         });
 
