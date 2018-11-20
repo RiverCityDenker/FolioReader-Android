@@ -354,6 +354,7 @@ public class FolioActivity
             getWindow().setNavigationBarColor(color);
         }
         toolbar.setEbook(mEbook);
+        toolbar.setTitle(titleEbook);
         updateDownloadProgress(mEbook);
     }
 
@@ -557,7 +558,6 @@ public class FolioActivity
             if (selectedChapterHref.contains(spine.href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                toolbar.setTitle(spine.getChapterTitle());
 
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
                         mFolioPageFragmentAdapter.getItem(mChapterPosition);
@@ -586,7 +586,6 @@ public class FolioActivity
             if (spine.href.contains(href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                toolbar.setTitle(spine.getChapterTitle());
                 break;
             }
         }
@@ -618,9 +617,6 @@ public class FolioActivity
     @Override
     public void onLoadPublication(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
-        if (publication.metadata.title != null) {
-            toolbar.setTitle(publication.metadata.title);
-        }
 
         if (mBookId == null) {
             if (publication.metadata.identifier != null) {
@@ -638,9 +634,6 @@ public class FolioActivity
 
     public void onLoadPublicationCustom(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
-        if (publication.metadata.title != null) {
-            toolbar.setTitle(publication.metadata.title);
-        }
 
         if (mBookId == null) {
             if (publication.metadata.identifier != null) {
@@ -674,7 +667,6 @@ public class FolioActivity
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
                 mediaControllerView.setPlayButtonDrawable();
                 mChapterPosition = position;
-                toolbar.setTitle(mSpineReferenceList.get(mChapterPosition).bookTitle);
             }
 
             @Override
