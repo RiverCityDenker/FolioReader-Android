@@ -129,6 +129,7 @@ public class FolioActivity
     private boolean mImageClicked;
     private String mSelectedChapterHref;
     private boolean wasScrollLeft;
+    private boolean isScrolling;
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -201,6 +202,16 @@ public class FolioActivity
     @Override
     public boolean wasScrollLeft() {
         return wasScrollLeft;
+    }
+
+    @Override
+    public boolean isScrolling() {
+        return isScrolling;
+    }
+
+    @Override
+    public void setScrolling(boolean isScrolling) {
+        this.isScrolling = isScrolling;
     }
 
     public Ebook getEbook() {
@@ -679,6 +690,7 @@ public class FolioActivity
                     wasScrollLeft = false;
                 }
                 lastPage = position;
+                isScrolling = true;
             }
 
             @Override

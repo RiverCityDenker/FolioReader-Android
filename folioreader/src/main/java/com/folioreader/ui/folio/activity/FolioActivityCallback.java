@@ -33,4 +33,8 @@ public interface FolioActivityCallback {
     DownloadInfo getDownloadInfo();
 
     boolean wasScrollLeft();
+
+    boolean isScrolling();
+
+    void setScrolling(boolean isScrolling);
 }

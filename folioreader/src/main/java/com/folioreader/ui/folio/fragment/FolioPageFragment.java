@@ -956,11 +956,18 @@ public class FolioPageFragment
             }
         }
         isHorizontalPaging = false;
-//        if (mActivityCallback.wasScrollLeft()) {
-//            getActivity().runOnUiThread(this::scrollToLast);
-//        } else {
-//            getActivity().runOnUiThread(this::scrollToFirst);
-//        }
+        if (mActivityCallback.isScrolling()) {
+            if (mActivityCallback.wasScrollLeft()) {
+                Toast.makeText(getContext(), "scroll left", Toast.LENGTH_SHORT).show();
+                getActivity().runOnUiThread(this::scrollToLast);
+            } else {
+                Toast.makeText(getContext(), "scroll right", Toast.LENGTH_SHORT).show();
+                getActivity().runOnUiThread(this::scrollToFirst);
+            }
+            mActivityCallback.setScrolling(false);
+        } else {
+            hideLoading();
+        }
     }
 
     private void loadRangy(final WebView view, final String rangy) {
