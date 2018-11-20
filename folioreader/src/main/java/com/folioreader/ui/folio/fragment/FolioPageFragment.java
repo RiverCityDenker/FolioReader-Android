@@ -765,13 +765,8 @@ public class FolioPageFragment
                     lastReadPosition = folioReader.getReadPosition(mBookId);
                 }
                 if (lastReadPosition != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mWebview.loadPage(String.format(getString(R.string.go_to_span),
-                                    lastReadPosition.isUsingId(), lastReadPosition.getValue()));
-                        }
-                    });
+                    mWebview.loadPage(String.format(getString(R.string.go_to_span),
+                            lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                 } else {
                     Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
                 }

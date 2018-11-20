@@ -59,6 +59,7 @@ public class DialogFactory {
                 }).create();
         boolean isSkip = SharedPreferenceUtil.getSharedPreferencesBoolean(context, SharedPreferenceUtil.PREF_KEY_DIALOG_SKIP, false);
         if (!isSkip) {
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
