@@ -2,6 +2,7 @@ package com.folioreader.view;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.webkit.WebView;
 import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
+import com.folioreader.util.ReadPositionUtil;
 
 /**
  * @author by mahavir on 3/31/16.
@@ -61,10 +63,6 @@ public class FolioWebView extends WebView
         gestureDetector.setOnDoubleTapListener(this);
         density = getResources().getDisplayMetrics().density;
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-    }
-
-    public interface ScrollToReadPositionCallback {
-        void finish();
     }
 
     @SuppressWarnings("unused")
@@ -187,6 +185,21 @@ public class FolioWebView extends WebView
             if (webViewPager != null) {
                 webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
             }
+        });
+    }
+
+    public void setPageCountByLandspace(int horizontalPageCount) {
+        this.horizontalPageCount = horizontalPageCount;
+
+        handler.post(() -> {
+            if (webViewPager == null) {
+                webViewPager = ((View) getParent()).findViewById(R.id.webViewPager);
+            }
+
+            webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
+
+            loadPage(String.format(getContext().getString(R.string.go_to_span),
+                    ReadPositionUtil.getReadPosition().isUsingId(), ReadPositionUtil.getReadPosition().getValue()));
         });
     }
 

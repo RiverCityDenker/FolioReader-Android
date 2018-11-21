@@ -10,11 +10,13 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +28,6 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -536,8 +537,6 @@ public class FolioPageFragment
 
         mWebview.setWebChromeClient(webChromeClient);
         mWebview.setWebViewClient(webViewClient);
-        mWebview.getSettings().setDomStorageEnabled(true);
-        mWebview.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
         mTextSelectionSupport = TextSelectionSupport.support(getActivity(), mWebview);
         mTextSelectionSupport.setSelectionListener(new TextSelectionSupport.SelectionListener() {
@@ -594,7 +593,21 @@ public class FolioPageFragment
         super.onConfigurationChanged(newConfig);
         if (getDirection().equals("HORIZONTAL")) {
             if (mHtmlString != null && mConfig.isEnableDirection()) {
-                reload(new ReloadDataEvent());
+                if (isCurrentFragment()) {
+                    getLastReadPosition();
+                }
+
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int height = displayMetrics.heightPixels;
+                int width = displayMetrics.widthPixels;
+                mWebview.setLayoutParams(new FrameLayout.LayoutParams(
+                        width,
+                        height));
+                new Handler().post(() -> {
+                    mWebview.loadPage("javascript:preInitHorizontalDirection()");
+                    mWebview.loadPage("javascript:resizeForLandScape()");
+                });
             }
         }
     }
@@ -761,8 +774,11 @@ public class FolioPageFragment
         if (mIsPageReloaded) {
             if (isCurrentFragment()) {
                 if (lastReadPosition == null) {
-                    FolioReader folioReader = FolioReader.getInstance(getContext());
-                    lastReadPosition = folioReader.getReadPosition(mBookId);
+                    lastReadPosition = mActivityCallback.getLastReadPosition();
+                    if (lastReadPosition == null) {
+                        FolioReader folioReader = FolioReader.getInstance(getContext());
+                        lastReadPosition = folioReader.getReadPosition(mBookId);
+                    }
                 }
                 if (lastReadPosition != null) {
                     mWebview.loadPage(String.format(getString(R.string.go_to_span),
@@ -949,27 +965,25 @@ public class FolioPageFragment
     @JavascriptInterface
     public void setHorizontalPageCount(int horizontalPageCount) {
         mWebview.setHorizontalPageCount(horizontalPageCount);
-//        if (isCurrentFragment()) {
-//            if (!TextUtils.isEmpty(((FolioActivity) getActivity()).getSelectedChapterHref())) {
-//                final String selectedChapterHref = ((FolioActivity) getActivity()).getSelectedChapterHref();
-//                getActivity().runOnUiThread(() -> scrollToAnchorId(selectedChapterHref));
-//            }
-//        }
         isHorizontalPaging = false;
 
         if (mActivityCallback.isScrolling()) {
             if (mActivityCallback.wasScrollLeft()) {
-//                Toast.makeText(getContext(), "scroll left", Toast.LENGTH_SHORT).show();
                 getActivity().runOnUiThread(this::scrollToLast);
             } else {
-//                Toast.makeText(getContext(), "scroll right", Toast.LENGTH_SHORT).show();
                 getActivity().runOnUiThread(this::scrollToFirst);
             }
             mActivityCallback.setScrolling(false);
-        }
-        else {
+        } else {
             hideLoading();
         }
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void setHorizontalPageCountByLandSpace(int horizontalPageCount) {
+        mWebview.setPageCountByLandspace(horizontalPageCount);
+        isHorizontalPaging = false;
     }
 
     private void loadRangy(final WebView view, final String rangy) {
