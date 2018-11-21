@@ -89,7 +89,7 @@ public class DownloadManager {
             if (!ebookAfterUpdate.isDownloaded()) {
                 EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate, isFullDelete));
             }
-            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate, isFullDelete)
+            compositeSubscription.add(dataManager.deleteEbook(context.getApplicationContext(), ebookAfterUpdate, isFullDelete)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(listener::deleteEbookSuccess));
@@ -110,7 +110,7 @@ public class DownloadManager {
             if (!ebookAfterUpdate.isDownloaded()) {
                 EventBus.getDefault().post(new CancelDownloadEvent(ebookAfterUpdate, true));
             }
-            compositeSubscription.add(dataManager.deleteEbook(ebookAfterUpdate, true)
+            compositeSubscription.add(dataManager.deleteEbook(context, ebookAfterUpdate, true)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(listener::deleteEbookSuccess));

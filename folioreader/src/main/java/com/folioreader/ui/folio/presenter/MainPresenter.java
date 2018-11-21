@@ -149,8 +149,8 @@ public class MainPresenter implements ManifestCallBack {
             mainMvpView.hideLoading();
     }
 
-    public void deleteCacheData(Ebook ebook) {
-        FileUtil.deleteDownloadedEbookFromExternalStorage(ebook, true);
+    public void deleteCacheData(Context applicationContext, Ebook ebook) {
+        FileUtil.deleteDownloadedEbookFromExternalStorage(applicationContext, ebook, true);
     }
 
     public void handleClickOnDownloadingView(Context context, Ebook ebook) {

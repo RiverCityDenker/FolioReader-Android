@@ -177,7 +177,7 @@ public class FileUtil {
         return object;
     }
 
-    public static void deleteDownloadedEbookFromExternalStorage(Ebook ebook, boolean isFullDelete) {
+    public static void deleteDownloadedEbookFromExternalStorage(Context context, Ebook ebook, boolean isFullDelete) {
         String path = ebook.getFilePath();
         if (path == null) {
             Log.w("FileUtil", "path to download is empty: " + path);
@@ -187,6 +187,9 @@ public class FileUtil {
         File file = new File(path);
         if (isFullDelete) {
             deleteDirectory(file);
+            if (isFileExist(context, String.valueOf(ebook.getId()), "content.opf")) {
+                deleteFile(FileUtil.getFile(path, "content.opf"));
+            }
         } else {
             deleteAlmostFilesInReader(file);
         }

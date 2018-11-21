@@ -612,7 +612,7 @@ public class FolioActivity
         }
         Log.e(TAG, "onDestroy: >>>");
         if (isOnlineReading() && !isDownloadingBook()) {
-            getPresenter().deleteCacheData(mEbook);
+            getPresenter().deleteCacheData(getApplicationContext(), mEbook);
         }
         long timeRead = TimeUnit.SECONDS.toSeconds(FileUtil.getCurrentTimeStamp() - SharedPreferenceUtil.getSharedPreferencesLong(this, titleEbook, 1526620402));
         googleAnalytic.sendEvent(AnalyticViewName.eBook_reading_duration, AnalyticViewName.reading_duration, titleEbook, timeRead);

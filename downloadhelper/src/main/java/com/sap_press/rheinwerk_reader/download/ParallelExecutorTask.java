@@ -15,6 +15,8 @@ public abstract class ParallelExecutorTask<Pa, Pr, Re> extends AsyncTask<Pa, Pr,
     private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
     private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
     private static final int KEEP_ALIVE = 1;
+    public static final int LONG_TIME_WAITING_SHUTDOWN = 6;
+    public static final int SHORT_TIME_WAITING_SHUTDOWN = 2;
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 

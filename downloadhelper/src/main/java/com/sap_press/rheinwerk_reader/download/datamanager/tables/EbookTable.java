@@ -238,7 +238,7 @@ public class EbookTable {
     }
 
     public static synchronized boolean update(Ebook ebook, String tableName) {
-        Log.e(TAG, "update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey() + " - isFailed = " + ebook.isDownloadFailed());
+        Log.d(TAG, "update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey() + " - isFailed = " + ebook.isDownloadFailed());
         return EbookDbAdapter.updateEbook(tableName, getEbookContentValues(ebook), String.valueOf(ebook.getId()));
     }
 
