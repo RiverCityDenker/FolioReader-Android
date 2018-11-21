@@ -608,7 +608,8 @@ public class DownloadService extends Service {
             if (progressPercent > 100
                     || downloadedPercent < 0
                     || (downloadFileAsyn != null && downloadFileAsyn.isStop())
-                    || isCancelDownloading)
+                    || isCancelDownloading
+                    || !isOnline(this))
                 return;
 
             if (progressPercent >= downloadedPercent) {
