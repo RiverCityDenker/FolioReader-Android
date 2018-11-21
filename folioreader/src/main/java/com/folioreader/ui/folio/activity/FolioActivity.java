@@ -695,7 +695,7 @@ public class FolioActivity
 
             @Override
             public void onPageSelected(int position) {
-                Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
+//                Log.d(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
                 showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
@@ -705,7 +705,7 @@ public class FolioActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                Toast.makeText(FolioActivity.this, "state " + state, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(FolioActivity.this, "state " + state, Toast.LENGTH_SHORT).show();
                 if (state == SCROLL_STATE_DRAGGING) {
                     isScrolling = true;
                 }
