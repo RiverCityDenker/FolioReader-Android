@@ -607,7 +607,8 @@ public class DownloadService extends Service {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
             int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
-            if (progressPercent > 100 || downloadedPercent < 0) return;
+            boolean isOnline = isOnline(this);
+            if (progressPercent > 100 || downloadedPercent < 0 || !isOnline) return;
             if (progressPercent >= downloadedPercent) {
                 ebook.setDownloadProgress(progressPercent);
                 dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
