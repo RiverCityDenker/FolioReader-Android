@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 
 import com.folioreader.Config;
 import com.folioreader.Constants;
+import com.folioreader.FolioApp;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -106,7 +107,7 @@ public class AppUtil {
     }
 
     public synchronized static Config getSavedConfig(Context context) {
-        String json = getSharedPreferencesString(context, Config.INTENT_CONFIG, null);
+        String json = getSharedPreferencesString(FolioApp.getContext(), Config.INTENT_CONFIG, null);
         if (json != null) {
             try {
                 JSONObject jsonObject = new JSONObject(json);
