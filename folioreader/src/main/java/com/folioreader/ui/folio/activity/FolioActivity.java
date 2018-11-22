@@ -101,7 +101,7 @@ public class FolioActivity
         MainMvpView,
         MediaControllerCallback,
         FolioToolbarCallback,
-        DialogInterface.OnDismissListener {
+        DialogInterface.OnDismissListener, FolioPageFragmentAdapter.FolioPageAdapterListener {
 
     private static final String LOG_TAG = "FolioActivity";
 
@@ -131,6 +131,8 @@ public class FolioActivity
     private String mSelectedChapterHref;
     private boolean wasScrollLeft;
     private boolean isScrolling;
+    private ArrayList<Integer> mPositionList = new ArrayList<>();
+
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -231,6 +233,35 @@ public class FolioActivity
 
     public String getSelectedChapterHref() {
         return mSelectedChapterHref;
+    }
+
+    @Override
+    public void updatePositionList(int position) {
+        if (!mPositionList.contains(Integer.valueOf(position))) {
+            mPositionList.add(position);
+            Log.e(TAG, "updatePositionList: >>>" + position);
+        }
+    }
+
+    public void doShouldHideLoading(int mPosition) {
+        runOnUiThread(() -> {
+            refreshPositionList();
+            if (mPositionList.contains(mPosition)) {
+                Log.e(TAG, "run: >>>remove " + mPosition);
+                mPositionList.remove(Integer.valueOf(mPosition));
+            }
+            Log.d(TAG, "doShouldHideLoading: >>>>>>>>>>" + mPositionList.size());
+            if (mPositionList.isEmpty()) {
+                hideLoading();
+            }
+        });
+    }
+
+    private void refreshPositionList() {
+        if (mPositionList.size() > 3) {
+            mPositionList.remove(0);
+            refreshPositionList();
+        }
     }
 
     public enum EpubSourceType {
@@ -542,7 +573,7 @@ public class FolioActivity
         if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                     mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
-                    mEpubSourceType);
+                    mEpubSourceType, this);
         } else {
             mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                     mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);
@@ -695,8 +726,8 @@ public class FolioActivity
 
             @Override
             public void onPageSelected(int position) {
-//                Log.d(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
-                showLoading();
+                if (position != 0 && mSpineReferenceList != null && position != mSpineReferenceList.size() -1)
+                    showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
                 mediaControllerView.setPlayButtonDrawable();
@@ -705,7 +736,6 @@ public class FolioActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
-//                Toast.makeText(FolioActivity.this, "state " + state, Toast.LENGTH_SHORT).show();
                 if (state == SCROLL_STATE_DRAGGING) {
                     isScrolling = true;
                 }
@@ -718,7 +748,7 @@ public class FolioActivity
             if (mEpubSourceType.equals(EpubSourceType.ENCRYPTED_FILE)) {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                         mSpineReferenceList, ebookFilePath, mBookId, bookFileName, contentKey, userKey,
-                        mEpubSourceType);
+                        mEpubSourceType, this);
             } else {
                 mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
                         mSpineReferenceList, bookFileName, mBookId, mEpubSourceType);

@@ -1,6 +1,7 @@
 package com.sap_press.rheinwerk_reader.download.datamanager;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
@@ -81,6 +82,7 @@ public class DownloadDataManager {
 
     public Observable<Ebook> deleteEbook(Context context, Ebook ebook, boolean isFullDelete) {
         return Observable.fromCallable(() -> {
+            boolean isDownloading = ebook.isDownloading();
             String filePath = LibraryTable.getEbook(ebook.getId()).getFilePath();
             ebook.setFilePath(filePath);
             FileUtil.deleteDownloadedEbookFromExternalStorage(context, ebook, isFullDelete);
@@ -89,7 +91,10 @@ public class DownloadDataManager {
             else
                 ebook.resetApartInfo();
             LibraryTable.updateEbook(ebook);
-            Thread.sleep(6000);
+            if (isDownloading) {
+                Log.e("DownloadDataManager", "deleteEbook: >>>book is downloading ...");
+                Thread.sleep(6000);
+            }
             return ebook;
         });
     }

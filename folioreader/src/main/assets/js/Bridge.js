@@ -952,7 +952,7 @@ Scrolls the web page to particular span using id or index
 @param {number} value - if usingId true then span id else span index
 */
 function scrollToSpan(usingId, value) {
-//    console.log(">>>scrollToSpan1");
+    console.log(">>>scrollToSpan1");
     var usingIdType = typeof usingId;
 
 //    console.log(">>>usingId type = " + usingIdType);
@@ -980,7 +980,7 @@ function scrollToSpan(usingId, value) {
         goToElement(spanCollection[value]);
     }
 
-    
+        console.log("Bridge : >>>>>>hideLoading")
         FolioPageFragment.hideLoading();
 }
 

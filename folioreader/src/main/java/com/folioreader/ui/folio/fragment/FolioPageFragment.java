@@ -472,7 +472,8 @@ public class FolioPageFragment
     @JavascriptInterface
     public void hideLoading() {
         if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> loadingView.hide());
+            Log.d(TAG, "hideLoading: >>>>>>>>>>" + mPosition);
+            ((FolioActivity) getActivity()).doShouldHideLoading(mPosition);
         }
     }
 
@@ -593,6 +594,7 @@ public class FolioPageFragment
         super.onConfigurationChanged(newConfig);
         if (getDirection().equals("HORIZONTAL")) {
             if (mHtmlString != null && mConfig.isEnableDirection()) {
+                showLoading();
                 if (isCurrentFragment()) {
                     getLastReadPosition();
                 }

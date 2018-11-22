@@ -197,7 +197,7 @@ public class FolioWebView extends WebView
             }
 
             webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
-
+            Log.d("FolioWebView", "setPageCountByLandspace: >>>");
             loadPage(String.format(getContext().getString(R.string.go_to_span),
                     ReadPositionUtil.getReadPosition().isUsingId(), ReadPositionUtil.getReadPosition().getValue()));
         });
