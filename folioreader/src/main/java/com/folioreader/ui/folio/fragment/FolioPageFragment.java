@@ -1165,10 +1165,10 @@ public class FolioPageFragment
 //                getString(R.string.copy)));
         quickAction.addActionItem(new ActionItem(ACTION_ID_HIGHLIGHT,
                 getString(R.string.highlight)));
-        if (!mSelectedText.trim().contains(" ")) {
-            quickAction.addActionItem(new ActionItem(ACTION_ID_DEFINE,
-                    getString(R.string.define)));
-        }
+//        if (!mSelectedText.trim().contains(" ")) {
+//            quickAction.addActionItem(new ActionItem(ACTION_ID_DEFINE,
+//                    getString(R.string.define)));
+//        }
 //  Remove Share function in version 1.0
 //        quickAction.addActionItem(new ActionItem(ACTION_ID_SHARE,
 //                getString(R.string.share)));
