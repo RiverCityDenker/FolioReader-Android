@@ -25,6 +25,8 @@ public abstract class ParallelExecutorTask<Pa, Pr, Re> extends AsyncTask<Pa, Pr,
 
     private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<>();
 
+    public static final ThreadPoolExecutor DEFAULT_POOL = createPool();
+
     private final ThreadPoolExecutor poolExecutor;
 
     ParallelExecutorTask(ThreadPoolExecutor poolExecutor) {

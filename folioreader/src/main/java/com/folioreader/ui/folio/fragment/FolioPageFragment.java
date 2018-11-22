@@ -175,6 +175,8 @@ public class FolioPageFragment
     private FolioPagePresenter mPresenter;
     private boolean mIsErrorPage;
     private boolean isHorizontalPaging;
+    private Handler handler = new Handler();
+//    private DirectionalViewpager viewPager;
 
     public static FolioPageFragment newInstance(int position, String bookTitle, Link spineRef, String bookId, FolioActivity.EpubSourceType mEpubSourceType) {
         FolioPageFragment fragment = new FolioPageFragment();
@@ -185,6 +187,7 @@ public class FolioPageFragment
         args.putString(KEY_SOURCE_TYPE, mEpubSourceType.name());
         args.putSerializable(SPINE_ITEM, spineRef);
         fragment.setArguments(args);
+//        fragment.setViewPager(viewpager);
         return fragment;
     }
 
@@ -203,6 +206,7 @@ public class FolioPageFragment
         args.putString(KEY_FRAGMENT_FOLIO_BOOK_CONTENT_KEY, contentKey);
         args.putString(KEY_FRAGMENT_FOLIO_BOOK_USER_KEY, userKey);
         fragment.setArguments(args);
+//        fragment.setViewPager(viewpager);
         return fragment;
     }
 
@@ -258,8 +262,14 @@ public class FolioPageFragment
 
         mConfig = AppUtil.getSavedConfig(getContext());
         mIsOnlineReading = ((FolioActivity) getActivity()).isOnlineReading();
-        loadingView = ((FolioActivity) getActivity()).getLoadingView();
-        showLoading();
+
+        loadingView = mRootView.findViewById(R.id.loadingView);
+        //todoHa this code is bad too
+//        ((FolioActivity) getActivity()).hideLoading();
+//        showLoading();
+        if(isHorizontalPaging) {
+            showLoading();
+        }
         initSeekbar();
         initAnimations();
         initWebView();
@@ -387,9 +397,14 @@ public class FolioPageFragment
             Log.e(TAG, "scrollToAnchorId: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
-            if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
-                getActivity().runOnUiThread(() -> loadingView.show());
-            }
+
+            //todoHa
+//            if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
+//            if (loadingView != null) {
+            getActivity().runOnUiThread(() -> showLoading());
+//            }
+
+            //todoHa why need to scroll to first here?
         } else {
             scrollToFirst();
         }
@@ -467,20 +482,11 @@ public class FolioPageFragment
         return mActivityCallback.getDirection().toString();
     }
 
-
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void hideLoading() {
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> loadingView.hide());
-        }
-    }
-
     public void scrollToLast() {
-        boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
-        if (!isPageLoading) {
-            loadingView.show();
-        }
+//        boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
+//        if (!isPageLoading) {
+//            loadingView.show();
+//        }
         mWebview.loadPage("javascript:scrollToLast()");
     }
 
@@ -490,11 +496,11 @@ public class FolioPageFragment
     }
 
     public void scrollToFirst() {
-        boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
-        if (!isPageLoading) {
-            if (getActivity() != null)
-                getActivity().runOnUiThread(() -> loadingView.show());
-        }
+//        boolean isPageLoading = loadingView == null || loadingView.getVisibility() == View.VISIBLE;
+//        if (!isPageLoading) {
+//            if (getActivity() != null)
+//                getActivity().runOnUiThread(() -> loadingView.show());
+//        }
         mWebview.loadPage("javascript:scrollToFirst()");
     }
 
@@ -784,17 +790,18 @@ public class FolioPageFragment
                     mWebview.loadPage(String.format(getString(R.string.go_to_span),
                             lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                 } else {
-                    Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
+                    Log.e(TAG, "loadContent: lastReadPosition = null");
                 }
             } else {
                 if (mPosition == mActivityCallback.getChapterPosition() - 1) {
                     // Scroll to last, the page before current page
-                    mWebview.loadPage("javascript:scrollToLast()");
-                } else {
-                    // Make loading view invisible for all other fragments
-                    if (!mIsOnlineReading)
-                        hideLoading();
+                   scrollToLast();
                 }
+//                else {
+//                    // Make loading view invisible for all other fragments
+//                    if (!mIsOnlineReading)
+//                        hideLoading();
+//                }
             }
             mIsPageReloaded = false;
         } else if (!TextUtils.isEmpty(mAnchorId)) {
@@ -949,7 +956,6 @@ public class FolioPageFragment
     public void storeFirstVisibleSpan(boolean usingId, String value) {
 
         synchronized (this) {
-            Log.e(TAG, "todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
             lastReadPosition = new ReadPositionImpl(mBookId, spineItem.getId(),
                     spineItem.getOriginalHref(), mPosition, usingId, value);
             Intent intent = new Intent(FolioReader.ACTION_SAVE_READ_POSITION);
@@ -1388,16 +1394,81 @@ public class FolioPageFragment
     public void scrollToHighlightId(String highlightId) {
         this.highlightId = highlightId;
 
-        if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
-            loadingView.show();
-            mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
-            this.highlightId = null;
-        }
+        //todoHa
+//        if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
+        showLoading();
+        mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
+        this.highlightId = null;
+//        }
+    }
+
+
+//    public DirectionalViewpager getViewPager() {
+//        return viewPager;
+//    }
+//
+//    public void setViewPager(DirectionalViewpager viewPager) {
+//        this.viewPager = viewPager;
+//    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void hideLoading() {
+        //todoHa this could be a problem if fragment is auto initiated
+//        if(viewPager != null) {
+//        View view = getView();
+//        if (view != null) {
+//            getView().setFocusable(true);
+//            getView().setClickable(true);
+//            getView().setFocusableInTouchMode(true);
+//            getView().setEnabled(true);
+//        }
+
+//        }
+
+//        if (getActivity() != null) {
+//            getActivity().runOnUiThread(() -> {
+//                Log.d("todoHa", "page: " + spineItem.href);
+//                loadingView.hide();
+//            });
+//        }
+
+        handler.postDelayed(() -> {
+            Log.d("todoHa", "page: " + spineItem.href);
+            loadingView.hide();
+        }, 1000);
+    }
+
+    public boolean isLoadingShow() {
+//        if (loadingView != null) {
+            return loadingView.getVisibility() == View.VISIBLE;
+//        } else {
+//            return false;
+//        }
     }
 
     @Override
     public void showLoading() {
-        if (loadingView != null)
-            loadingView.visible();
+        //todoHa this could be a problem if fragment is auto initiated
+//        if(viewPager != null) {
+//            viewPager.disableSwipe(true);
+//        View view = getView();
+//        if (view != null) {
+//            getView().setFocusable(false);
+//            getView().setClickable(false);
+//            getView().setFocusableInTouchMode(false);
+//            getView().setEnabled(false);
+//        }
+//        }
+//        if (loadingView != null)
+
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                Log.d("todoHa", "page: " + spineItem.href);
+                loadingView.show();
+            });
+        }
     }
+
+
 }

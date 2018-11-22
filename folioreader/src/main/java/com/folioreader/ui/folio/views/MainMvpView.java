@@ -17,9 +17,9 @@ public interface MainMvpView extends BaseMvpView {
 
     void showDownloadError(String message);
 
-    void showLoading();
-
-    void hideLoading();
+//    void showLoading();
+//
+//    void hideLoading();
 
     void exitReader();
 

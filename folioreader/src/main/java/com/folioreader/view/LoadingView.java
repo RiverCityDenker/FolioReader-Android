@@ -3,6 +3,7 @@ package com.folioreader.view;
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.webkit.JavascriptInterface;
 import android.widget.FrameLayout;
@@ -46,7 +47,6 @@ public class LoadingView extends FrameLayout {
         progressBar = findViewById(R.id.progressBar);
 
         updateTheme();
-        show();
     }
 
     public void updateTheme() {
@@ -60,24 +60,14 @@ public class LoadingView extends FrameLayout {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void show() {
+        Log.d("todoHa", "show", new Exception());
         setVisibility(VISIBLE);
     }
 
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void hide() {
-        setVisibility(INVISIBLE);
-    }
-
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void visible() {
-        setVisibility(VISIBLE);
-    }
-
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void invisible() {
+        Log.d("todoHa", "hide", new Exception());
         setVisibility(INVISIBLE);
     }
 }

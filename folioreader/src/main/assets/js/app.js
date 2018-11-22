@@ -146,6 +146,5 @@ function initSSReaderAgain() {
 
         if(typeof window.ssReader !== "undefined"){
           window.ssReader.init();
-          console.log("todoDung ssreader created")
         }
 }

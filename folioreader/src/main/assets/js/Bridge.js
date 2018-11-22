@@ -397,14 +397,6 @@ var LoadingView = {
 
     hide : function() {
         console.warn("-> Mock call to LoadingView.hide()");
-    },
-
-    visible : function() {
-        console.warn("-> Mock call to LoadingView.visible()");
-    },
-
-    invisible : function() {
-        console.warn("-> Mock call to LoadingView.invisible()");
     }
 };*/
 

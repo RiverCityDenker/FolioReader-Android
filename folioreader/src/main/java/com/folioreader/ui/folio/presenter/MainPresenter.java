@@ -140,13 +140,13 @@ public class MainPresenter implements ManifestCallBack {
     }
 
     private void showLoading() {
-        if (mainMvpView != null)
-            mainMvpView.showLoading();
+//        if (mainMvpView != null)
+//            mainMvpView.showLoading();
     }
 
     private void hideLoading() {
-        if (mainMvpView != null)
-            mainMvpView.hideLoading();
+//        if (mainMvpView != null)
+//            mainMvpView.hideLoading();
     }
 
     public void deleteCacheData(Ebook ebook) {

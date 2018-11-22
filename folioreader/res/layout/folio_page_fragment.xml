@@ -4,12 +4,14 @@
     android:id="@+id/folioPageFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/app_green"
     android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/webViewLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/pink"
         android:layout_above="@+id/indicatorLayout">
 
         <com.folioreader.view.WebViewPager
@@ -23,6 +25,13 @@
             android:layout_height="match_parent" />
 
     </FrameLayout>
+
+    <com.folioreader.view.LoadingView
+        android:id="@+id/loadingView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue"
+        android:visibility="gone"/>
 
     <com.folioreader.view.VerticalSeekbar
         android:id="@+id/scrollSeekbar"

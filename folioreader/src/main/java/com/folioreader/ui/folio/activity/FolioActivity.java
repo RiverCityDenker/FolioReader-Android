@@ -126,7 +126,7 @@ public class FolioActivity
     private MainPresenter mMainPresenter;
     private DownloadInfo mDownloadInfo;
     private boolean mIsOnlineReading;
-    private LoadingView loadingView;
+//    private LoadingView loadingView;
     private boolean mImageClicked;
     private String mSelectedChapterHref;
     private boolean wasScrollLeft;
@@ -180,15 +180,15 @@ public class FolioActivity
 
     }
 
-    @Override
-    public void showLoading() {
-        loadingView.visible();
-    }
+//    @Override
+//    public void showLoading() {
+//        loadingView.show();
+//    }
 
-    @Override
-    public void hideLoading() {
-        loadingView.invisible();
-    }
+//    @Override
+//    public void hideLoading() {
+//        loadingView.hide();
+//    }
 
     @Override
     public void exitReader() {
@@ -273,7 +273,7 @@ public class FolioActivity
 
         setConfig(savedInstanceState);
         setContentView(R.layout.folio_activity);
-        loadingView = (LoadingView) findViewById(R.id.loadingView);
+//        loadingView = (LoadingView) findViewById(R.id.loadingView);
         this.savedInstanceState = savedInstanceState;
         mEpubSourceType = (EpubSourceType)
                 getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
@@ -696,7 +696,7 @@ public class FolioActivity
             @Override
             public void onPageSelected(int position) {
 //                Log.d(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
-                showLoading();
+//                showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
                 mediaControllerView.setPlayButtonDrawable();
@@ -832,10 +832,10 @@ public class FolioActivity
         }
     }
 
-    @Override
-    public LoadingView getLoadingView() {
-        return loadingView;
-    }
+//    @Override
+//    public LoadingView getLoadingView() {
+//        return loadingView;
+//    }
 
     @Override
     public void updateEbook(Ebook ebook) {

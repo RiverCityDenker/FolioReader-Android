@@ -26,7 +26,7 @@ public interface FolioActivityCallback {
 
     void showSinglePage(String url);
 
-    LoadingView getLoadingView();
+//    LoadingView getLoadingView();
 
     void updateEbook(Ebook ebook);
 

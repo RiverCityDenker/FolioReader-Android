@@ -106,7 +106,6 @@ public class WebViewPager extends ViewPager {
     @SuppressWarnings("unused")
     @JavascriptInterface
     public void setCurrentPage(final int pageIndex) {
-        Log.v(LOG_TAG, "todoDung -> setCurrentItem -> pageIndex = " + pageIndex);
 
         handler.postDelayed(() -> {
             if (folioWebView != null)
