@@ -593,7 +593,7 @@ public class FolioPageFragment
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (getDirection().equals("HORIZONTAL")) {
-            if (mHtmlString != null && mConfig.isEnableDirection()) {
+            if (mHtmlString != null) {
                 showLoading();
                 if (isCurrentFragment()) {
                     getLastReadPosition();
