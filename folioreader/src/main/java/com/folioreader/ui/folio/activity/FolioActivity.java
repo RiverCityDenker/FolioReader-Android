@@ -91,6 +91,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.folioreader.Constants.CHAPTER_SELECTED;
+import static com.folioreader.view.DirectionalViewpager.SCROLL_STATE_DRAGGING;
 import static com.sap_press.rheinwerk_reader.dialog.DialogCreator.createPausedDownloadDialog;
 
 public class FolioActivity
@@ -128,6 +129,8 @@ public class FolioActivity
     private LoadingView loadingView;
     private boolean mImageClicked;
     private String mSelectedChapterHref;
+    private boolean wasScrollLeft;
+    private boolean isScrolling;
 
     public boolean isOnlineReading() {
         return mIsOnlineReading;
@@ -200,6 +203,21 @@ public class FolioActivity
     @Override
     public DownloadInfo getDownloadInfo() {
         return mDownloadInfo;
+    }
+
+    @Override
+    public boolean wasScrollLeft() {
+        return wasScrollLeft;
+    }
+
+    @Override
+    public boolean isScrolling() {
+        return isScrolling;
+    }
+
+    @Override
+    public void setScrolling(boolean isScrolling) {
+        this.isScrolling = isScrolling;
     }
 
     public Ebook getEbook() {
@@ -359,6 +377,7 @@ public class FolioActivity
             getWindow().setNavigationBarColor(color);
         }
         toolbar.setEbook(mEbook);
+        toolbar.setTitle(titleEbook);
         updateDownloadProgress(mEbook);
     }
 
@@ -565,7 +584,6 @@ public class FolioActivity
             if (selectedChapterHref.contains(spine.href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                toolbar.setTitle(spine.getChapterTitle());
 
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
                         mFolioPageFragmentAdapter.getItem(mChapterPosition);
@@ -594,7 +612,6 @@ public class FolioActivity
             if (spine.href.contains(href)) {
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
-                toolbar.setTitle(spine.getChapterTitle());
                 break;
             }
         }
@@ -626,9 +643,6 @@ public class FolioActivity
     @Override
     public void onLoadPublication(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
-        if (publication.metadata.title != null) {
-            toolbar.setTitle(publication.metadata.title);
-        }
 
         if (mBookId == null) {
             if (publication.metadata.identifier != null) {
@@ -646,9 +660,6 @@ public class FolioActivity
 
     public void onLoadPublicationCustom(EpubPublicationCustom publication) {
         mSpineReferenceList.addAll(publication.spines);
-        if (publication.metadata.title != null) {
-            toolbar.setTitle(publication.metadata.title);
-        }
 
         if (mBookId == null) {
             if (publication.metadata.identifier != null) {
@@ -668,25 +679,36 @@ public class FolioActivity
         mFolioPageViewPager = (DirectionalViewpager) findViewById(R.id.folioPageViewPager);
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
-            int lastPage;
+            int lastPage = 0;
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                if (lastPage > position) {
+                    //User Move to left
+                    wasScrollLeft = true;
+                } else if (lastPage < position) {
+                    //User Move to right
+                    wasScrollLeft = false;
+                }
+                lastPage = position;
             }
 
             @Override
             public void onPageSelected(int position) {
-                Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
-
+//                Log.d(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
+                showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
                 mediaControllerView.setPlayButtonDrawable();
                 mChapterPosition = position;
-                toolbar.setTitle(mSpineReferenceList.get(mChapterPosition).bookTitle);
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
+//                Toast.makeText(FolioActivity.this, "state " + state, Toast.LENGTH_SHORT).show();
+                if (state == SCROLL_STATE_DRAGGING) {
+                    isScrolling = true;
+                }
             }
         });
 
