@@ -384,7 +384,7 @@ public class FolioPageFragment
 
         if (!TextUtils.isEmpty(href) && href.indexOf('#') != -1) {
             mAnchorId = href.substring(href.lastIndexOf('#') + 1);
-            Log.e(TAG, "scrollToAnchorId: >>>" + mAnchorId);
+            Log.d(TAG, "scrollToAnchorId: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
             if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
@@ -425,7 +425,7 @@ public class FolioPageFragment
                     "UTF-8",
                     null);
         } else {
-            Log.e(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
+            Log.d(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
             if (spineItem != null) {
                 String ref = spineItem.href;
                 if (!reloaded && spineItem.properties.contains("media-overlay")) {
@@ -617,11 +617,11 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.e(TAG, "onDownloadFileSuccess: >>> event href = " + event.getHref());
-        Log.e(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
+        Log.d(TAG, "onDownloadFileSuccess: >>> event href = " + event.getHref());
+        Log.d(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
         if (spineItem != null && event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
-            Log.e(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0, 20) : "rong"));
+            Log.d(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0, 20) : "rong"));
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = false;
@@ -634,12 +634,12 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
-        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>> event href = " + event.getEbook().getHref());
-        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>> spineItem.href = " + spineItem.href);
+        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>> event href = " + event.getEbook().getHref());
+        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>> spineItem.href = " + spineItem.href);
         if (event != null && event.getEbook() != null
                 && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
-            Log.e(TAG, "onDownloadSingleFileErrorEvent: >>>" + html);
+            Log.d(TAG, "onDownloadSingleFileErrorEvent: >>>" + html);
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = true;
@@ -652,7 +652,7 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateReaderPageWhenOnlineEvent(UpdateReaderPageWhenOnlineEvent event) {
-        Log.e(TAG, "onUpdateReaderPageWhenOnlineEvent: >>>" + spineItem.href);
+        Log.d(TAG, "onUpdateReaderPageWhenOnlineEvent: >>>" + spineItem.href);
         mIsErrorPage = false;
         if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                 || mContentKey == null || mContentKey.isEmpty()) {
@@ -786,7 +786,7 @@ public class FolioPageFragment
                     mWebview.loadPage(String.format(getString(R.string.go_to_span),
                             lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                 } else {
-                    Log.e(TAG, "todoDung loadContent: lastReadPosition = null");
+                    Log.d(TAG, "todoDung loadContent: lastReadPosition = null");
                 }
             } else {
                 if (mPosition == mActivityCallback.getChapterPosition() - 1) {
@@ -951,7 +951,7 @@ public class FolioPageFragment
     public void storeFirstVisibleSpan(boolean usingId, String value) {
 
         synchronized (this) {
-            Log.e(TAG, "todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
+            Log.d(TAG, "todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
             lastReadPosition = new ReadPositionImpl(mBookId, spineItem.getId(),
                     spineItem.getOriginalHref(), mPosition, usingId, value);
             Intent intent = new Intent(FolioReader.ACTION_SAVE_READ_POSITION);

@@ -27,7 +27,7 @@ public class HTTPDownloader {
                                       String appVersion) throws Exception {
 
         File file = FileUtil.getFile(folderPath, href);
-        Log.e(TAG, "downloadFile: >>>" + file.getCanonicalPath());
+        Log.d(TAG, "downloadFile: >>>" + file.getCanonicalPath());
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);

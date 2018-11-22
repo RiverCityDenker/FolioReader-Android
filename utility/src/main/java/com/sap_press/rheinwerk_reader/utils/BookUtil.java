@@ -145,14 +145,14 @@ public class BookUtil {
         float screenWidth = dm.widthPixels / dm.xdpi;
         float screenHeight = dm.heightPixels / dm.ydpi;
 
-        Log.e(TAG, "onCreate: >>>" + dm.widthPixels + " --- " + dm.xdpi + " === " + screenWidth);
-        Log.e(TAG, "onCreate: >>>" + dm.heightPixels + " --- " + dm.ydpi + " === " + screenHeight);
+        Log.d(TAG, "onCreate: >>>" + dm.widthPixels + " --- " + dm.xdpi + " === " + screenWidth);
+        Log.d(TAG, "onCreate: >>>" + dm.heightPixels + " --- " + dm.ydpi + " === " + screenHeight);
 
-        Log.e(TAG, "testLayout: >>>>> Dpi = " + dm.density + "---" + dm.densityDpi);
+        Log.d(TAG, "testLayout: >>>>> Dpi = " + dm.density + "---" + dm.densityDpi);
 
         int widthInDp = (int) (dm.widthPixels / dm.density);
         int dp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dm.widthPixels, dm);
-        Log.e(TAG, "testLayout: >>>SW = " + widthInDp + " --- " + dp);
+        Log.d(TAG, "testLayout: >>>SW = " + widthInDp + " --- " + dp);
 
 
 // return 0.75 if it's LDPI

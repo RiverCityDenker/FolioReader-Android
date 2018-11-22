@@ -201,7 +201,7 @@ public class DictionaryFragment extends DialogFragment implements DictionaryCall
                 mediaPlayer.prepare();
                 mediaPlayer.start();
             } catch (IOException e) {
-                Log.e(TAG, "playMedia failed", e);
+                Log.d(TAG, "playMedia failed", e);
             }
         }
     }

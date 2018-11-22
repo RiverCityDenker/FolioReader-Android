@@ -48,7 +48,7 @@ public class VerticalDownloadingView extends DownloadingView {
         } else {
             mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_gray_paused_download));
         }
-        Log.e(TAG, "onPaused: >>>" + progress);
+        Log.d(TAG, "onPaused: >>>" + progress);
         configProgressBar(mContext.getResources().getColor(R.color.color_white), mContext.getResources().getColor(R.color.color_gray_paused_download));
     }
 

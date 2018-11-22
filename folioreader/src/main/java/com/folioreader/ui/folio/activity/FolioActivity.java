@@ -239,7 +239,7 @@ public class FolioActivity
     public void updatePositionList(int position) {
         if (!mPositionList.contains(Integer.valueOf(position))) {
             mPositionList.add(position);
-            Log.e(TAG, "updatePositionList: >>>" + position);
+            Log.d(TAG, "updatePositionList: >>>" + position);
         }
     }
 
@@ -247,7 +247,7 @@ public class FolioActivity
         runOnUiThread(() -> {
             refreshPositionList();
             if (mPositionList.contains(mPosition)) {
-                Log.e(TAG, "run: >>>remove " + mPosition);
+                Log.d(TAG, "run: >>>remove " + mPosition);
                 mPositionList.remove(Integer.valueOf(mPosition));
             }
             Log.d(TAG, "doShouldHideLoading: >>>>>>>>>>" + mPositionList.size());
@@ -420,7 +420,7 @@ public class FolioActivity
     @Override
     public void startContentHighlightActivity() {
         if (mSpineReferenceList.isEmpty()) {
-            Log.e(TAG, "startContentHighlightActivity: >>>");
+            Log.d(TAG, "startContentHighlightActivity: >>>");
             showErrorDialog();
             return;
         }
@@ -451,7 +451,7 @@ public class FolioActivity
         String selectedChapterHref = event.getHref();
         for (Link spine : mSpineReferenceList) {
             if (selectedChapterHref.contains(spine.href)) {
-                Log.e(TAG, "onTOCClickedEvent: >>>" + selectedChapterHref);
+                Log.d(TAG, "onTOCClickedEvent: >>>" + selectedChapterHref);
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
@@ -481,7 +481,7 @@ public class FolioActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadInterruptedBookEvent(OnDownloadInterruptedBookEvent event) {
         if (event.getEbook().isDownloadFailed()) {
-            Log.e(TAG, "onDownloadInterruptedBookEvent: >>>>>>");
+            Log.d(TAG, "onDownloadInterruptedBookEvent: >>>>>>");
             createPausedDownloadDialog(this,
                     getResources().getString(R.string.text_failed_dialog_title),
                     getResources().getString(R.string.text_failed_dialog_message),
@@ -658,7 +658,7 @@ public class FolioActivity
         if (mEpubServer != null) {
             mEpubServer.stop();
         }
-        Log.e(TAG, "onDestroy: >>>");
+        Log.d(TAG, "onDestroy: >>>");
         if (isOnlineReading() && !isDownloadingBook()) {
             getPresenter().deleteCacheData(getApplicationContext(), mEbook);
         }
@@ -841,7 +841,7 @@ public class FolioActivity
         if (mImageClicked) return;
         mImageClicked = true;
         String idref = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1, href.lastIndexOf("."));
-        Log.e(TAG, "showSinglePage: >>>" + idref);
+        Log.d(TAG, "showSinglePage: >>>" + idref);
         for (CustomLink spine : mSpineReferenceList) {
             if (spine.href.contains(idref) && spine.linear.equalsIgnoreCase("no")) {
 
@@ -960,7 +960,7 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onFinishedDownloadContent(FinishDownloadContentEvent event) {
-        Log.e(TAG, "onFinishedDownloadContent: >>>");
+        Log.d(TAG, "onFinishedDownloadContent: >>>");
         if (mEbook.getId() == event.getEbook().getId()) {
             mEbook = event.getEbook();
             ebookFilePath = mEbook.getFilePath();

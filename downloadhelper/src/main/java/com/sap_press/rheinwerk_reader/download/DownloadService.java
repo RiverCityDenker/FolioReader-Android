@@ -203,7 +203,7 @@ public class DownloadService extends Service {
                 resetEbookAndUpdate(event.getEbook(), event.isFullDelete());
                 downloadNextOrStop(false, 0);
             } else {
-                Log.e(TAG, "onCancelDownloadEvent: >>>");
+                Log.d(TAG, "onCancelDownloadEvent: >>>");
             }
         } else {
             Ebook ebook = LibraryTable.getEbook(currentEbookId);
@@ -264,7 +264,7 @@ public class DownloadService extends Service {
         if (!ebookList.isEmpty()) {
             Ebook currentEbook = ebookList.get(0);
             if (hasErrorInPreviousBook) {
-                Log.e(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
+                Log.d(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
@@ -387,13 +387,13 @@ public class DownloadService extends Service {
 
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
         if (!isOnlineReading) {
-            Log.e(TAG, "handleError: >>>" + ebookId + " - " + currentEbookId);
+            Log.d(TAG, "handleError: >>>" + ebookId + " - " + currentEbookId);
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
             mCurrentBookId = ebookId;
             sendErrorDownloadEventToGA(throwable, ebookId);
             shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
             if (isOnline(this)) {
-                Log.e(TAG, "handleError: >>>isOnline");
+                Log.d(TAG, "handleError: >>>isOnline");
                 updateDownloadStatus(Integer.parseInt(ebookId), true, false);
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
@@ -413,7 +413,7 @@ public class DownloadService extends Service {
             // Comment this line because this ticket : https://2denker.atlassian.net/browse/RE-431
             //listener.handleDownloadError(throwable);
         } else {
-            Log.e(TAG, "handleError: >>>" + throwable.getMessage());
+            Log.d(TAG, "handleError: >>>" + throwable.getMessage());
             EventBus.getDefault().post(new DownloadBasicFileErrorEvent(throwable instanceof HttpException));
         }
 
@@ -581,7 +581,7 @@ public class DownloadService extends Service {
                 contentKey = HTTPDownloader.downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e(TAG, "downloadSingleFile: failed " + e.getMessage());
+                Log.d(TAG, "downloadSingleFile: failed " + e.getMessage());
                 failedDownloadFiles.add(manifest.getHref());
 
                 contentKey = ERROR_DOWNLOAD_FILE;

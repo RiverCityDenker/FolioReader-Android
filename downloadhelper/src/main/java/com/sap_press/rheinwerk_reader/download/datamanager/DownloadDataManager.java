@@ -92,23 +92,10 @@ public class DownloadDataManager {
                 ebook.resetApartInfo();
             LibraryTable.updateEbook(ebook);
             if (isDownloading) {
-                Log.e("DownloadDataManager", "deleteEbook: >>>book is downloading ...");
                 Thread.sleep(6000);
             }
             return ebook;
         });
-    }
-
-    public void updateDownloadedEbook(Ebook ebook) {
-        LibraryTable.updateEbook(ebook);
-    }
-
-    public void setOnlineOfflineReading(boolean isOnlineReading) {
-        mDownloadSharedPref.put(DownloadSharedPref.PREF_KEY_READING_TYPE_KEY, isOnlineReading);
-    }
-
-    public boolean isOnlineReading() {
-        return mDownloadSharedPref.get(DownloadSharedPref.PREF_KEY_READING_TYPE_KEY, true);
     }
 
     public Ebook getEbookById(int ebookId) {

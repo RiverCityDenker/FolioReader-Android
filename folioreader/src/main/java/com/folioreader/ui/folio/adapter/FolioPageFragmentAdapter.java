@@ -70,7 +70,7 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        Log.e(TAG, "instantiateItem: >>>" + position);
+        Log.d(TAG, "instantiateItem: >>>" + position);
         mListener.updatePositionList(position);
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
         fragments.set(position, fragment);
@@ -82,16 +82,16 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
         if (mSpineReferences.size() == 0 || position < 0 || position >= mSpineReferences.size())
             return null;
-        Log.e(TAG, "getItem: >>>position = " + position);
+        Log.d(TAG, "getItem: >>>position = " + position);
         Fragment fragment = fragments.get(position);
         if (fragment == null) {
             if (mEpubSourceType.equals(FolioActivity.EpubSourceType.ENCRYPTED_FILE)) {
-                Log.e(TAG, "getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
+                Log.d(TAG, "getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position, mEbookFilePath,
                         mSpineReferences.get(position), mBookId, mEpubFileName,
                         contentKey, userKey, mEpubSourceType);
             } else {
-                Log.e(TAG, "getItem: NORMAL>>>" + mSpineReferences.get(position));
+                Log.d(TAG, "getItem: NORMAL>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position,
                         mEpubFileName, mSpineReferences.get(position), mBookId, mEpubSourceType);
             }

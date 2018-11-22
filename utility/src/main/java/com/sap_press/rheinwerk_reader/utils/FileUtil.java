@@ -183,7 +183,7 @@ public class FileUtil {
             Log.w("FileUtil", "path to download is empty: " + path);
             return;
         }
-        Log.e(TAG, "deleteDownloadedEbookFromExternalStorage: >>>" + path);
+        Log.d(TAG, "deleteDownloadedEbookFromExternalStorage: >>>" + path);
         File file = new File(path);
         if (isFullDelete) {
             deleteDirectory(file);

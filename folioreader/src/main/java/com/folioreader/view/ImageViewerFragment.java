@@ -106,7 +106,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         tvClose = view.findViewById(R.id.tv_close);
         tvClose.setOnClickListener(view1 -> dismiss());
         filePath = (imagePath.contains("file")) ? imagePath.replace("file://", "") : imagePath;
-        Log.e(TAG, "onCreateView: >>>" + filePath);
+        Log.d(TAG, "onCreateView: >>>" + filePath);
 
         imageWebView.getSettings().setJavaScriptEnabled(true);
         imageWebView.getSettings().setAllowFileAccess(true);
@@ -163,7 +163,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Override
     public void showImage(String downloadResult) {
-        Log.e(TAG, "showImage: >>>");
+        Log.d(TAG, "showImage: >>>");
         loadPage();
     }
 
@@ -189,7 +189,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
-        Log.e(TAG, "onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
+        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 if (event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
@@ -202,9 +202,9 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.e(TAG, "onDownloadFileSuccess: >>>");
+        Log.d(TAG, "onDownloadFileSuccess: >>>");
         if (event.getEbook().getHref() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
-            Log.e(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
+            Log.d(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
             configAndDownloadImage();
         }
     }

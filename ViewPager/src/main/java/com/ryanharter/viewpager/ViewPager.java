@@ -2919,7 +2919,7 @@ public class ViewPager extends ViewGroup {
                         parent = parent.getParent()) {
                     sb.append(" => ").append(parent.getClass().getSimpleName());
                 }
-                Log.e(TAG, "arrowScroll tried to find focus based on non-child " +
+                Log.d(TAG, "arrowScroll tried to find focus based on non-child " +
                         "current focused view " + sb.toString());
                 currentFocused = null;
             }

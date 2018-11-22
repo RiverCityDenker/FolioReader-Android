@@ -247,9 +247,9 @@ public class FolioReader {
     public ReadPosition getReadPosition(String bookId) {
         final ReadPosition readPosition = ReadPositionTable.getReadPositionById(bookId);
         if (readPosition != null) {
-            Log.e(TAG, "getReadPosition: >>>readPosition = " + readPosition.toJson());
+            Log.d(TAG, "getReadPosition: >>>readPosition = " + readPosition.toJson());
         } else {
-            Log.e(TAG, "getReadPosition: >>>readPosition = null");
+            Log.d(TAG, "getReadPosition: >>>readPosition = null");
         }
         return readPosition;
     }
