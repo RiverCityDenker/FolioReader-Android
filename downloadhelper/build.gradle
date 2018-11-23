@@ -42,6 +42,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.FOLIO_RXJAVA_VERSION"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.ext.FOLIO_RXANDROID_VERSION"
     implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:$rootProject.ext.FOLIO_ADAPTER_RETROFIT_VERSION"
+    implementation "com.jakewharton.timber:timber:$rootProject.ext.FOLIO_ANDROID_TIMBER_VERSION"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.3.1'
 
     // r2-streamer

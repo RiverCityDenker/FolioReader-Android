@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.folioreader.util.ObjectMapperSingleton;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.io.IOException;
 
@@ -59,7 +60,7 @@ public class ReadPositionImpl implements ReadPosition, Parcelable {
                     .forType(ReadPositionImpl.class)
                     .readValue(jsonString);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "-> " + e);
+            FolioLogging.tag(LOG_TAG).e("-> " + e);
         }
         return readPosition;
     }
@@ -143,7 +144,7 @@ public class ReadPositionImpl implements ReadPosition, Parcelable {
             ObjectWriter objectWriter = ObjectMapperSingleton.getObjectMapper().writer();
             return objectWriter.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            Log.e(LOG_TAG, "-> " + e);
+            FolioLogging.tag(LOG_TAG).e("-> " + e);
             return null;
         }
     }

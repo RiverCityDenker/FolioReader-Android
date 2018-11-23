@@ -9,6 +9,7 @@ import com.sap_press.rheinwerk_reader.download.datamanager.tables.LastReadTable;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.SubscriptionTable;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.UserTable;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 public class EbookDbHelper extends SQLiteOpenHelper {
 
@@ -68,7 +69,7 @@ public class EbookDbHelper extends SQLiteOpenHelper {
      * This basic upgrade functionality will destroy all old data on upgrade
      */
     private void onUpgradeDropTables(final SQLiteDatabase db) {
-        Log.e(TAG, "onUpgrade: >>>");
+        FolioLogging.tag(TAG).e("onUpgrade: >>>");
         db.execSQL(UserTable.SQL_DROP);
         db.execSQL(LibraryTable.SQL_DROP);
         db.execSQL(SubscriptionTable.SQL_DROP);

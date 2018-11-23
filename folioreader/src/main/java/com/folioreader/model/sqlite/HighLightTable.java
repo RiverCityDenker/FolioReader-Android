@@ -8,6 +8,7 @@ import android.util.Log;
 import com.folioreader.Constants;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.HighlightImpl;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -143,7 +144,7 @@ public class HighLightTable {
         try {
             date1 = dateFormat.parse(date);
         } catch (ParseException e) {
-            Log.e(TAG, "Date parsing failed", e);
+            FolioLogging.tag(TAG).e("Date parsing failed", e);
         }
         return date1;
     }

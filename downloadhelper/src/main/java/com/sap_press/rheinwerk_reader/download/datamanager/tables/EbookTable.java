@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.download.datamanager.sqlite.EbookDbAdapter;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import java.util.ArrayList;
@@ -159,7 +160,7 @@ public class EbookTable {
             cursor.close();
         } else {
             cursor.close();
-            Log.e(TAG, "getEbook: >>>" + "Ebook with id " + ebookId + " does not exists");
+            FolioLogging.tag(TAG).e("getEbook: >>>" + "Ebook with id " + ebookId + " does not exists");
         }
         return ebook;
     }
@@ -238,7 +239,7 @@ public class EbookTable {
     }
 
     public static synchronized boolean update(Ebook ebook, String tableName) {
-        Log.d(TAG, "update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey() + " - isFailed = " + ebook.isDownloadFailed());
+        FolioLogging.tag(TAG).d("update: >>>" + ebook.getId() + " --- " + ebook.getDownloadProgress() + "%" + " === contentKey = " + ebook.getContentKey() + " - isFailed = " + ebook.isDownloadFailed());
         return EbookDbAdapter.updateEbook(tableName, getEbookContentValues(ebook), String.valueOf(ebook.getId()));
     }
 
@@ -250,7 +251,7 @@ public class EbookTable {
             }
         } else {
             insertEbook(ebook, tableName);
-            Log.e(TAG, "insertEbook: >>>" + ebook.getDownloadProgress());
+            FolioLogging.tag(TAG).d("insertEbook: >>>" + ebook.getDownloadProgress());
             return ebook;
         }
         return ebook;

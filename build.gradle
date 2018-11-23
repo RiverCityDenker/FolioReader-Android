@@ -48,6 +48,7 @@ ext {
     FOLIO_RXJAVA_VERSION = '2.1.9'
     FOLIO_RXANDROID_VERSION = '2.0.1'
     FOLIO_ADAPTER_RETROFIT_VERSION = '1.0.0'
+    FOLIO_ANDROID_TIMBER_VERSION = '4.7.1'
 }
 
 task clean(type: Delete) {

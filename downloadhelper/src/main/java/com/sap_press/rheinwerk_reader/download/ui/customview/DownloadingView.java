@@ -20,6 +20,7 @@ import com.sap_press.rheinwerk_reader.download.events.DownloadingEvent;
 import com.sap_press.rheinwerk_reader.download.events.OnResetDownloadBookEvent;
 import com.sap_press.rheinwerk_reader.download.events.ResumeDownloadUpdateViewEvent;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 import org.greenrobot.eventbus.EventBus;
@@ -199,7 +200,7 @@ public abstract class DownloadingView extends RelativeLayout {
         if (event.getEbook().getId() != getEbook().getId()) return;
         mEbook.setDownloadFailed(event.getEbook().isDownloadFailed());
         if (!mEbook.isDownloadFailed()) {
-            Log.d(TAG, "onResetDownloadBookEvent: >>>reset to default");
+            FolioLogging.tag(TAG).d("onResetDownloadBookEvent: >>>reset to default");
             resetProgressBar();
             final int progress = mProgressBar.getProgress();
             if (progress == 0) {
@@ -220,7 +221,7 @@ public abstract class DownloadingView extends RelativeLayout {
                 }
             }
         } else {
-            Log.d(TAG, "onResetDownloadBookEvent: >>>");
+            FolioLogging.tag(TAG).d("onResetDownloadBookEvent: >>>");
         }
     }
 

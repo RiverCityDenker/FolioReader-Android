@@ -14,6 +14,7 @@ import com.folioreader.model.event.MediaOverlayPlayPauseEvent;
 import com.folioreader.model.event.MediaOverlaySpeedEvent;
 import com.folioreader.model.media_overlay.OverlayItems;
 import com.folioreader.util.UiUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import org.readium.r2_streamer.model.publication.SMIL.Clip;
 import org.readium.r2_streamer.model.publication.SMIL.MediaOverlays;
@@ -141,7 +142,7 @@ public class MediaController {
             mediaPlayer.prepare();
             isMediaPlayerReady = true;
         } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+            FolioLogging.tag(TAG).e(e.getMessage());
         }
     }
 

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.folioreader.model.dictionary.Wikipedia;
 import com.folioreader.util.AppUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,7 +58,7 @@ public class WikipediaTask extends AsyncTask<String, Void, Wikipedia> {
                         wikipedia.setLink(links.get(0).toString());
                         return wikipedia;
                     } catch (Exception e) {
-                        Log.e(TAG, "WikipediaTask failed", e);
+                        FolioLogging.tag(TAG).e("WikipediaTask failed", e);
                         return null;
                     }
 
@@ -65,11 +66,11 @@ public class WikipediaTask extends AsyncTask<String, Void, Wikipedia> {
                     return null;
                 }
             } catch (JSONException e) {
-                Log.e(TAG, "WikipediaTask failed", e);
+                FolioLogging.tag(TAG).e("WikipediaTask failed", e);
                 return null;
             }
         } catch (IOException e) {
-            Log.e(TAG, "WikipediaTask failed", e);
+            FolioLogging.tag(TAG).e("WikipediaTask failed", e);
         }
         return null;
     }

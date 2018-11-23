@@ -7,6 +7,7 @@ import android.util.TypedValue;
 import android.widget.LinearLayout;
 
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
 
@@ -48,7 +49,7 @@ public class VerticalDownloadingView extends DownloadingView {
         } else {
             mImageView.setColorFilter(mContext.getResources().getColor(R.color.color_gray_paused_download));
         }
-        Log.d(TAG, "onPaused: >>>" + progress);
+        FolioLogging.tag(TAG).d("onPaused: >>>" + progress);
         configProgressBar(mContext.getResources().getColor(R.color.color_white), mContext.getResources().getColor(R.color.color_gray_paused_download));
     }
 

@@ -10,6 +10,7 @@ import com.folioreader.ui.folio.views.ImageViewerView;
 import com.sap_press.rheinwerk_reader.download.DownloadFileTask;
 import com.sap_press.rheinwerk_reader.download.HTTPDownloader;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
@@ -107,12 +108,12 @@ public class ImageViewerPresenter {
                                         HTTPDownloader.downloadFile(fileUrl, dataManager.getAccessToken(), folderPath, href, downloadInfo.getmAppVersion());
                                         return DOWNLOAD_IMAGE_SUCCESS;
                                     } catch (Exception e) {
-                                        Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
+                                        FolioLogging.tag(TAG).e("parseHtml:parse Image >>>" + e.getMessage());
                                         showErrorPage(e);
                                         return null;
                                     }
                                 } else {
-                                    Log.e(TAG, "doInBackground: >>>File is already exist");
+                                    FolioLogging.tag(TAG).e("doInBackground: >>>File is already exist");
                                     return DOWNLOAD_IMAGE_SUCCESS;
                                 }
 
@@ -151,7 +152,7 @@ public class ImageViewerPresenter {
         protected void onPostExecute(String downloadResult) {
             if (mvpView != null) {
                 mvpView.hideLoading();
-                Log.e(TAG, "onPostExecute: >>>downloadResult = " + downloadResult);
+                FolioLogging.tag(TAG).e("onPostExecute: >>>downloadResult = " + downloadResult);
                 if (!TextUtils.isEmpty(downloadResult)) {
                     mvpView.showImage(downloadResult);
                 }

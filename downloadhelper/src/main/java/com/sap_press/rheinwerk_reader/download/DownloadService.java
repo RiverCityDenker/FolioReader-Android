@@ -31,6 +31,7 @@ import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
@@ -203,7 +204,7 @@ public class DownloadService extends Service {
                 resetEbookAndUpdate(event.getEbook(), event.isFullDelete());
                 downloadNextOrStop(false, 0);
             } else {
-                Log.d(TAG, "onCancelDownloadEvent: >>>");
+                FolioLogging.tag(TAG).d("onCancelDownloadEvent: >>>");
             }
         } else {
             Ebook ebook = LibraryTable.getEbook(currentEbookId);
@@ -264,7 +265,7 @@ public class DownloadService extends Service {
         if (!ebookList.isEmpty()) {
             Ebook currentEbook = ebookList.get(0);
             if (hasErrorInPreviousBook) {
-                Log.d(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
+                FolioLogging.tag(TAG).d("downloadNextOrStop:hasErrorInPreviousBook ");
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
@@ -387,13 +388,13 @@ public class DownloadService extends Service {
 
     private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
         if (!isOnlineReading) {
-            Log.d(TAG, "handleError: >>>" + ebookId + " - " + currentEbookId);
+            FolioLogging.tag(TAG).d("handleError: >>>" + ebookId + " - " + currentEbookId);
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
             mCurrentBookId = ebookId;
             sendErrorDownloadEventToGA(throwable, ebookId);
             shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
             if (isOnline(this)) {
-                Log.d(TAG, "handleError: >>>isOnline");
+                FolioLogging.tag(TAG).d("handleError: >>>isOnline");
                 updateDownloadStatus(Integer.parseInt(ebookId), true, false);
                 final Ebook ebook = dataManager.getEbookById(Integer.parseInt(ebookId));
                 EventBus.getDefault().post(new DownloadingEvent(ebook));
@@ -413,7 +414,7 @@ public class DownloadService extends Service {
             // Comment this line because this ticket : https://2denker.atlassian.net/browse/RE-431
             //listener.handleDownloadError(throwable);
         } else {
-            Log.d(TAG, "handleError: >>>" + throwable.getMessage());
+            FolioLogging.tag(TAG).d("handleError: >>>" + throwable.getMessage());
             EventBus.getDefault().post(new DownloadBasicFileErrorEvent(throwable instanceof HttpException));
         }
 
@@ -581,7 +582,7 @@ public class DownloadService extends Service {
                 contentKey = HTTPDownloader.downloadFile(fileUrl, token, folderPath, manifest.getHref(), mAppVersion);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "downloadSingleFile: failed " + e.getMessage());
+                FolioLogging.tag(TAG).d("downloadSingleFile: failed " + e.getMessage());
                 failedDownloadFiles.add(manifest.getHref());
 
                 contentKey = ERROR_DOWNLOAD_FILE;
@@ -618,11 +619,11 @@ public class DownloadService extends Service {
             }
 
             if ((fileCount + failedDownloadFiles.size()) == ebook.getTotal()) {
-                Log.d(TAG, "downloadSingleSucscess:2 >>>" + fileCount + " : " + failedDownloadFiles.size() + " : " + ebook.getTotal());
+                FolioLogging.tag(TAG).d("downloadSingleSucscess:2 >>>" + fileCount + " : " + failedDownloadFiles.size() + " : " + ebook.getTotal());
                 if (!failedDownloadFiles.isEmpty()) {
                     shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
                     int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
-                    Log.d(TAG, "downloadSingleSucscess: 2-1" + successProgressPercent);
+                    FolioLogging.tag(TAG).d("downloadSingleSucscess: 2-1" + successProgressPercent);
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
@@ -643,7 +644,7 @@ public class DownloadService extends Service {
                     ebook.setDownloadFailed(true);
                     ebook.setDownloadProgress(successProgressPercent);
                     ebook.setNeedResume(false);
-                    Log.d(TAG, "downloadSingleSucscess: 2-2" + successProgressPercent);
+                    FolioLogging.tag(TAG).d("downloadSingleSucscess: 2-2" + successProgressPercent);
                     dataManager.updateEbook(ebook);
                     resetDownloadFailedByFile();
                     downloadNextOrStop(true, ebook.getId());

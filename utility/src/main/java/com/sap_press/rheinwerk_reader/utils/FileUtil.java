@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubBook;
 import com.sap_press.rheinwerk_reader.mod.models.foliosupport.EpubCommon;
@@ -180,10 +181,10 @@ public class FileUtil {
     public static void deleteDownloadedEbookFromExternalStorage(Context context, Ebook ebook, boolean isFullDelete) {
         String path = ebook.getFilePath();
         if (path == null) {
-            Log.w("FileUtil", "path to download is empty: " + path);
+            FolioLogging.tag(TAG).w("path to download is empty: " + path);
             return;
         }
-        Log.d(TAG, "deleteDownloadedEbookFromExternalStorage: >>>" + path);
+        FolioLogging.tag(TAG).d("deleteDownloadedEbookFromExternalStorage: >>>" + path);
         File file = new File(path);
         if (isFullDelete) {
             deleteDirectory(file);

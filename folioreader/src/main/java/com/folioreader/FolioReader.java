@@ -21,6 +21,7 @@ import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadPositionListener;
 import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 
@@ -247,9 +248,9 @@ public class FolioReader {
     public ReadPosition getReadPosition(String bookId) {
         final ReadPosition readPosition = ReadPositionTable.getReadPositionById(bookId);
         if (readPosition != null) {
-            Log.d(TAG, "getReadPosition: >>>readPosition = " + readPosition.toJson());
+            FolioLogging.tag(TAG).d("getReadPosition: >>>readPosition = " + readPosition.toJson());
         } else {
-            Log.d(TAG, "getReadPosition: >>>readPosition = null");
+            FolioLogging.tag(TAG).d("getReadPosition: >>>readPosition = null");
         }
         return readPosition;
     }

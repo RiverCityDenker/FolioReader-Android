@@ -17,6 +17,7 @@ import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.ui.folio.activity.FolioActivityCallback;
 import com.folioreader.util.ReadPositionUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 /**
  * @author by mahavir on 3/31/16.
@@ -70,7 +71,7 @@ public class FolioWebView extends WebView
     public void setCompatMode(String compatMode) {
         Log.v(LOG_TAG, "-> setCompatMode -> compatMode = " + compatMode);
         if (compatMode.equals(getContext().getString(R.string.back_compat))) {
-            Log.e(LOG_TAG, "-> Web page loaded in Quirks mode. Please report to developer " +
+            FolioLogging.tag(LOG_TAG).e("-> Web page loaded in Quirks mode. Please report to developer " +
                     "for debugging with current EPUB file as many features might stop working " +
                     "(ex. Horizontal scroll feature).");
         }
@@ -197,7 +198,7 @@ public class FolioWebView extends WebView
             }
 
             webViewPager.setHorizontalPageCount(FolioWebView.this.horizontalPageCount);
-            Log.d("FolioWebView", "setPageCountByLandspace: >>>");
+            FolioLogging.tag(LOG_TAG).d("setPageCountByLandspace: >>>");
             loadPage(String.format(getContext().getString(R.string.go_to_span),
                     ReadPositionUtil.getReadPosition().isUsingId(), ReadPositionUtil.getReadPosition().getValue()));
         });

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.view.UnderlinedTextView;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.lang.ref.SoftReference;
 import java.util.Hashtable;
@@ -36,6 +37,8 @@ import java.util.Hashtable;
  * Created by mahavir on 3/30/16.
  */
 public class UiUtil {
+    private static final String TAG = UiUtil.class.getSimpleName();
+
     public static void setCustomFont(View view, Context ctx, AttributeSet attrs,
                                      int[] attributeSet, int fontId) {
         TypedArray a = ctx.obtainStyledAttributes(attrs, attributeSet);
@@ -56,7 +59,7 @@ public class UiUtil {
                 ((Button) view).setTypeface(tf);
             }
         } catch (Exception e) {
-            Log.e("AppUtil", "Could not get typface  " + asset);
+            FolioLogging.tag(TAG).e("Could not get typface  " + asset);
             return false;
         }
 
@@ -97,7 +100,7 @@ public class UiUtil {
     public static int getColorForFont(int fontCurrent, int fontSelected, int selectedColor, int unselectedColor) {
         if (fontCurrent == fontSelected) {
             return selectedColor;
-        } else  {
+        } else {
             return unselectedColor;
         }
     }

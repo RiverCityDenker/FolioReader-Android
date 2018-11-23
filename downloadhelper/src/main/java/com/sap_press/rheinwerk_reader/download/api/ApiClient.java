@@ -8,6 +8,7 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.sap_press.rheinwerk_reader.BuildConfig;
 import com.sap_press.rheinwerk_reader.download.api.network.HostSelectionInterceptor;
 import com.sap_press.rheinwerk_reader.download.api.network.TLSSocketFactory;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
+    private static final String TAG = ApiClient.class.getSimpleName();
     private static Retrofit retrofit = null;
     private static int REQUEST_TIMEOUT = 60;
     private static OkHttpClient okHttpClient;
@@ -74,7 +76,7 @@ public class ApiClient {
 
                 builder.connectionSpecs(specs);
             } catch (Exception exc) {
-                Log.e("OkHttpTLSCompat", "Error while setting TLS 1.2", exc);
+                FolioLogging.tag(TAG).e("Error while setting TLS 1.2", exc);
             }
         }
         okHttpClient = builder.build();

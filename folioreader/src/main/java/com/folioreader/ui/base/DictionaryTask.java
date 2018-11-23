@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folioreader.model.dictionary.Dictionary;
 import com.folioreader.util.AppUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class DictionaryTask extends AsyncTask<String, Void, Dictionary> {
             objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
             return objectMapper.readValue(stringBuilder.toString(), Dictionary.class);
         } catch (IOException e) {
-            Log.e(TAG, "DictionaryTask failed", e);
+            FolioLogging.tag(TAG).e("DictionaryTask failed", e);
         }
         return null;
     }

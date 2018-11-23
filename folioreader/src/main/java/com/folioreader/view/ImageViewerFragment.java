@@ -25,6 +25,7 @@ import com.folioreader.util.AppUtil;
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
@@ -106,7 +107,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
         tvClose = view.findViewById(R.id.tv_close);
         tvClose.setOnClickListener(view1 -> dismiss());
         filePath = (imagePath.contains("file")) ? imagePath.replace("file://", "") : imagePath;
-        Log.d(TAG, "onCreateView: >>>" + filePath);
+        FolioLogging.tag(TAG).d("onCreateView: >>>" + filePath);
 
         imageWebView.getSettings().setJavaScriptEnabled(true);
         imageWebView.getSettings().setAllowFileAccess(true);
@@ -163,7 +164,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Override
     public void showImage(String downloadResult) {
-        Log.d(TAG, "showImage: >>>");
+        FolioLogging.tag(TAG).d("showImage: >>>");
         loadPage();
     }
 
@@ -189,7 +190,7 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
-        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
+        FolioLogging.tag(TAG).d("onDownloadSingleFileErrorEvent: >>>" + event.getEbook().getHref());
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 if (event.getEbook() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
@@ -202,9 +203,9 @@ public class ImageViewerFragment extends DialogFragment implements ImageViewerVi
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.d(TAG, "onDownloadFileSuccess: >>>");
+        FolioLogging.tag(TAG).d( "onDownloadFileSuccess: >>>");
         if (event.getEbook().getHref() != null && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(href))) {
-            Log.d(TAG, "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
+            FolioLogging.tag(TAG).d( "onDownloadFileSuccess: >>>" + event.getEbook().getHref());
             configAndDownloadImage();
         }
     }

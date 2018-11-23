@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import com.folioreader.ui.custom.CustomLink;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.fragment.FolioPageFragment;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
     private FolioActivity.EpubSourceType mEpubSourceType;
     private ArrayList<Fragment> fragments;
     private final FolioPageAdapterListener mListener;
+
     public interface FolioPageAdapterListener {
         void updatePositionList(int position);
     }
@@ -70,7 +72,7 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        Log.d(TAG, "instantiateItem: >>>" + position);
+        FolioLogging.tag(TAG).d("instantiateItem: >>>" + position);
         mListener.updatePositionList(position);
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
         fragments.set(position, fragment);
@@ -82,16 +84,16 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
 
         if (mSpineReferences.size() == 0 || position < 0 || position >= mSpineReferences.size())
             return null;
-        Log.d(TAG, "getItem: >>>position = " + position);
+        FolioLogging.tag(TAG).d("getItem: >>>position = " + position);
         Fragment fragment = fragments.get(position);
         if (fragment == null) {
             if (mEpubSourceType.equals(FolioActivity.EpubSourceType.ENCRYPTED_FILE)) {
-                Log.d(TAG, "getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
+                FolioLogging.tag(TAG).d("getItem: ENCRYPTED_FILE>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position, mEbookFilePath,
                         mSpineReferences.get(position), mBookId, mEpubFileName,
                         contentKey, userKey, mEpubSourceType);
             } else {
-                Log.d(TAG, "getItem: NORMAL>>>" + mSpineReferences.get(position));
+                FolioLogging.tag(TAG).d("getItem: NORMAL>>>" + mSpineReferences.get(position));
                 fragment = FolioPageFragment.newInstance(position,
                         mEpubFileName, mSpineReferences.get(position), mBookId, mEpubSourceType);
             }
