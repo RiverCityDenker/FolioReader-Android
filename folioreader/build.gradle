@@ -93,7 +93,7 @@ dependencies {
     implementation "com.android.support:design:$rootProject.ext.FOLIO_ANDROID_LIB_VERSION"
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
     //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.ext.KOTLIN_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.ext.kotlin_version"
     // r2-streamer
     api "org.readium:r2-fetcher:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
     api "org.readium:r2-parser:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"

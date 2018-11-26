@@ -7,7 +7,11 @@ import com.google.gson.Gson;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiClient;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiService;
 import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.sync.highlight.model.Note;
 
+import java.util.List;
+
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -36,6 +40,11 @@ public class HighlightManager {
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addHighlightSuccess, this::addHighlightFailed);
         compositeSubscription.add(subscription);
+    }
+
+    public Observable<List<Note>> getNotesById(String productId) {
+        final String token = dataManager.getAccessToken();
+        return mApiService.getNotesByBookId(token, productId);
     }
 
     private void addHighlightFailed(Throwable throwable) {

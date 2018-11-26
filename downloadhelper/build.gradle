@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.FOLIO_ANDROID_COMPILE_SDK_VERSION
@@ -50,4 +51,8 @@ dependencies {
     implementation project(':aping')
     implementation project(':models')
     implementation project(':crypto')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

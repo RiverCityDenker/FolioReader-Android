@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
 
@@ -32,4 +33,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.FOLIO_RETROFIT_VERSION"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.FOLIO_RETROFIT_VERSION"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }
