@@ -764,6 +764,7 @@
                 this.copyPropertiesToElement(this.elementProperties, el, false);
                 this.copyAttributesToElement(this.elementAttributes, el);
                  //Highlight.printData("createContainer");
+                 console.log("duy:test>>>createContainer el = " + el.id);
                 addClass(el, this.className, serializedHighlight);
                 if (this.onElementCreate) {
                     this.onElementCreate(el, this);
@@ -809,6 +810,7 @@
                         this.appliesToElement(parent) &&
                         this.elementHasProperties(parent, this.elementProperties) &&
                         this.elementHasAttributes(parent, this.elementAttributes)) {
+                        console.log("duy:test>>>applyToTextNode addClass" + parent.id);
                         addClass(parent, this.className, serializedHighlight);
                     } else {
                         var textNodeParent = textNode.parentNode;

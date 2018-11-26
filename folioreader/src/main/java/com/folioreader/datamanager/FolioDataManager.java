@@ -37,4 +37,8 @@ public class FolioDataManager {
     public int getDownloadedEbooksCount() {
         return LibraryTable.getDownloadedEbooksCount();
     }
+
+    public String getAccessToken() {
+        return mDownloadDataManager.getAccessToken();
+    }
 }

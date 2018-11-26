@@ -1140,6 +1140,9 @@ public class FolioPageFragment
         } else {
             mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + HighlightImpl.HighlightStyle.classForStyle(style)));
         }
+
+        //post to api
+
     }
 
     public void highlightRemove() {
@@ -1389,12 +1392,9 @@ public class FolioPageFragment
 
     public void scrollToHighlightId(String highlightId) {
         this.highlightId = highlightId;
-
-        if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
-            loadingView.show();
-            mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
-            this.highlightId = null;
-        }
+        loadingView.show();
+        mWebview.loadPage(String.format(getString(R.string.go_to_highlight), highlightId));
+        this.highlightId = null;
     }
 
     @Override

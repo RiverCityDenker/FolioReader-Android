@@ -82,6 +82,7 @@ function setFontSize(cls) {
 
 // Menu colors
 function setHighlightStyle(style) {
+    console.log("duy:test>>>setHighlightStyle thisHighlight = " + thisHighlight.id);
     Highlight.getUpdatedHighlightId(thisHighlight.id, style);
 }
 
@@ -124,6 +125,8 @@ var callHighlightURL = function(elm) {
     var URLBase = "highlight://";
     var currentHighlightRect = getRectForSelectedText(elm);
     thisHighlight = elm;
+
+    console.log("duy:test>>>callHighlightURL thisHighlight = " + elm.id)
 
     window.location = URLBase + encodeURIComponent(currentHighlightRect);
 }
@@ -1032,6 +1035,7 @@ function getHighlightString(style) {
 
     range.insertNode(elm);
     thisHighlight = elm;
+    console.log("duy:test>>>getHighlightString thisHighlight = " + elm.id)
 
     var params = [];
     params.push({id: id, rect: getRectForSelectedText(elm)});

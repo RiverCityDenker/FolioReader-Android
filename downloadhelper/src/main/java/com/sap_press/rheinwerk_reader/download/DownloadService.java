@@ -15,8 +15,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
-import com.sap_press.rheinwerk_reader.download.api.ApiClient;
-import com.sap_press.rheinwerk_reader.download.api.ApiService;
+import com.sap_press.rheinwerk_reader.mod.aping.api.ApiClient;
+import com.sap_press.rheinwerk_reader.mod.aping.api.ApiService;
 import com.sap_press.rheinwerk_reader.download.datamanager.DownloadDataManager;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 import com.sap_press.rheinwerk_reader.download.events.CancelDownloadEvent;

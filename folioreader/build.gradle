@@ -99,10 +99,15 @@ dependencies {
     api "org.readium:r2-parser:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
     api "org.readium:r2-server:$rootProject.ext.FOLIO_R2_STREAMER_VERSION"
     implementation "org.greenrobot:eventbus:$rootProject.ext.FOLIO_EVENTBUS_VERSION"
+    implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.FOLIO_RXJAVA_VERSION"
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.ext.FOLIO_RXANDROID_VERSION"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.FOLIO_RETROFIT_VERSION"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.FOLIO_RETROFIT_VERSION"
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     implementation project(':downloadhelper')
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation project(':utility')
     implementation project(':models')
+    implementation project(':aping')
 }
 apply from: '../folioreader/bintray/bintrayv1.gradle'
