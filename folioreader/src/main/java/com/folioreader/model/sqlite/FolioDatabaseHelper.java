@@ -5,6 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LastReadTable;
+import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
+
 public class FolioDatabaseHelper extends SQLiteOpenHelper {
     @SuppressWarnings("unused")
     private static final String TAG = "SQLiteOpenHelper";
@@ -13,7 +16,7 @@ public class FolioDatabaseHelper extends SQLiteOpenHelper {
     private static SQLiteDatabase myWritableDb;
 
     public static final String DATABASE_NAME = "FolioReader.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String KEY_ID = "_id";
     private final Context mContext;
@@ -65,8 +68,8 @@ public class FolioDatabaseHelper extends SQLiteOpenHelper {
 
         // TODO Implement your database update functionality here and remove the
         // following method call!
-        //onUpgradeDropTables(db);
-        //onCreate(db);
+        onUpgradeDropTables(db);
+        onCreate(db);
         resetAllPreferences(mContext);
 
 		/* PROTECTED REGION END */
@@ -76,7 +79,8 @@ public class FolioDatabaseHelper extends SQLiteOpenHelper {
      * This basic upgrade functionality will destroy all old data on upgrade
      */
     private final void onUpgradeDropTables(final SQLiteDatabase db) {
-
+        db.execSQL(HighLightTable.SQL_DROP);
+        db.execSQL(LastReadTable.SQL_DROP);
     }
 
     /**

@@ -97,7 +97,22 @@ public class DbAdapter {
         return id;
     }
 
+    public static String getHighlightIdForQuery(String query) {
+        Cursor c = mDatabase.rawQuery(query, null);
+
+        String id = "";
+        while (c.moveToNext()) {
+            id = c.getString(c.getColumnIndex(HighLightTable.ID));
+        }
+        c.close();
+        return id;
+    }
+
     public static Cursor getHighlightsForId(int id) {
+        return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
+    }
+
+    public static Cursor getHighlightItemsForId(String id) {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
     }
 

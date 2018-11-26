@@ -6,8 +6,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiClient;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiService;
-import com.sap_press.rheinwerk_reader.mod.models.notes.AddNoteResponse;
-import com.sap_press.rheinwerk_reader.mod.models.notes.NoteRequestBody;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -29,10 +28,10 @@ public class HighlightManager {
         this.mApiService = ApiClient.getClient(context, mBaseUrl).create(ApiService.class);
     }
 
-    public void addHighlight(NoteRequestBody noteRequestBody) {
+    public void addHighlight(HighlightV2 highlightItem) {
         // Add to server
         final String token = dataManager.getAccessToken();
-        final Disposable subscription = mApiService.addNote(token, noteRequestBody)
+        final Disposable subscription = mApiService.addNote(token, highlightItem)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addHighlightSuccess, this::addHighlightFailed);
@@ -43,7 +42,7 @@ public class HighlightManager {
         Log.e(TAG, "addHighlightFailed: >>>" + throwable.getMessage());
     }
 
-    private void addHighlightSuccess(AddNoteResponse addNoteResponse) {
-        Log.e(TAG, "addHighlightSuccess: >>>" + new Gson().toJson(addNoteResponse));
+    private void addHighlightSuccess(HighlightV2 highlightV2) {
+        Log.e(TAG, "addHighlightSuccess: >>>" + new Gson().toJson(highlightV2));
     }
 }
