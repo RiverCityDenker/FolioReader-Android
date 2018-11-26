@@ -7,8 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.folioreader.model.HighLight;
-import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.sqlite.HighLightTable;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,19 +40,28 @@ public class HighlightUtil {
 
             String rangyHighlightElement = getRangyString(rangy, oldRangy);
 
-            HighlightImpl highlightImpl = new HighlightImpl();
-            highlightImpl.setContent(textContent);
-            highlightImpl.setType(color);
-            highlightImpl.setPageNumber(pageNo);
-            highlightImpl.setBookId(bookId);
-            highlightImpl.setPageId(pageId);
-            highlightImpl.setRangy(rangyHighlightElement);
-            highlightImpl.setDate(Calendar.getInstance().getTime());
+//            HighlightImpl highlightImpl = new HighlightImpl();
+//            highlightImpl.setContent(textContent);
+//            highlightImpl.setType(color);
+//            highlightImpl.setPageNumber(pageNo);
+//            highlightImpl.setBookId(bookId);
+//            highlightImpl.setPageId(pageId);
+//            highlightImpl.setRangy(rangyHighlightElement);
+//            highlightImpl.setDate(Calendar.getInstance().getTime());
+
+            HighlightV2 highlightV2 = new HighlightV2();
+            highlightV2.setMarkedText(textContent);
+            highlightV2.setType(color);
+            highlightV2.setPageIndex(pageNo);
+            highlightV2.setProductId(Integer.parseInt(bookId));
+            highlightV2.setFilePath(pageId);
+            highlightV2.setRange(rangyHighlightElement);
+            highlightV2.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
             // save highlight to database
-            long id = HighLightTable.insertHighlight(highlightImpl);
+            long id = HighLightTable.insertHighlightItem(highlightV2);
             if (id != -1) {
-                highlightImpl.setId((int) id);
-                sendHighlightBroadcastEvent(context, highlightImpl, HighLight.HighLightAction.NEW);
+//                highlightV2.setId((int) id);
+//                sendHighlightBroadcastEvent(context, hi, HighLight.HighLightAction.NEW);
             }
             return rangy;
         } catch (JSONException e) {
@@ -101,7 +110,7 @@ public class HighlightUtil {
     }
 
     public static String generateRangyString(String pageId) {
-        List<String> rangyList = HighLightTable.getHighlightsForPageId(pageId);
+        List<String> rangyList = HighLightTable.getHighlightItemsForPageId(pageId);
         StringBuilder builder = new StringBuilder();
         if (!rangyList.isEmpty()) {
             builder.append("type:textContent");
@@ -114,17 +123,17 @@ public class HighlightUtil {
     }
 
     public static void sendHighlightBroadcastEvent(Context context,
-                                                   HighlightImpl highlightImpl,
+                                                   HighlightV2 highlightV2,
                                                    HighLight.HighLightAction action) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(
-                getHighlightBroadcastIntent(highlightImpl, action));
+                getHighlightBroadcastIntent(highlightV2, action));
     }
 
-    public static Intent getHighlightBroadcastIntent(HighlightImpl highlightImpl,
+    public static Intent getHighlightBroadcastIntent(HighlightV2 highlightV2,
                                                      HighLight.HighLightAction modify) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(HighlightImpl.INTENT, highlightImpl);
-        bundle.putSerializable(HighLight.HighLightAction.class.getName(), modify);
-        return new Intent(HighlightImpl.BROADCAST_EVENT).putExtras(bundle);
+        bundle.putParcelable(HighlightV2.INTENT, highlightV2);
+        bundle.putSerializable(HighlightV2.HighLightAction.class.getName(), modify);
+        return new Intent(HighlightV2.BROADCAST_EVENT).putExtras(bundle);
     }
 }

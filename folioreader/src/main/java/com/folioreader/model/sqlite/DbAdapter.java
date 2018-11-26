@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.folioreader.model.ReadPosition;
-
 public class DbAdapter {
     private static final String TAG = "DBAdapter";
 
@@ -79,22 +77,11 @@ public class DbAdapter {
     }
 
     public static boolean updateHighLight(ContentValues highlightContentValues, String id) {
-        return mDatabase.update(HighLightTable.TABLE_NAME, highlightContentValues, HighLightTable.ID + " = " + id, null) > 0;
+        return mDatabase.update(HighLightTable.TABLE_NAME, highlightContentValues, HighLightTable.COL_INTERNAL_ID + " = " + id, null) > 0;
     }
 
     public static Cursor getHighlightsForPageId(String query, String pageId) {
         return mDatabase.rawQuery(query, null);
-    }
-
-    public static int getIdForQuery(String query) {
-        Cursor c = mDatabase.rawQuery(query, null);
-
-        int id = -1;
-        while (c.moveToNext()) {
-            id = c.getInt(c.getColumnIndex(HighLightTable.ID));
-        }
-        c.close();
-        return id;
     }
 
     public static String getHighlightIdForQuery(String query) {
@@ -102,18 +89,14 @@ public class DbAdapter {
 
         String id = "";
         while (c.moveToNext()) {
-            id = c.getString(c.getColumnIndex(HighLightTable.ID));
+            id = c.getString(c.getColumnIndex(HighLightTable.COL_INTERNAL_ID));
         }
         c.close();
         return id;
     }
 
-    public static Cursor getHighlightsForId(int id) {
-        return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
-    }
-
     public static Cursor getHighlightItemsForId(String id) {
-        return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
+        return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.COL_INTERNAL_ID + " = \"" + id + "\"", null);
     }
 
     public static long saveReadPosition(ContentValues readPositionContentValues) {

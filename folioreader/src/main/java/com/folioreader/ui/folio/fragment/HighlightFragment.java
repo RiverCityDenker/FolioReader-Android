@@ -1,8 +1,6 @@
 package com.folioreader.ui.folio.fragment;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,22 +18,19 @@ import android.widget.Toast;
 
 import com.folioreader.Config;
 import com.folioreader.Constants;
+import com.folioreader.FolioReader;
 import com.folioreader.R;
 import com.folioreader.model.HighLight;
-import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.event.HighlightClickedEvent;
-import com.folioreader.model.event.TOCClickedEvent;
 import com.folioreader.model.event.UpdateHighlightEvent;
 import com.folioreader.model.sqlite.HighLightTable;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.adapter.HighlightAdapter;
 import com.folioreader.util.AppUtil;
-import com.folioreader.FolioReader;
 import com.folioreader.util.HighlightUtil;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 
 import org.greenrobot.eventbus.EventBus;
-
-import static com.folioreader.Constants.CHAPTER_SELECTED;
 
 public class HighlightFragment extends Fragment implements HighlightAdapter.HighLightAdapterCallback {
     private static final String HIGHLIGHT_ITEM = "highlight_item";
@@ -82,30 +77,30 @@ public class HighlightFragment extends Fragment implements HighlightAdapter.High
         highlightsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         highlightsView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
 
-        adapter = new HighlightAdapter(getActivity(), HighLightTable.getAllHighlights(mBookId), this, config);
+        adapter = new HighlightAdapter(getActivity(), HighLightTable.getAllHighlightItems(mBookId), this, config);
         highlightsView.setAdapter(adapter);
     }
 
     @Override
-    public void onItemClick(HighlightImpl highlightImpl) {
-        EventBus.getDefault().post(new HighlightClickedEvent(highlightImpl));
+    public void onItemClick(HighlightV2 highlightV2) {
+        EventBus.getDefault().post(new HighlightClickedEvent(highlightV2));
         mItemSelectedListener.onItemSelected();
     }
 
     @Override
-    public void deleteHighlight(int id) {
-        if(HighLightTable.deleteHighlight(id)) {
+    public void deleteHighlight(String internalId) {
+        if (HighLightTable.deleteHighlightItem(internalId)) {
             EventBus.getDefault().post(new UpdateHighlightEvent());
         }
     }
 
     @Override
-    public void editNote(final HighlightImpl highlightImpl, final int position) {
+    public void editNote(final HighlightV2 highlightV2, final int position) {
         final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_edit_notes);
         dialog.show();
-        String noteText = highlightImpl.getNote();
+        String noteText = highlightV2.getNote();
         ((EditText) dialog.findViewById(R.id.edit_note)).setText(noteText);
 
         dialog.findViewById(R.id.btn_save_note).setOnClickListener(new View.OnClickListener() {
@@ -115,11 +110,11 @@ public class HighlightFragment extends Fragment implements HighlightAdapter.High
                 String note =
                         ((EditText) dialog.findViewById(R.id.edit_note)).getText().toString();
                 if (!TextUtils.isEmpty(note)) {
-                    highlightImpl.setNote(note);
-                    if (HighLightTable.updateHighlight(highlightImpl)) {
+                    highlightV2.setNote(note);
+                    if (HighLightTable.updateHighlight(highlightV2)) {
                         HighlightUtil.sendHighlightBroadcastEvent(
                                 HighlightFragment.this.getActivity().getApplicationContext(),
-                                highlightImpl,
+                                highlightV2,
                                 HighLight.HighLightAction.MODIFY);
                         adapter.editNote(note, position);
                     }

@@ -37,7 +37,6 @@ import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.R;
 import com.folioreader.datamanager.FolioDataManager;
-import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.event.HighlightClickedEvent;
 import com.folioreader.model.event.MediaOverlayPlayPauseEvent;
@@ -73,6 +72,7 @@ import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 import com.sap_press.rheinwerk_reader.utils.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -471,11 +471,11 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onHighlightClickedEvent(HighlightClickedEvent event) {
-        HighlightImpl highlightImpl = event.getHighlightImpl();
-        mFolioPageViewPager.setCurrentItem(highlightImpl.getPageNumber());
+        HighlightV2 highlightV2 = event.getHighlight();
+        mFolioPageViewPager.setCurrentItem(highlightV2.getPageIndex());
         FolioPageFragment folioPageFragment = (FolioPageFragment)
-                mFolioPageFragmentAdapter.getItem(highlightImpl.getPageNumber());
-        folioPageFragment.scrollToHighlightId(highlightImpl.getRangy());
+                mFolioPageFragmentAdapter.getItem(highlightV2.getPageIndex());
+        folioPageFragment.scrollToHighlightId(highlightV2.getRange());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -726,7 +726,7 @@ public class FolioActivity
 
             @Override
             public void onPageSelected(int position) {
-                if (position != 0 && mSpineReferenceList != null && position != mSpineReferenceList.size() -1)
+                if (position != 0 && mSpineReferenceList != null && position != mSpineReferenceList.size() - 1)
                     showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));

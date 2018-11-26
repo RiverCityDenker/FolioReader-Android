@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.folioreader.model.HighLight;
-import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.sqlite.DbAdapter;
 import com.folioreader.model.sqlite.ReadPositionTable;
@@ -20,9 +19,9 @@ import com.folioreader.ui.base.SaveReceivedHighlightTask;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadPositionListener;
-import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 
 import java.util.List;
 
@@ -48,11 +47,11 @@ public class FolioReader {
     private BroadcastReceiver highlightReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            HighlightImpl highlightImpl = intent.getParcelableExtra(HighlightImpl.INTENT);
-            HighLight.HighLightAction action = (HighLight.HighLightAction)
-                    intent.getSerializableExtra(HighLight.HighLightAction.class.getName());
-            if (onHighlightListener != null && highlightImpl != null && action != null) {
-                onHighlightListener.onHighlight(highlightImpl, action);
+            HighlightV2 highlightV2 = intent.getParcelableExtra(HighlightV2.INTENT);
+            HighlightV2.HighLightAction action = (HighlightV2.HighLightAction)
+                    intent.getSerializableExtra(HighlightV2.HighLightAction.class.getName());
+            if (onHighlightListener != null && highlightV2 != null && action != null) {
+                onHighlightListener.onHighlight(highlightV2, action);
             }
         }
     };
@@ -63,7 +62,7 @@ public class FolioReader {
 
             ReadPosition readPosition =
                     intent.getParcelableExtra(FolioReader.EXTRA_READ_POSITION);
-            if (readPositionListener != null )
+            if (readPositionListener != null)
                 readPositionListener.saveReadPosition(readPosition);
         }
     };
@@ -90,7 +89,7 @@ public class FolioReader {
         this.context = context;
         DbAdapter.initialize(context);
         LocalBroadcastManager.getInstance(context).registerReceiver(highlightReceiver,
-                new IntentFilter(HighlightImpl.BROADCAST_EVENT));
+                new IntentFilter(HighlightV2.BROADCAST_EVENT));
         LocalBroadcastManager.getInstance(context).registerReceiver(readPositionReceiver,
                 new IntentFilter(ACTION_SAVE_READ_POSITION));
     }
@@ -210,7 +209,8 @@ public class FolioReader {
 
     /**
      * Pass your configuration and choose to override it every time or just for first execution.
-     * @param config custom configuration.
+     *
+     * @param config         custom configuration.
      * @param overrideConfig true will override the config, false will use either this
      *                       config if it is null in application context or will fetch previously
      *                       saved one while execution.

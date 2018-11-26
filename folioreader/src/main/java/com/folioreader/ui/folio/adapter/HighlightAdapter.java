@@ -16,10 +16,9 @@ import android.widget.TextView;
 
 import com.folioreader.Config;
 import com.folioreader.R;
-import com.folioreader.model.HighlightImpl;
-import com.folioreader.util.AppUtil;
 import com.folioreader.util.UiUtil;
 import com.folioreader.view.UnderlinedTextView;
+import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 
 import java.util.List;
 
@@ -28,12 +27,12 @@ import java.util.List;
  */
 
 public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.HighlightHolder> {
-    private List<HighlightImpl> highlights;
+    private List<HighlightV2> highlights;
     private HighLightAdapterCallback callback;
     private Context context;
-    private  Config config;
+    private Config config;
 
-    public HighlightAdapter(Context context, List<HighlightImpl> highlights, HighLightAdapterCallback callback, Config config) {
+    public HighlightAdapter(Context context, List<HighlightV2> highlights, HighLightAdapterCallback callback, Config config) {
         this.context = context;
         this.highlights = highlights;
         this.callback = callback;
@@ -55,16 +54,16 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
                 ((AppCompatActivity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        holder.container.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT));
+                        holder.container.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
                     }
                 });
             }
         }, 10);
 
-        holder.content.setText(Html.fromHtml(getItem(position).getContent()));
+        holder.content.setText(Html.fromHtml(getItem(position).getMarkedText()));
         UiUtil.setBackColorToTextView(holder.content,
                 getItem(position).getType());
-        holder.date.setText(AppUtil.formatDate(getItem(position).getDate()));
+        holder.date.setText(getItem(position).getCreatedAt());
         holder.container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +73,7 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callback.deleteHighlight(getItem(position).getId());
+                callback.deleteHighlight(getItem(position).getInternalId());
                 highlights.remove(position);
                 notifyDataSetChanged();
 
@@ -132,7 +131,7 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
         }
     }
 
-    private HighlightImpl getItem(int position) {
+    private HighlightV2 getItem(int position) {
         return highlights.get(position);
     }
 
@@ -167,10 +166,10 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
     }
 
     public interface HighLightAdapterCallback {
-        void onItemClick(HighlightImpl highlightImpl);
+        void onItemClick(HighlightV2 highlightV2);
 
-        void deleteHighlight(int id);
+        void deleteHighlight(String internalId);
 
-        void editNote(HighlightImpl highlightImpl, int position);
+        void editNote(HighlightV2 highlightV2, int position);
     }
 }
