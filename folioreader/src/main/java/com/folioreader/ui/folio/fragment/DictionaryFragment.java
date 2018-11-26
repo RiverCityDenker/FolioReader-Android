@@ -29,6 +29,7 @@ import com.folioreader.ui.base.DictionaryTask;
 import com.folioreader.ui.base.WikipediaCallBack;
 import com.folioreader.ui.base.WikipediaTask;
 import com.folioreader.ui.folio.adapter.DictionaryAdapter;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.io.IOException;
 
@@ -201,7 +202,7 @@ public class DictionaryFragment extends DialogFragment implements DictionaryCall
                 mediaPlayer.prepare();
                 mediaPlayer.start();
             } catch (IOException e) {
-                Log.d(TAG, "playMedia failed", e);
+                FolioLogging.tag(TAG).d("playMedia failed", e);
             }
         }
     }

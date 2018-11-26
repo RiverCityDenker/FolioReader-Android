@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.readium.r2_streamer.parser.EpubParser;
@@ -81,7 +82,7 @@ public class ParseAndDownloadFileAsyn extends ParallelExecutorTask<String, Void,
                                         + "&file_path=" + href;
                                 HTTPDownloader.downloadFile(fileUrl, token, folderPath, href, appVersion);
                             } catch (Exception e) {
-                                Log.e(TAG, "parseHtml:parse Image >>>" + e.getMessage());
+                                FolioLogging.tag(TAG).e("parseHtml:parse Image >>>" + e.getMessage());
                             }
                             break;
                     }
@@ -108,7 +109,7 @@ public class ParseAndDownloadFileAsyn extends ParallelExecutorTask<String, Void,
                                         + "&file_path=" + href;
                                 HTTPDownloader.downloadFile(fileUrl, token, folderPath, href, appVersion);
                             } catch (Exception e) {
-                                Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
+                                FolioLogging.tag(TAG).e("parseHtml:parse Link >>>" + e.getMessage());
                             }
                         }
                         break;

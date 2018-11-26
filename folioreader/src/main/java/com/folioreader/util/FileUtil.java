@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.folioreader.Constants;
 import com.folioreader.ui.folio.activity.FolioActivity;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,7 +47,7 @@ public class FileUtil {
             }
             return filePath;
         } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+            FolioLogging.tag(TAG).e(e.getMessage());
         }
 
         return null;
@@ -107,12 +108,12 @@ public class FileUtil {
             inputStream.close();
             outputStream.close();
         } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+            FolioLogging.tag(TAG).e(e.getMessage());
         }
         return false;
     }
 
     public static Long getCurrentTimeStamp() {
-        return System.currentTimeMillis()/1000;
+        return System.currentTimeMillis() / 1000;
     }
 }

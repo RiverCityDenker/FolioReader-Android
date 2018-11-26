@@ -9,6 +9,7 @@ import android.util.Log;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.sqlite.HighLightTable;
 import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +66,7 @@ public class HighlightUtil {
             }
             return rangy;
         } catch (JSONException e) {
-            Log.e(TAG, "createHighlightRangy failed", e);
+            FolioLogging.tag(TAG).e("createHighlightRangy failed", e);
         }
         return "";
     }

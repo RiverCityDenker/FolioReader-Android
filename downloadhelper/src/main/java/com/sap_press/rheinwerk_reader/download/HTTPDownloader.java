@@ -2,6 +2,7 @@ package com.sap_press.rheinwerk_reader.download;
 
 import android.util.Log;
 
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import java.io.BufferedInputStream;
@@ -11,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import timber.log.Timber;
 
 import static com.sap_press.rheinwerk_reader.utils.Constant.X_CONTENT_KEY;
 
@@ -27,7 +30,7 @@ public class HTTPDownloader {
                                       String appVersion) throws Exception {
 
         File file = FileUtil.getFile(folderPath, href);
-        Log.d(TAG, "downloadFile: >>>" + file.getCanonicalPath());
+        FolioLogging.tag(TAG).d("downloadFile: >>>" + file.getCanonicalPath());
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);

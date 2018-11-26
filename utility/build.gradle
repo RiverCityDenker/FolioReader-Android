@@ -38,6 +38,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.FOLIO_RETROFIT_VERSION"
     implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:' + rootProject.ext.rxAdapterRetrofitVersion
     implementation 'commons-io:commons-io:' + rootProject.ext.apacheCommonIOVersion
+    implementation "com.jakewharton.timber:timber:$rootProject.ext.FOLIO_ANDROID_TIMBER_VERSION"
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation project(':models')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.readium.r2_streamer.parser.EpubParser;
@@ -58,7 +59,7 @@ public class ParseAndDownloadFileSync {
 
     public void parseAndDownload(String contentKey, DownloadFinishCallback callback) {
         final String html = CryptoManager.decryptContentKey(contentKey, apiKey, getFilePath(folderPath, originalHref));
-        Log.e(TAG, "parseAndDownload: >>>>>>>>>>>>>>>>>" + originalHref);
+        FolioLogging.tag(TAG).e("parseAndDownload: >>>>>>>>>>>>>>>>>" + originalHref);
         try {
             parseHtml(html, callback);
         } catch (EpubParserException e) {
@@ -125,7 +126,7 @@ public class ParseAndDownloadFileSync {
             @SuppressLint("StaticFieldLeak") ParallelExecutorTask task = new ParallelExecutorTask(poolExecutor) {
                 @Override
                 protected Object doInBackground(Object[] objects) {
-                    Log.d(TAG, "doInBackground: >>>imageHref = " + s);
+                    FolioLogging.tag(TAG).d("doInBackground: >>>imageHref = " + s);
                     try {
                         final String fileUrl = baseUrl + "ebooks/" + ebookId
                                 + "/download?app_version=" + appVersion
@@ -133,7 +134,7 @@ public class ParseAndDownloadFileSync {
                         HTTPDownloader.downloadFile(fileUrl, token, folderPath, s, appVersion);
                         checkDownloadFinished();
                     } catch (Exception e) {
-                        Log.e(TAG, "parseHtml:parse Link >>>" + e.getMessage());
+                        FolioLogging.tag(TAG).e("parseHtml:parse Link >>>" + e.getMessage());
                         checkDownloadFinished();
                     }
 
@@ -144,7 +145,7 @@ public class ParseAndDownloadFileSync {
                     int current = downloadedCount.incrementAndGet();
                     if (current == filesToLoad.size()) {
                         //all download finished
-                        Log.d(TAG, "checkDownloadFinished: >>>all download finished, href = " + originalHref);
+                        FolioLogging.tag(TAG).d("checkDownloadFinished: >>>all download finished, href = " + originalHref);
                         callback.downloadFinish();
                     }
                 }

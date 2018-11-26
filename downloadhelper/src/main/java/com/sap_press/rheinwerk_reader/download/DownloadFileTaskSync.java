@@ -10,6 +10,7 @@ import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.FinishDownloadContentEvent;
 import com.sap_press.rheinwerk_reader.downloadhelper.R;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.apiinfo.ApiInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
@@ -49,7 +50,7 @@ public class DownloadFileTaskSync {
 
     public Ebook downloadSync(String... originalHrefs) {
         String originalHref = originalHrefs[0];
-        Log.e(TAG, "doInBackground:test >>>" + originalHref);
+        FolioLogging.tag(TAG).e("doInBackground:test >>>" + originalHref);
         final String href = FileUtil.reformatHref(originalHref);
         final String fileUrl = baseUrl + "ebooks/" + ebookId + "/download?app_version=" + appVersion + "&file_path=" + href;
         ebook.setHref(href);
@@ -130,7 +131,7 @@ public class DownloadFileTaskSync {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                    Log.e(TAG, "downloadSingleFile: >>>retryCount = " + retryCount + ", href = " + href);
+                    FolioLogging.tag(TAG).e("downloadSingleFile: >>>retryCount = " + retryCount + ", href = " + href);
                     return downloadSingleFile(context, fileUrl, href, appVersion, retryCount);
                 } else {
                     if (FileUtil.isFileExist(context, ebookId, href))

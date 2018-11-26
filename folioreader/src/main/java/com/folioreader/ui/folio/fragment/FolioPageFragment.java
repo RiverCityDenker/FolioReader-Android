@@ -76,6 +76,7 @@ import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.UpdateReaderPageWhenOnlineEvent;
 import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -384,7 +385,7 @@ public class FolioPageFragment
 
         if (!TextUtils.isEmpty(href) && href.indexOf('#') != -1) {
             mAnchorId = href.substring(href.lastIndexOf('#') + 1);
-            Log.d(TAG, "scrollToAnchorId: >>>" + mAnchorId);
+            FolioLogging.tag(TAG).d("scrollToAnchorId: >>>" + mAnchorId);
             mWebview.loadPage(String.format(getString(R.string.go_to_anchor), mAnchorId));
             mAnchorId = null;
             if (loadingView != null && loadingView.getVisibility() != View.VISIBLE) {
@@ -425,7 +426,7 @@ public class FolioPageFragment
                     "UTF-8",
                     null);
         } else {
-            Log.d(TAG, "setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
+            FolioLogging.tag(TAG).d("setHtml: >>>href = " + spineItem.href + " - " + reloaded + " - " + mIsOnlineReading);
             if (spineItem != null) {
                 String ref = spineItem.href;
                 if (!reloaded && spineItem.properties.contains("media-overlay")) {
@@ -472,7 +473,7 @@ public class FolioPageFragment
     @JavascriptInterface
     public void hideLoading() {
         if (getActivity() != null) {
-            Log.d(TAG, "hideLoading: >>>>>>>>>>" + mPosition);
+            FolioLogging.tag(TAG).d("hideLoading: >>>>>>>>>>" + mPosition);
             ((FolioActivity) getActivity()).doShouldHideLoading(mPosition);
         }
     }
@@ -617,11 +618,11 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadFileSuccess(DownloadFileSuccessEvent event) {
-        Log.d(TAG, "onDownloadFileSuccess: >>> event href = " + event.getHref());
-        Log.d(TAG, "onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
+        FolioLogging.tag(TAG).d("onDownloadFileSuccess: >>> event href = " + event.getHref());
+        FolioLogging.tag(TAG).d("onDownloadFileSuccess: >>> spineItem.href = " + spineItem.href);
         if (spineItem != null && event.getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = CryptoManager.decryptContentKey(event.getEbook().getContentKey(), mUserKey, getFilePath());
-            Log.d(TAG, "onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0, 20) : "rong"));
+            FolioLogging.tag(TAG).d("onDownloadFileSuccess: >>> html = " + (html.length() > 0 ? html.substring(0, 20) : "rong"));
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = false;
@@ -634,12 +635,12 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDownloadSingleFileErrorEvent(DownloadSingleFileErrorEvent event) {
-        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>> event href = " + event.getEbook().getHref());
-        Log.d(TAG, "onDownloadSingleFileErrorEvent: >>> spineItem.href = " + spineItem.href);
+        FolioLogging.tag(TAG).d("onDownloadSingleFileErrorEvent: >>> event href = " + event.getEbook().getHref());
+        FolioLogging.tag(TAG).d("onDownloadSingleFileErrorEvent: >>> spineItem.href = " + spineItem.href);
         if (event != null && event.getEbook() != null
                 && event.getEbook().getHref().equalsIgnoreCase(FileUtil.reformatHref(spineItem.href))) {
             final String html = getErrorHtml(getContext(), mConfig, event.getTitle(), event.getMessage());
-            Log.d(TAG, "onDownloadSingleFileErrorEvent: >>>" + html);
+            FolioLogging.tag(TAG).d("onDownloadSingleFileErrorEvent: >>>" + html);
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     mIsErrorPage = true;
@@ -652,7 +653,7 @@ public class FolioPageFragment
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateReaderPageWhenOnlineEvent(UpdateReaderPageWhenOnlineEvent event) {
-        Log.d(TAG, "onUpdateReaderPageWhenOnlineEvent: >>>" + spineItem.href);
+        FolioLogging.tag(TAG).d("onUpdateReaderPageWhenOnlineEvent: >>>" + spineItem.href);
         mIsErrorPage = false;
         if (!FileUtil.isFileExist(getActivity(), mBookId, spineItem.href)
                 || mContentKey == null || mContentKey.isEmpty()) {
@@ -668,7 +669,7 @@ public class FolioPageFragment
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            Log.e(TAG, "onReceivedError1: " + description);
+            FolioLogging.tag(TAG).e("onReceivedError1: " + description);
         }
 
         @Override
@@ -720,7 +721,7 @@ public class FolioPageFragment
                                             getActivity())));
                         }
                     } catch (UnsupportedEncodingException e) {
-                        Log.d(LOG_TAG, e.getMessage());
+                        FolioLogging.tag(LOG_TAG).d(e.getMessage());
                     }
                 } else {
                     if (url.contains("#")) {
@@ -749,7 +750,7 @@ public class FolioPageFragment
                 try {
                     return new WebResourceResponse("image/png", null, null);
                 } catch (Exception e) {
-                    Log.e(LOG_TAG, "shouldInterceptRequest failed", e);
+                    FolioLogging.tag(LOG_TAG).e("shouldInterceptRequest failed", e);
                 }
             }
             return null;
@@ -765,7 +766,7 @@ public class FolioPageFragment
                 try {
                     return new WebResourceResponse("image/png", null, null);
                 } catch (Exception e) {
-                    Log.e(LOG_TAG, "shouldInterceptRequest failed", e);
+                    FolioLogging.tag(LOG_TAG).e("shouldInterceptRequest failed", e);
                 }
             }
             return null;
@@ -786,7 +787,7 @@ public class FolioPageFragment
                     mWebview.loadPage(String.format(getString(R.string.go_to_span),
                             lastReadPosition.isUsingId(), lastReadPosition.getValue()));
                 } else {
-                    Log.d(TAG, "todoDung loadContent: lastReadPosition = null");
+                    FolioLogging.tag(TAG).d("todoDung loadContent: lastReadPosition = null");
                 }
             } else {
                 if (mPosition == mActivityCallback.getChapterPosition() - 1) {
@@ -933,7 +934,7 @@ public class FolioPageFragment
                 wait(2000);
             }
         } catch (InterruptedException e) {
-            Log.e(LOG_TAG, "-> " + e);
+            FolioLogging.tag(LOG_TAG).e("-> " + e);
         }
 
         return lastReadPosition;
@@ -951,7 +952,7 @@ public class FolioPageFragment
     public void storeFirstVisibleSpan(boolean usingId, String value) {
 
         synchronized (this) {
-            Log.d(TAG, "todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
+            FolioLogging.tag(TAG).d("todoDung storeFirstVisibleSpan: " + usingId + "     " + value);
             lastReadPosition = new ReadPositionImpl(mBookId, spineItem.getId(),
                     spineItem.getOriginalHref(), mPosition, usingId, value);
             Intent intent = new Intent(FolioReader.ACTION_SAVE_READ_POSITION);
@@ -1050,7 +1051,7 @@ public class FolioPageFragment
             mMinutesLeftTextView.setText(minutesRemainingStr);
             mPagesLeftTextView.setText(pagesRemainingStr);
         } catch (java.lang.ArithmeticException | IllegalStateException exp) {
-            Log.d("divide error", exp.toString());
+            FolioLogging.tag(TAG).d(exp.toString());
         }
     }
 

@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.folioreader.util.AppUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class HtmlTask extends AsyncTask<String, Void, String> {
                 stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             return stringBuilder.toString();
         } catch (IOException e) {
-            Log.e(TAG, "HtmlTask failed", e);
+            FolioLogging.tag(TAG).e("HtmlTask failed", e);
         }
         return null;
     }

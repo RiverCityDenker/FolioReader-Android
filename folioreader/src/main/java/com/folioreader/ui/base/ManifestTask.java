@@ -6,6 +6,7 @@ import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folioreader.ui.custom.EpubPublicationCustom;
 import com.folioreader.util.AppUtil;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import org.readium.r2_streamer.model.tableofcontents.TOCLink;
 
@@ -51,7 +52,7 @@ public class ManifestTask extends AsyncTask<String, Void, EpubPublicationCustom>
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(stringBuilder.toString(), EpubPublicationCustom.class);
         } catch (IOException e) {
-            Log.e(TAG, "ManifestTask failed", e);
+            FolioLogging.tag(TAG).e("ManifestTask failed", e);
         }
         return null;
     }

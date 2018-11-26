@@ -70,6 +70,7 @@ import com.sap_press.rheinwerk_reader.download.events.OnDownloadInterruptedBookE
 import com.sap_press.rheinwerk_reader.download.events.UnableDownloadEvent;
 import com.sap_press.rheinwerk_reader.googleanalytics.AnalyticViewName;
 import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
 import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
@@ -239,7 +240,7 @@ public class FolioActivity
     public void updatePositionList(int position) {
         if (!mPositionList.contains(Integer.valueOf(position))) {
             mPositionList.add(position);
-            Log.d(TAG, "updatePositionList: >>>" + position);
+            FolioLogging.tag(TAG).d("updatePositionList: >>>" + position);
         }
     }
 
@@ -247,10 +248,10 @@ public class FolioActivity
         runOnUiThread(() -> {
             refreshPositionList();
             if (mPositionList.contains(mPosition)) {
-                Log.d(TAG, "run: >>>remove " + mPosition);
+                FolioLogging.tag(TAG).d("run: >>>remove " + mPosition);
                 mPositionList.remove(Integer.valueOf(mPosition));
             }
-            Log.d(TAG, "doShouldHideLoading: >>>>>>>>>>" + mPositionList.size());
+            FolioLogging.tag(TAG).d("doShouldHideLoading: >>>>>>>>>>" + mPositionList.size());
             if (mPositionList.isEmpty()) {
                 hideLoading();
             }
@@ -420,7 +421,7 @@ public class FolioActivity
     @Override
     public void startContentHighlightActivity() {
         if (mSpineReferenceList.isEmpty()) {
-            Log.d(TAG, "startContentHighlightActivity: >>>");
+            FolioLogging.tag(TAG).d("startContentHighlightActivity: >>>");
             showErrorDialog();
             return;
         }
@@ -451,7 +452,7 @@ public class FolioActivity
         String selectedChapterHref = event.getHref();
         for (Link spine : mSpineReferenceList) {
             if (selectedChapterHref.contains(spine.href)) {
-                Log.d(TAG, "onTOCClickedEvent: >>>" + selectedChapterHref);
+                FolioLogging.tag(TAG).d("onTOCClickedEvent: >>>" + selectedChapterHref);
                 mChapterPosition = mSpineReferenceList.indexOf(spine);
                 mFolioPageViewPager.setCurrentItem(mChapterPosition);
                 FolioPageFragment folioPageFragment = (FolioPageFragment)
@@ -481,7 +482,7 @@ public class FolioActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadInterruptedBookEvent(OnDownloadInterruptedBookEvent event) {
         if (event.getEbook().isDownloadFailed()) {
-            Log.d(TAG, "onDownloadInterruptedBookEvent: >>>>>>");
+            FolioLogging.tag(TAG).d("onDownloadInterruptedBookEvent: >>>>>>");
             createPausedDownloadDialog(this,
                     getResources().getString(R.string.text_failed_dialog_title),
                     getResources().getString(R.string.text_failed_dialog_message),
@@ -524,7 +525,7 @@ public class FolioActivity
             mMainPresenter.parseManifest(urlString);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "initBook failed", e);
+            FolioLogging.tag(LOG_TAG).e("initBook failed", e);
         }
     }
 
@@ -658,7 +659,7 @@ public class FolioActivity
         if (mEpubServer != null) {
             mEpubServer.stop();
         }
-        Log.d(TAG, "onDestroy: >>>");
+        FolioLogging.tag(TAG).d("onDestroy: >>>");
         if (isOnlineReading() && !isDownloadingBook()) {
             getPresenter().deleteCacheData(getApplicationContext(), mEbook);
         }
@@ -841,7 +842,7 @@ public class FolioActivity
         if (mImageClicked) return;
         mImageClicked = true;
         String idref = href.substring(href.indexOf(bookFileName + "/") + bookFileName.length() + 1, href.lastIndexOf("."));
-        Log.d(TAG, "showSinglePage: >>>" + idref);
+        FolioLogging.tag(TAG).d("showSinglePage: >>>" + idref);
         for (CustomLink spine : mSpineReferenceList) {
             if (spine.href.contains(idref) && spine.linear.equalsIgnoreCase("no")) {
 
@@ -960,7 +961,7 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onFinishedDownloadContent(FinishDownloadContentEvent event) {
-        Log.d(TAG, "onFinishedDownloadContent: >>>");
+        FolioLogging.tag(TAG).d("onFinishedDownloadContent: >>>");
         if (mEbook.getId() == event.getEbook().getId()) {
             mEbook = event.getEbook();
             ebookFilePath = mEbook.getFilePath();

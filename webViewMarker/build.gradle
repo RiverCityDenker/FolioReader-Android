@@ -24,7 +24,6 @@ ext {
     licenseUrl = 'https://en.wikipedia.org/wiki/FreeBSD_Documentation_License#License'
     allLicenses = ["FreeBSD"]
 }
-
 android {
     compileSdkVersion rootProject.ext.FOLIO_ANDROID_COMPILE_SDK_VERSION
 
@@ -42,7 +41,6 @@ android {
         }
     }
 }
-
 apply from: '../folioreader/bintray/installv1.gradle'
 apply from: '../folioreader/bintray/bintrayv1.gradle'
 repositories {
@@ -50,4 +48,5 @@ repositories {
 }
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation project(':utility')
 }

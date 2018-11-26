@@ -8,9 +8,11 @@ import android.util.Log;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LastReadTable;
 import com.sap_press.rheinwerk_reader.download.datamanager.tables.LibraryTable;
 
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
+
 public class FolioDatabaseHelper extends SQLiteOpenHelper {
     @SuppressWarnings("unused")
-    private static final String TAG = "SQLiteOpenHelper";
+    private static final String TAG = "FolioDatabaseHelper";
 
     private static FolioDatabaseHelper mInstance;
     private static SQLiteDatabase myWritableDb;
@@ -56,7 +58,7 @@ public class FolioDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public final void onCreate(final SQLiteDatabase db) {
-        Log.d("create table highlight", "****" + HighLightTable.SQL_CREATE);
+        FolioLogging.tag(TAG).d("create table highlight", "****" + HighLightTable.SQL_CREATE);
         db.execSQL(HighLightTable.SQL_CREATE);
         db.execSQL(ReadPositionTable.SQL_CREATE);
     }
