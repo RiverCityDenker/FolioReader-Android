@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.folioreader.model.HighLight;
 import com.folioreader.model.sqlite.HighLightTable;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 
 import org.json.JSONException;
@@ -50,16 +49,16 @@ public class HighlightUtil {
 //            highlightImpl.setRangy(rangyHighlightElement);
 //            highlightImpl.setDate(Calendar.getInstance().getTime());
 
-            HighlightV2 highlightV2 = new HighlightV2();
-            highlightV2.setMarkedText(textContent);
-            highlightV2.setType(color);
-            highlightV2.setPageIndex(pageNo);
-            highlightV2.setProductId(Integer.parseInt(bookId));
-            highlightV2.setFilePath(pageId);
-            highlightV2.setRange(rangyHighlightElement);
-            highlightV2.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
+            Note note = new Note();
+            note.setMarkedText(textContent);
+            note.setType(color);
+            note.setPageIndex(pageNo);
+            note.setProductId(Integer.parseInt(bookId));
+            note.setFilePath(pageId);
+            note.setRange(rangyHighlightElement);
+            note.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
             // save highlight to database
-            long id = HighLightTable.insertHighlightItem(highlightV2);
+            long id = HighLightTable.insertHighlightItem(note);
             if (id != -1) {
 //                highlightV2.setId((int) id);
 //                sendHighlightBroadcastEvent(context, hi, HighLight.HighLightAction.NEW);
@@ -124,17 +123,17 @@ public class HighlightUtil {
     }
 
     public static void sendHighlightBroadcastEvent(Context context,
-                                                   HighlightV2 highlightV2,
+                                                   Note note,
                                                    HighLight.HighLightAction action) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(
-                getHighlightBroadcastIntent(highlightV2, action));
+                getHighlightBroadcastIntent(note, action));
     }
 
-    public static Intent getHighlightBroadcastIntent(HighlightV2 highlightV2,
+    public static Intent getHighlightBroadcastIntent(Note note,
                                                      HighLight.HighLightAction modify) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(HighlightV2.INTENT, highlightV2);
-        bundle.putSerializable(HighlightV2.HighLightAction.class.getName(), modify);
-        return new Intent(HighlightV2.BROADCAST_EVENT).putExtras(bundle);
+        bundle.putParcelable(Note.INTENT, note);
+        bundle.putSerializable(Note.HighLightAction.class.getName(), modify);
+        return new Intent(Note.BROADCAST_EVENT).putExtras(bundle);
     }
 }

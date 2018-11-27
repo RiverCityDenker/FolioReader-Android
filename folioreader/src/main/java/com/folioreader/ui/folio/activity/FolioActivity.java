@@ -73,7 +73,7 @@ import com.sap_press.rheinwerk_reader.googleanalytics.GoogleAnalyticManager;
 import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 import com.sap_press.rheinwerk_reader.utils.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -472,11 +472,11 @@ public class FolioActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onHighlightClickedEvent(HighlightClickedEvent event) {
-        HighlightV2 highlightV2 = event.getHighlight();
-        mFolioPageViewPager.setCurrentItem(highlightV2.getPageIndex());
+        Note note = event.getHighlight();
+        mFolioPageViewPager.setCurrentItem(note.getPageIndex());
         FolioPageFragment folioPageFragment = (FolioPageFragment)
-                mFolioPageFragmentAdapter.getItem(highlightV2.getPageIndex());
-        folioPageFragment.scrollToHighlightId(highlightV2.getRange());
+                mFolioPageFragmentAdapter.getItem(note.getPageIndex());
+        folioPageFragment.scrollToHighlightId(note.getRange());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
