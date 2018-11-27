@@ -71,7 +71,7 @@ public class HighlightUtil {
         if (downloadInfo.ismIsTestMode()) {
             //post Highlight to server
             HighlightManager highlightManager = new HighlightManager(context, downloadInfo.getmBaseUrl());
-            highlightManager.addHighlight(note);
+            highlightManager.createNote(note);
         } else {
             // save highlight to database
             long id = HighLightTable.insertHighlightItem(note);
