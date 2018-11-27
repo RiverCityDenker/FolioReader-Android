@@ -16,6 +16,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Response;
 
 public class HighlightManager {
 
@@ -42,10 +43,16 @@ public class HighlightManager {
         compositeSubscription.add(subscription);
     }
 
-    public Observable<List<Note>> getNotesById(String productId) {
+    public Observable<List<Note>> getAllNotesByBookId(String productId) {
         final String token = dataManager.getAccessToken();
-        return mApiService.getNotesByBookId(token, productId);
+        return mApiService.getAllNotesByBookId(token, productId);
     }
+
+    public Observable<Response<Void>> deleteNoteById(String noteId) {
+        final String token = dataManager.getAccessToken();
+        return mApiService.deleteNoteById(noteId, token);
+    }
+
 
     private void addHighlightFailed(Throwable throwable) {
         Log.e(TAG, "addHighlightFailed: >>>" + throwable.getMessage());
