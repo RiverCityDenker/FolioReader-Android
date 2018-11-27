@@ -1153,10 +1153,14 @@ function goToAnchor(anchorId) {
       $("#"+inputId).trigger("input", ["true"]);
     },
 
-    highlightSelection: function(color){
+    highlightSelection: function(color, bookId, pageIndex){
       try {
+        var highlightSelection = this.highlighter.highlightSelection("highlight_" + color, null);
+        newHighlights = highlightSelection;
+        var aNewHighlight = newHighlights[0];
+        var id = bookId + "_" + pageIndex.toString() + "_" + aNewHighlight.characterRange.start.toString() + "_" + aNewHighlight.characterRange.end.toString();
+        aNewHighlight.id = id;
 
-        this.highlighter.highlightSelection("highlight_" + color, null);
         var range = window.getSelection().toString();
         var params = {content: range,rangy: this.getHighlights(),color: color};
         this.clearSelection();
@@ -1175,7 +1179,8 @@ function goToAnchor(anchorId) {
 
     getHighlights: function(){
       try {
-        return this.highlighter.serialize();
+        var rangy = this.highlighter.serialize();
+        return rangy;
       } catch(err){}
     },
 

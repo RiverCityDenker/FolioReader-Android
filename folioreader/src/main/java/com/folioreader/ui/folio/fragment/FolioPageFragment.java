@@ -1137,7 +1137,9 @@ public class FolioPageFragment
 
     public void highlight(HighlightV2.HighlightStyle style, boolean isCreated) {
         if (isCreated) {
-            mWebview.loadPage(String.format("javascript:if(typeof ssReader !== \"undefined\"){ssReader.highlightSelection('%s');}", HighlightV2.HighlightStyle.classForStyle(style)));
+            mWebview.loadPage(String.format("javascript:if(typeof ssReader !== \"undefined\"){" +
+                    "ssReader.highlightSelection('%s', '%s', '%d');}",
+                    HighlightV2.HighlightStyle.classForStyle(style), mBookId, mPosition));
         } else {
             mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + HighlightV2.HighlightStyle.classForStyle(style)));
         }
@@ -1328,10 +1330,14 @@ public class FolioPageFragment
             rangy = HighlightUtil.createHighlightRangy(getActivity().getApplicationContext(),
                     html,
                     mBookId,
-                    getPageName(),
+                    getPageId(),
                     mPosition,
                     rangy);
         }
+    }
+
+    private String getPageId() {
+        return spineItem.href;
     }
 
     private String getPageName() {

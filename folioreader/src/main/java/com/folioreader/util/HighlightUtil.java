@@ -41,15 +41,6 @@ public class HighlightUtil {
 
             String rangyHighlightElement = getRangyString(rangy, oldRangy);
 
-//            HighlightImpl highlightImpl = new HighlightImpl();
-//            highlightImpl.setContent(textContent);
-//            highlightImpl.setType(color);
-//            highlightImpl.setPageNumber(pageNo);
-//            highlightImpl.setBookId(bookId);
-//            highlightImpl.setPageId(pageId);
-//            highlightImpl.setRangy(rangyHighlightElement);
-//            highlightImpl.setDate(Calendar.getInstance().getTime());
-
             HighlightV2 highlightV2 = new HighlightV2();
             highlightV2.setMarkedText(textContent);
             highlightV2.setType(color);
@@ -57,12 +48,12 @@ public class HighlightUtil {
             highlightV2.setProductId(Integer.parseInt(bookId));
             highlightV2.setFilePath(pageId);
             highlightV2.setRange(rangyHighlightElement);
+            highlightV2.setInternalId(getHighlightIdFromRangy(rangyHighlightElement));
             highlightV2.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
             // save highlight to database
             long id = HighLightTable.insertHighlightItem(highlightV2);
             if (id != -1) {
-//                highlightV2.setId((int) id);
-//                sendHighlightBroadcastEvent(context, hi, HighLight.HighLightAction.NEW);
+                sendHighlightBroadcastEvent(context, highlightV2, HighLight.HighLightAction.NEW);
             }
             return rangy;
         } catch (JSONException e) {
@@ -108,6 +99,16 @@ public class HighlightUtil {
             return new ArrayList<>();
         }
         return rangyElementList;
+    }
+
+    /**
+     * @param rangy This is rangy like format start$end$bookId_pageIndex_start_end$highlight_green$
+     * @return bookId_pageIndex_start_end
+     */
+    private static String getHighlightIdFromRangy(String rangy) {
+        List<String> rangyElementList = new ArrayList<>();
+        rangyElementList.addAll(Arrays.asList(rangy.split("\\$")));
+        return rangyElementList.size() >= 3 ? rangyElementList.get(2) : "";
     }
 
     public static String generateRangyString(String pageId) {
