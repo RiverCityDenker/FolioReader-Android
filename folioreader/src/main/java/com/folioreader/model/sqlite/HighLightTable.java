@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.folioreader.Constants;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import java.text.SimpleDateFormat;
@@ -131,6 +132,7 @@ public class HighLightTable {
     }
 
     public static long insertHighlightItem(Note highlight) {
+        FolioLogging.tag(TAG).d("insertHighlightItem id = " + highlight.getInternalId());
         highlight.setUuid(UUID.randomUUID().toString());
         return DbAdapter.saveHighLight(getHighlightItemContentValues(highlight));
     }

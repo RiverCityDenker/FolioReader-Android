@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.folioreader.datamanager.HighlightManager;
 import com.folioreader.model.sqlite.HighLightTable;
+import com.google.gson.Gson;
 import com.sap_press.rheinwerk_reader.logging.FolioLogging;
+import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import org.json.JSONException;
@@ -25,6 +28,7 @@ public class HighlightUtil {
     private static final String TAG = "HighlightUtil";
 
     public static String createHighlightRangy(Context context,
+                                              DownloadInfo downloadInfo,
                                               String content,
                                               String bookId,
                                               String pageId,
@@ -32,32 +36,49 @@ public class HighlightUtil {
                                               String oldRangy) {
         try {
             JSONObject jObject = new JSONObject(content);
-
             String rangy = jObject.getString("rangy");
-            String textContent = jObject.getString("content");
-            String color = jObject.getString("color");
-
-            String rangyHighlightElement = getRangyString(rangy, oldRangy);
-
-            Note note = new Note();
-            note.setMarkedText(textContent);
-            note.setType(color);
-            note.setPageIndex(pageNo);
-            note.setProductId(Integer.parseInt(bookId));
-            note.setFilePath(pageId);
-            note.setRange(rangyHighlightElement);
-            note.setInternalId(getHighlightIdFromRangy(rangyHighlightElement));
-            note.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
+            postNoteToServer(context, downloadInfo, bookId, pageId, pageNo, oldRangy, jObject, rangy);
             // save highlight to database
-            long id = HighLightTable.insertHighlightItem(note);
-            if (id != -1) {
-                sendHighlightBroadcastEvent(context, note, Note.HighLightAction.NEW);
-            }
+//            long id = HighLightTable.insertHighlightItem(note);
+//            if (id != -1) {
+//                sendHighlightBroadcastEvent(context, note, Note.HighLightAction.NEW);
+//            }
             return rangy;
         } catch (JSONException e) {
             FolioLogging.tag(TAG).e("createHighlightRangy failed", e);
         }
         return "";
+    }
+
+    private static void postNoteToServer(Context context, DownloadInfo downloadInfo, String bookId,
+                                         String pageId, int pageNo, String oldRangy,
+                                         JSONObject jObject, String rangy) throws JSONException {
+        String textContent = jObject.getString("content");
+        String color = jObject.getString("color");
+
+        String rangyHighlightElement = getRangyString(rangy, oldRangy);
+        Note note = new Note();
+        note.setMarkedText(textContent);
+        note.setType(color);
+        note.setPageIndex(pageNo);
+        note.setProductId(Integer.parseInt(bookId));
+        note.setFilePath(pageId);
+        note.setRange(rangyHighlightElement);
+        note.setInternalId(getHighlightIdFromRangy(rangyHighlightElement));
+        note.setCreatedAt(HighLightTable.getDateTimeString(Calendar.getInstance().getTime()));
+        note.setTitle("Title");
+        note.setNoteText("note");
+        if (downloadInfo.ismIsTestMode()) {
+            //post Highlight to server
+            HighlightManager highlightManager = new HighlightManager(context, downloadInfo.getmBaseUrl());
+            highlightManager.addHighlight(note);
+        } else {
+            // save highlight to database
+            long id = HighLightTable.insertHighlightItem(note);
+            if (id != -1) {
+                sendHighlightBroadcastEvent(context, note, Note.HighLightAction.NEW);
+            }
+        }
     }
 
     /**

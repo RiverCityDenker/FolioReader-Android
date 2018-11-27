@@ -1142,9 +1142,6 @@ public class FolioPageFragment
         } else {
             mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + Note.HighlightStyle.classForStyle(style)));
         }
-
-        //post to api
-
     }
 
     public void highlightRemove() {
@@ -1327,6 +1324,7 @@ public class FolioPageFragment
     public void onReceiveHighlights(String html) {
         if (html != null) {
             rangy = HighlightUtil.createHighlightRangy(getActivity().getApplicationContext(),
+                    mActivityCallback.getDownloadInfo(),
                     html,
                     mBookId,
                     getPageId(),

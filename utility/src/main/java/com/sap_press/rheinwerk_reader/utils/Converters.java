@@ -7,8 +7,12 @@ import java.util.List;
 
 public class Converters {
 
-    public static <T> List<T> fromString(String value, Class<T[]> clazz) {
+    public static <T> List<T> fromStringToList(String value, Class<T[]> clazz) {
         return Arrays.asList(new Gson().fromJson(value, clazz));
+    }
+
+    public static <T> T fromStringToObject(String value, Class<T> clazz) {
+        return new Gson().fromJson(value, clazz);
     }
 
     public static <T> String fromArrayList(List<T> list) {

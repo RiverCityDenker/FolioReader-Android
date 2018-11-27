@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiClient;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiService;
 import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
@@ -33,6 +34,7 @@ public class HighlightManager {
     }
 
     public void addHighlight(Note highlightItem) {
+        FolioLogging.tag(TAG).d("SEND NOTE = " + new Gson().toJson(highlightItem));
         // Add to server
         final String token = dataManager.getAccessToken();
         final Disposable subscription = mApiService.addNote(token, highlightItem)
