@@ -33,11 +33,11 @@ public class HighlightManager {
         this.mApiService = ApiClient.getClient(context, mBaseUrl).create(ApiService.class);
     }
 
-    public void addHighlight(Note highlightItem) {
-        FolioLogging.tag(TAG).d("SEND NOTE = " + new Gson().toJson(highlightItem));
+    public void createNote(Note note) {
+        FolioLogging.tag(TAG).d("SEND NOTE = " + new Gson().toJson(note));
         // Add to server
         final String token = dataManager.getAccessToken();
-        final Disposable subscription = mApiService.addNote(token, highlightItem)
+        final Disposable subscription = mApiService.addNote(token, note)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addHighlightSuccess, this::addHighlightFailed);
@@ -54,6 +54,11 @@ public class HighlightManager {
         return mApiService.deleteNoteById(noteId, token);
     }
 
+    public Observable<Note> updateNoteById(String noteId, Note note) {
+        // Add to server
+        final String token = dataManager.getAccessToken();
+        return mApiService.updateNoteById(noteId, token, note);
+    }
 
     private void addHighlightFailed(Throwable throwable) {
         Log.e(TAG, "addHighlightFailed: >>>" + throwable.getMessage());
