@@ -20,7 +20,6 @@ import com.folioreader.Config;
 import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.R;
-import com.folioreader.model.HighLight;
 import com.folioreader.model.event.HighlightClickedEvent;
 import com.folioreader.model.event.UpdateHighlightEvent;
 import com.folioreader.model.sqlite.HighLightTable;
@@ -28,7 +27,7 @@ import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.ui.folio.adapter.HighlightAdapter;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.HighlightUtil;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -82,8 +81,8 @@ public class HighlightFragment extends Fragment implements HighlightAdapter.High
     }
 
     @Override
-    public void onItemClick(HighlightV2 highlightV2) {
-        EventBus.getDefault().post(new HighlightClickedEvent(highlightV2));
+    public void onItemClick(Note note) {
+        EventBus.getDefault().post(new HighlightClickedEvent(note));
         mItemSelectedListener.onItemSelected();
     }
 
@@ -95,28 +94,28 @@ public class HighlightFragment extends Fragment implements HighlightAdapter.High
     }
 
     @Override
-    public void editNote(final HighlightV2 highlightV2, final int position) {
+    public void editNote(final Note note, final int position) {
         final Dialog dialog = new Dialog(getActivity(), R.style.DialogCustomTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_edit_notes);
         dialog.show();
-        String noteText = highlightV2.getNote();
+        String noteText = note.getNoteText();
         ((EditText) dialog.findViewById(R.id.edit_note)).setText(noteText);
 
         dialog.findViewById(R.id.btn_save_note).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String note =
+                String noteText =
                         ((EditText) dialog.findViewById(R.id.edit_note)).getText().toString();
-                if (!TextUtils.isEmpty(note)) {
-                    highlightV2.setNote(note);
-                    if (HighLightTable.updateHighlight(highlightV2)) {
+                if (!TextUtils.isEmpty(noteText)) {
+                    note.setNoteText(noteText);
+                    if (HighLightTable.updateHighlight(note)) {
                         HighlightUtil.sendHighlightBroadcastEvent(
                                 HighlightFragment.this.getActivity().getApplicationContext(),
-                                highlightV2,
-                                HighLight.HighLightAction.MODIFY);
-                        adapter.editNote(note, position);
+                                note,
+                                Note.HighLightAction.MODIFY);
+                        adapter.editNote(noteText, position);
                     }
                     dialog.dismiss();
                 } else {

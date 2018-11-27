@@ -1,16 +1,16 @@
 package com.folioreader.model.event;
 
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 public class HighlightClickedEvent {
-    private final HighlightV2 highlightV2;
+    private final Note note;
 
-    public HighlightClickedEvent(HighlightV2 highlightV2) {
-        this.highlightV2 = highlightV2;
+    public HighlightClickedEvent(Note note) {
+        this.note = note;
     }
 
-    public HighlightV2 getHighlight() {
-        return highlightV2;
+    public Note getHighlight() {
+        return note;
     }
 
 }

@@ -1,6 +1,6 @@
 package com.folioreader.util;
 
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 /**
  * Interface to convey highlight events.
@@ -13,8 +13,8 @@ public interface OnHighlightListener {
     /**
      * This method will be invoked when a highlight is created, deleted or modified.
      *
-     * @param highlight meta-data for created highlight {@link HighlightV2}.
-     * @param type      type of event e.g new,edit or delete {@link com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2.HighLightAction}.
+     * @param highlight meta-data for created highlight {@link Note}.
+     * @param type      type of event e.g new,edit or delete {@link Note.HighLightAction}.
      */
-    void onHighlight(HighlightV2 highlight, HighlightV2.HighLightAction type);
+    void onHighlight(Note highlight, Note.HighLightAction type);
 }

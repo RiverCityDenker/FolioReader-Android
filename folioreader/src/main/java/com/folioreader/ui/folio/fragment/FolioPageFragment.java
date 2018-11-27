@@ -39,7 +39,6 @@ import com.folioreader.Config;
 import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.R;
-import com.folioreader.model.HighLight;
 import com.folioreader.model.ReadPosition;
 import com.folioreader.model.ReadPositionImpl;
 import com.folioreader.model.event.MediaOverlayHighlightStyleEvent;
@@ -75,8 +74,8 @@ import com.sap_press.rheinwerk_reader.crypto.CryptoManager;
 import com.sap_press.rheinwerk_reader.download.events.DownloadFileSuccessEvent;
 import com.sap_press.rheinwerk_reader.download.events.DownloadSingleFileErrorEvent;
 import com.sap_press.rheinwerk_reader.download.events.UpdateReaderPageWhenOnlineEvent;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
 import com.sap_press.rheinwerk_reader.logging.FolioLogging;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 import com.sap_press.rheinwerk_reader.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -252,7 +251,7 @@ public class FolioPageFragment
                 mediaController.setTextToSpeech(getActivity().getApplicationContext());
             }
         }
-        highlightStyle = HighlightV2.HighlightStyle.classForStyle(HighlightV2.HighlightStyle.Normal);
+        highlightStyle = Note.HighlightStyle.classForStyle(Note.HighlightStyle.Normal);
         mRootView = inflater.inflate(R.layout.folio_page_fragment, container, false);
         mPagesLeftTextView = (TextView) mRootView.findViewById(R.id.pagesLeft);
         mMinutesLeftTextView = (TextView) mRootView.findViewById(R.id.minutesLeft);
@@ -330,15 +329,15 @@ public class FolioPageFragment
             switch (event.getStyle()) {
                 case DEFAULT:
                     highlightStyle =
-                            HighlightV2.HighlightStyle.classForStyle(HighlightV2.HighlightStyle.Normal);
+                            Note.HighlightStyle.classForStyle(Note.HighlightStyle.Normal);
                     break;
                 case UNDERLINE:
                     highlightStyle =
-                            HighlightV2.HighlightStyle.classForStyle(HighlightV2.HighlightStyle.DottetUnderline);
+                            Note.HighlightStyle.classForStyle(Note.HighlightStyle.DottetUnderline);
                     break;
                 case BACKGROUND:
                     highlightStyle =
-                            HighlightV2.HighlightStyle.classForStyle(HighlightV2.HighlightStyle.TextColor);
+                            Note.HighlightStyle.classForStyle(Note.HighlightStyle.TextColor);
                     break;
             }
             mWebview.loadPage(String.format(getString(R.string.setmediaoverlaystyle), highlightStyle));
@@ -688,8 +687,8 @@ public class FolioPageFragment
                     hideLoading();
                 }
                 mWebview.loadPage(String.format(getString(R.string.setmediaoverlaystyle),
-                        HighlightV2.HighlightStyle.classForStyle(
-                                HighlightV2.HighlightStyle.Normal)));
+                        Note.HighlightStyle.classForStyle(
+                                Note.HighlightStyle.Normal)));
 
                 String rangy = HighlightUtil.generateRangyString(getPageName());
                 FolioPageFragment.this.rangy = rangy;
@@ -859,16 +858,16 @@ public class FolioPageFragment
                 Pattern pattern = Pattern.compile(rangyPattern);
                 Matcher matcher = pattern.matcher(message);
                 if (matcher.matches()) {
-                    HighlightV2 highlightV2 = HighLightTable.getHighlightItemForRangy(message);
+                    Note note = HighLightTable.getHighlightItemForRangy(message);
                     if (HighLightTable.deleteHighlightItem(message)) {
                         String rangy = HighlightUtil.generateRangyString(getPageName());
                         loadRangy(view, rangy);
                         mTextSelectionSupport.endSelectionMode();
-                        if (highlightV2 != null) {
+                        if (note != null) {
                             HighlightUtil.sendHighlightBroadcastEvent(
                                     FolioPageFragment.this.getActivity().getApplicationContext(),
-                                    highlightV2,
-                                    HighLight.HighLightAction.DELETE);
+                                    note,
+                                    Note.HighLightAction.DELETE);
                         }
                     }
                 } else if (TextUtils.isDigitsOnly(message)) {
@@ -1135,13 +1134,13 @@ public class FolioPageFragment
         outState.putSerializable(SPINE_ITEM, spineItem);
     }
 
-    public void highlight(HighlightV2.HighlightStyle style, boolean isCreated) {
+    public void highlight(Note.HighlightStyle style, boolean isCreated) {
         if (isCreated) {
             mWebview.loadPage(String.format("javascript:if(typeof ssReader !== \"undefined\"){" +
-                    "ssReader.highlightSelection('%s', '%s', '%d');}",
-                    HighlightV2.HighlightStyle.classForStyle(style), mBookId, mPosition));
+                            "ssReader.highlightSelection('%s', '%s', '%d');}",
+                    Note.HighlightStyle.classForStyle(style), mBookId, mPosition));
         } else {
-            mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + HighlightV2.HighlightStyle.classForStyle(style)));
+            mWebview.loadPage(String.format("javascript:setHighlightStyle('%s')", "highlight_" + Note.HighlightStyle.classForStyle(style)));
         }
 
         //post to api
@@ -1303,15 +1302,15 @@ public class FolioPageFragment
 
     private void onHighlightColorsActionItemClicked(int actionId, View view, boolean isCreated) {
         if (actionId == ACTION_ID_HIGHLIGHT_YELLOW) {
-            highlight(HighlightV2.HighlightStyle.Yellow, isCreated);
+            highlight(Note.HighlightStyle.Yellow, isCreated);
         } else if (actionId == ACTION_ID_HIGHLIGHT_GREEN) {
-            highlight(HighlightV2.HighlightStyle.Green, isCreated);
+            highlight(Note.HighlightStyle.Green, isCreated);
         } else if (actionId == ACTION_ID_HIGHLIGHT_BLUE) {
-            highlight(HighlightV2.HighlightStyle.Blue, isCreated);
+            highlight(Note.HighlightStyle.Blue, isCreated);
         } else if (actionId == ACTION_ID_HIGHLIGHT_PINK) {
-            highlight(HighlightV2.HighlightStyle.Pink, isCreated);
+            highlight(Note.HighlightStyle.Pink, isCreated);
         } else if (actionId == ACTION_ID_HIGHLIGHT_UNDERLINE) {
-            highlight(HighlightV2.HighlightStyle.Underline, isCreated);
+            highlight(Note.HighlightStyle.Underline, isCreated);
         }
         mTextSelectionSupport.endSelectionMode();
     }

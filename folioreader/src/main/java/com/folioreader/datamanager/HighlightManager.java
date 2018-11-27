@@ -6,8 +6,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiClient;
 import com.sap_press.rheinwerk_reader.mod.aping.api.ApiService;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
-import com.sap_press.rheinwerk_reader.sync.highlight.model.Note;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import java.util.List;
 
@@ -16,6 +15,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Response;
 
 public class HighlightManager {
 
@@ -32,7 +32,7 @@ public class HighlightManager {
         this.mApiService = ApiClient.getClient(context, mBaseUrl).create(ApiService.class);
     }
 
-    public void addHighlight(HighlightV2 highlightItem) {
+    public void addHighlight(Note highlightItem) {
         // Add to server
         final String token = dataManager.getAccessToken();
         final Disposable subscription = mApiService.addNote(token, highlightItem)
@@ -42,16 +42,22 @@ public class HighlightManager {
         compositeSubscription.add(subscription);
     }
 
-    public Observable<List<Note>> getNotesById(String productId) {
+    public Observable<List<Note>> getAllNotesByBookId(String productId) {
         final String token = dataManager.getAccessToken();
-        return mApiService.getNotesByBookId(token, productId);
+        return mApiService.getAllNotesByBookId(token, productId);
     }
+
+    public Observable<Response<Void>> deleteNoteById(String noteId) {
+        final String token = dataManager.getAccessToken();
+        return mApiService.deleteNoteById(noteId, token);
+    }
+
 
     private void addHighlightFailed(Throwable throwable) {
         Log.e(TAG, "addHighlightFailed: >>>" + throwable.getMessage());
     }
 
-    private void addHighlightSuccess(HighlightV2 highlightV2) {
-        Log.e(TAG, "addHighlightSuccess: >>>" + new Gson().toJson(highlightV2));
+    private void addHighlightSuccess(Note note) {
+        Log.e(TAG, "addHighlightSuccess: >>>" + new Gson().toJson(note));
     }
 }

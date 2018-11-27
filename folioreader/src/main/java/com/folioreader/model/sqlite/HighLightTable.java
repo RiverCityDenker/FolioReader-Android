@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.folioreader.Constants;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,29 +69,29 @@ public class HighLightTable {
      * ###########################################################################################
      * This is Highlight for version 2.0
      */
-    public static ContentValues getHighlightItemContentValues(HighlightV2 highLight) {
+    public static ContentValues getHighlightItemContentValues(Note note) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_INTERNAL_ID, highLight.getInternalId());
-        contentValues.put(COL_BOOK_ID, String.valueOf(highLight.getProductId()));
-        contentValues.put(COL_CONTENT, highLight.getMarkedText());
-        contentValues.put(COL_DATE, highLight.getCreatedAt());
-        contentValues.put(COL_TYPE, highLight.getType());
-        contentValues.put(COL_PAGE_NUMBER, highLight.getPageIndex());
-        contentValues.put(COL_PAGE_ID, highLight.getFilePath());
-        contentValues.put(COL_RANGY, highLight.getRange());
-        contentValues.put(COL_NOTE, highLight.getNote());
-        contentValues.put(COL_UUID, highLight.getUUID());
-        contentValues.put(COL_SERVER_ID, highLight.getId());
-        contentValues.put(COL_ACCOUNT_ID, highLight.getAccountId());
-        contentValues.put(COL_IS_SYNCED, String.valueOf(highLight.isSynced()));
-        contentValues.put(COL_NUM_OF_TRY, highLight.getNumOfTry());
-        contentValues.put(COL_IS_DELETED, String.valueOf(highLight.isDeleted()));
-        contentValues.put(COL_TITLE, highLight.getTitle());
+        contentValues.put(COL_INTERNAL_ID, note.getInternalId());
+        contentValues.put(COL_BOOK_ID, String.valueOf(note.getProductId()));
+        contentValues.put(COL_CONTENT, note.getMarkedText());
+        contentValues.put(COL_DATE, note.getCreatedAt());
+        contentValues.put(COL_TYPE, note.getType());
+        contentValues.put(COL_PAGE_NUMBER, note.getPageIndex());
+        contentValues.put(COL_PAGE_ID, note.getFilePath());
+        contentValues.put(COL_RANGY, note.getRange());
+        contentValues.put(COL_NOTE, note.getNoteText());
+        contentValues.put(COL_UUID, note.getUUID());
+        contentValues.put(COL_SERVER_ID, note.getId());
+        contentValues.put(COL_ACCOUNT_ID, note.getAccountId());
+        contentValues.put(COL_IS_SYNCED, String.valueOf(note.isSynced()));
+        contentValues.put(COL_NUM_OF_TRY, note.getNumOfTry());
+        contentValues.put(COL_IS_DELETED, String.valueOf(note.isDeleted()));
+        contentValues.put(COL_TITLE, note.getTitle());
         return contentValues;
     }
 
-    public static ArrayList<HighlightV2> getAllHighlightItems(String bookId) {
-        ArrayList<HighlightV2> highlights = new ArrayList<>();
+    public static ArrayList<Note> getAllHighlightItems(String bookId) {
+        ArrayList<Note> highlights = new ArrayList<>();
         Cursor highlightCursor = DbAdapter.getHighLightsForBookId(bookId);
         while (highlightCursor.moveToNext()) {
             highlights.add(getHighlightItemFromCursor(highlightCursor));
@@ -99,9 +99,9 @@ public class HighLightTable {
         return highlights;
     }
 
-    public static HighlightV2 getHighlightItemById(String id) {
+    public static Note getHighlightItemById(String id) {
         Cursor highlightCursor = DbAdapter.getHighlightItemsForId(id);
-        HighlightV2 highlight = new HighlightV2();
+        Note highlight = new Note();
         while (highlightCursor.moveToNext()) {
             highlight = getHighlightItemFromCursor(highlightCursor);
         }
@@ -109,14 +109,14 @@ public class HighLightTable {
     }
 
     @NonNull
-    private static HighlightV2 getHighlightItemFromCursor(Cursor cursor) {
-        HighlightV2 highlight = new HighlightV2();
+    private static Note getHighlightItemFromCursor(Cursor cursor) {
+        Note highlight = new Note();
         highlight.setId(cursor.getInt(cursor.getColumnIndex(COL_SERVER_ID)));
         highlight.setAccountId(cursor.getInt(cursor.getColumnIndex(COL_ACCOUNT_ID)));
         highlight.setCreatedAt(cursor.getString(cursor.getColumnIndex(COL_DATE)));
         highlight.setFilePath(cursor.getString(cursor.getColumnIndex(COL_PAGE_ID)));
         highlight.setMarkedText(cursor.getString(cursor.getColumnIndex(COL_CONTENT)));
-        highlight.setNote(cursor.getString(cursor.getColumnIndex(COL_NOTE)));
+        highlight.setNoteText(cursor.getString(cursor.getColumnIndex(COL_NOTE)));
         highlight.setPageIndex(cursor.getInt(cursor.getColumnIndex(COL_PAGE_NUMBER)));
         highlight.setProductId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COL_BOOK_ID))));
         highlight.setRange(cursor.getString(cursor.getColumnIndex(COL_RANGY)));
@@ -130,7 +130,7 @@ public class HighLightTable {
         return highlight;
     }
 
-    public static long insertHighlightItem(HighlightV2 highlight) {
+    public static long insertHighlightItem(Note highlight) {
         highlight.setUuid(UUID.randomUUID().toString());
         return DbAdapter.saveHighLight(getHighlightItemContentValues(highlight));
     }
@@ -156,11 +156,11 @@ public class HighLightTable {
         return rangyList;
     }
 
-    public static boolean updateHighlight(HighlightV2 highlightV2) {
-        return DbAdapter.updateHighLight(getHighlightItemContentValues(highlightV2), String.valueOf(highlightV2.getInternalId()));
+    public static boolean updateHighlight(Note note) {
+        return DbAdapter.updateHighLight(getHighlightItemContentValues(note), String.valueOf(note.getInternalId()));
     }
 
-    public static HighlightV2 getHighlightItemForRangy(String rangy) {
+    public static Note getHighlightItemForRangy(String rangy) {
         String query = "SELECT " + COL_INTERNAL_ID + " FROM " + TABLE_NAME + " WHERE " + COL_RANGY + " = \"" + rangy + "\"";
         return getHighlightItemById(DbAdapter.getHighlightIdForQuery(query));
     }

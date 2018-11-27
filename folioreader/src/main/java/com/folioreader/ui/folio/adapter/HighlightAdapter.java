@@ -18,7 +18,7 @@ import com.folioreader.Config;
 import com.folioreader.R;
 import com.folioreader.util.UiUtil;
 import com.folioreader.view.UnderlinedTextView;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import java.util.List;
 
@@ -27,12 +27,12 @@ import java.util.List;
  */
 
 public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.HighlightHolder> {
-    private List<HighlightV2> highlights;
+    private List<Note> highlights;
     private HighLightAdapterCallback callback;
     private Context context;
     private Config config;
 
-    public HighlightAdapter(Context context, List<HighlightV2> highlights, HighLightAdapterCallback callback, Config config) {
+    public HighlightAdapter(Context context, List<Note> highlights, HighLightAdapterCallback callback, Config config) {
         this.context = context;
         this.highlights = highlights;
         this.callback = callback;
@@ -85,12 +85,12 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
                 callback.editNote(getItem(position), position);
             }
         });
-        if (getItem(position).getNote() != null) {
-            if (getItem(position).getNote().isEmpty()) {
+        if (getItem(position).getNoteText() != null) {
+            if (getItem(position).getNoteText().isEmpty()) {
                 holder.note.setVisibility(View.GONE);
             } else {
                 holder.note.setVisibility(View.VISIBLE);
-                holder.note.setText(getItem(position).getNote());
+                holder.note.setText(getItem(position).getNoteText());
             }
         } else {
             holder.note.setVisibility(View.GONE);
@@ -131,7 +131,7 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
         }
     }
 
-    private HighlightV2 getItem(int position) {
+    private Note getItem(int position) {
         return highlights.get(position);
     }
 
@@ -141,7 +141,7 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
     }
 
     public void editNote(String note, int position) {
-        highlights.get(position).setNote(note);
+        highlights.get(position).setNoteText(note);
         notifyDataSetChanged();
     }
 
@@ -166,10 +166,10 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
     }
 
     public interface HighLightAdapterCallback {
-        void onItemClick(HighlightV2 highlightV2);
+        void onItemClick(Note note);
 
         void deleteHighlight(String internalId);
 
-        void editNote(HighlightV2 highlightV2, int position);
+        void editNote(Note note, int position);
     }
 }

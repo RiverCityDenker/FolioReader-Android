@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.folioreader.model.HighLight;
 import com.folioreader.model.ReadPosition;
@@ -19,11 +18,10 @@ import com.folioreader.ui.base.SaveReceivedHighlightTask;
 import com.folioreader.ui.folio.activity.FolioActivity;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadPositionListener;
-import com.sap_press.rheinwerk_reader.download.util.DownloadUtil;
 import com.sap_press.rheinwerk_reader.logging.FolioLogging;
 import com.sap_press.rheinwerk_reader.mod.models.downloadinfo.DownloadInfo;
 import com.sap_press.rheinwerk_reader.mod.models.ebooks.Ebook;
-import com.sap_press.rheinwerk_reader.mod.models.notes.HighlightV2;
+import com.sap_press.rheinwerk_reader.mod.models.highlight.Note;
 
 import java.util.List;
 
@@ -49,11 +47,11 @@ public class FolioReader {
     private BroadcastReceiver highlightReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            HighlightV2 highlightV2 = intent.getParcelableExtra(HighlightV2.INTENT);
-            HighlightV2.HighLightAction action = (HighlightV2.HighLightAction)
-                    intent.getSerializableExtra(HighlightV2.HighLightAction.class.getName());
-            if (onHighlightListener != null && highlightV2 != null && action != null) {
-                onHighlightListener.onHighlight(highlightV2, action);
+            Note note = intent.getParcelableExtra(Note.INTENT);
+            Note.HighLightAction action = (Note.HighLightAction)
+                    intent.getSerializableExtra(Note.HighLightAction.class.getName());
+            if (onHighlightListener != null && note != null && action != null) {
+                onHighlightListener.onHighlight(note, action);
             }
         }
     };
@@ -91,7 +89,7 @@ public class FolioReader {
         this.context = context;
         DbAdapter.initialize(context);
         LocalBroadcastManager.getInstance(context).registerReceiver(highlightReceiver,
-                new IntentFilter(HighlightV2.BROADCAST_EVENT));
+                new IntentFilter(Note.BROADCAST_EVENT));
         LocalBroadcastManager.getInstance(context).registerReceiver(readPositionReceiver,
                 new IntentFilter(ACTION_SAVE_READ_POSITION));
     }
