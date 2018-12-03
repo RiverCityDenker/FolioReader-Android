@@ -49,7 +49,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -386,16 +385,15 @@ public class DownloadService extends Service {
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .subscribe(o -> downloadContentSuccess(context, ebook, o, apiInfo, isOnlineReading),
-                        throwable -> handleError(throwable, ebookId, null, isOnlineReading));
+                        throwable -> handleError(throwable, ebookId, isOnlineReading));
     }
 
-    private void handleError(Throwable throwable, String ebookId, ThreadPoolExecutor executor, boolean isOnlineReading) {
+    private void handleError(Throwable throwable, String ebookId, boolean isOnlineReading) {
         if (!isOnlineReading) {
             Log.d(TAG, "handleError: >>>" + ebookId + " - " + currentEbookId);
             if (ebookId.equalsIgnoreCase(mCurrentBookId)) return;
             mCurrentBookId = ebookId;
             sendErrorDownloadEventToGA(throwable, ebookId);
-            shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
             if (isOnline(this)) {
                 Log.d(TAG, "handleError: >>>isOnline");
                 updateDownloadStatus(Integer.parseInt(ebookId), true, false);
@@ -618,7 +616,7 @@ public class DownloadService extends Service {
         synchronized (DownloadService.class) {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
-            int progressPercent = (int) (fileCount * DOWNLOAD_COMPLETED / ebook.getTotal());
+            int progressPercent = fileCount * DOWNLOAD_COMPLETED / ebook.getTotal();
             if (progressPercent > 100
                     || downloadedPercent < 0
                     || (downloadFileAsyn != null && downloadFileAsyn.isStop())
@@ -656,21 +654,8 @@ public class DownloadService extends Service {
                     downloadNextOrStop(false, ebook.getId());
                 }
             } else if ((fileCount + failedDownloadFiles.size()) > ebook.getTotal()) {
-                if (!failedDownloadFiles.isEmpty()) {
-                    shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
-                    int successProgressPercent = DOWNLOAD_COMPLETED - ((failedDownloadFiles.size() * DOWNLOAD_COMPLETED) / ebook.getTotal() + 1);
-                    ebook.setDownloadFailed(true);
-                    ebook.setDownloadProgress(successProgressPercent);
-                    ebook.setNeedResume(false);
-                    Log.d(TAG, "downloadSingleSucscess: 2-3" + successProgressPercent);
-                    dataManager.updateEbook(ebook);
-                    resetDownloadFailedByFile();
-                    downloadNextOrStop(true, ebook.getId());
-                    EventBus.getDefault().post(new OnDownloadInterruptedBookEvent(ebook));
-                }
-                EventBus.getDefault().post(new DownloadingEvent(ebook));
-                Log.d(TAG, "downloadSingleSucscess: >>>return");
-                return;
+                Log.d(TAG, "todoDung wrong downloadSingleSucscess");
+
             } else if (isFinishedDownloadImage(fileCount)) {
                 Log.d(TAG, "downloadSingleSucscess: >>>isFinishedDownloadImage : fileCount = " + fileCount
                         + "failedDownloadFiles size = " + failedDownloadFiles.size());

@@ -26,8 +26,6 @@ public class HTTPDownloader {
                                       String href,
                                       String appVersion) throws Exception {
 
-        File file = FileUtil.getFile(folderPath, href);
-        Log.d(TAG, "downloadFile: >>>" + file.getCanonicalPath());
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setReadTimeout(60 * 1000);
@@ -48,10 +46,13 @@ public class HTTPDownloader {
             buffer.write(data, 0, current);
         }
 
+        File file = FileUtil.getFile(folderPath, href);
+        Log.d(TAG, "downloadFile: >>>" + file.getCanonicalPath());
         FileOutputStream fos = new FileOutputStream(file);
         fos.write(buffer.toByteArray());
         fos.flush();
         fos.close();
+
         return connection.getHeaderField(X_CONTENT_KEY);
     }
 }
