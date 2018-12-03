@@ -22,7 +22,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 
 public class FileUtil {
@@ -141,6 +143,10 @@ public class FileUtil {
         protected void onPostExecute(EpubBook epubBook) {
             this.listener.onContentParserResult(epubBook);
         }
+    }
+
+    public static Observable<EpubBook> parseContent(String filePath) {
+        return Observable.fromCallable(() -> (EpubBook) parseContentFileToObject(filePath));
     }
 
     private static <T> void saveObjectToFile(Context context, String fileName, T t) {
@@ -283,7 +289,7 @@ public class FileUtil {
         return file.delete();
     }
 
-    public static long getFilesCount(String directoryPath) {
+    public static int getFilesCount(String directoryPath) {
         int count = 0;
         try {
             File file = new File(directoryPath);
