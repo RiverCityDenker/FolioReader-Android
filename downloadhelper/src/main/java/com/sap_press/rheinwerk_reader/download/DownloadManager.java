@@ -72,6 +72,8 @@ public class DownloadManager {
 
     private void updateBookResumeState(Ebook ebook) {
         ebook.setNeedResume(true);
+        ebook.setDownloadFailed(false);
+        ebook.setDownloadProgress(0);
         updateBookDownloadTime(ebook);
     }
 
