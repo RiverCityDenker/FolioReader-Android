@@ -47,6 +47,6 @@ public abstract class ParallelExecutorTask<Pa, Pr, Re> extends AsyncTask<Pa, Pr,
     }
 
     public boolean isStop() {
-        return poolExecutor.isShutdown() || poolExecutor.isTerminated() || poolExecutor.isTerminating();
+        return poolExecutor.isTerminated();
     }
 }

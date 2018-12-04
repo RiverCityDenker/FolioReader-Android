@@ -183,7 +183,7 @@ public class DownloadService extends Service {
         Log.d(TAG, "onDestroy: >>>");
         EventBus.getDefault().unregister(this);
         stopForeground(true);
-        this.stopSelf();
+        //this.stopSelf();
         super.onDestroy();
     }
 
@@ -266,6 +266,7 @@ public class DownloadService extends Service {
                 Log.d(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
                 currentEbook = getNextBook(errorBookId, ebookList);
             }
+            Log.d(TAG, "downloadNextOrStop: >>>" + currentEbook.getId() + " : " + currentEbookId);
             if (currentEbook == null || currentEbook.getId() == currentEbookId) {
                 return;
             }
@@ -503,7 +504,7 @@ public class DownloadService extends Service {
                 downloadFileList(otherFileList, token, ebook, folderPath);
         } else {
             ebook.setDownloadProgress(DOWNLOAD_COMPLETED);
-            downloadSingleSucscess(null, ebook, downloadedFileCount.get(), token, folderPath);
+            downloadSingleSucscess(null, "", ebook, downloadedFileCount.get(), token, folderPath);
         }
     }
 
@@ -545,14 +546,17 @@ public class DownloadService extends Service {
 
         @Override
         protected Ebook doInBackground(EpubBook.Manifest... manifests) {
-            if (isStop()) return null;
+            if (isStop()) {
+                Log.d(TAG, "doInBackground:1 >>> isStop = true return; href = " + manifests[0].getHref());
+                return null;
+            }
             executor = getPoolExecutor();
             EpubBook.Manifest manifest = manifests[0];
             String href = manifest.getHref();
             final String fileUrl = mBaseUrl + "ebooks/" + ebookId + "/download?app_version=" + mAppVersion + "&file_path=" + href;
             final String contentKey = downloadSingleFile(manifest, fileUrl, RETRY_COUNT);
             if (isStop()) {
-                Log.d(TAG, "doInBackground: >>> isStop = true return;");
+                Log.d(TAG, "doInBackground:2 >>> isStop = true return; href = " + href);
                 return null;
             }
             if (!TextUtils.isEmpty(contentKey)
@@ -564,12 +568,12 @@ public class DownloadService extends Service {
             synchronized (DownloadService.class) {
                 if (contentKey != null) {
                     if (!contentKey.equalsIgnoreCase(ERROR_DOWNLOAD_FILE)) {
-                        downloadSingleSucscess(this, ebook, downloadedFileCount.incrementAndGet(), token, folderPath);
+                        downloadSingleSucscess(this, href, ebook, downloadedFileCount.incrementAndGet(), token, folderPath);
                     } else {
-                        downloadSingleSucscess(this, ebook, downloadedFileCount.get(), token, folderPath);
+                        downloadSingleSucscess(this, href, ebook, downloadedFileCount.get(), token, folderPath);
                     }
                 } else {
-                    downloadSingleSucscess(this, ebook, downloadedFileCount.incrementAndGet(), token, folderPath);
+                    downloadSingleSucscess(this, href, ebook, downloadedFileCount.incrementAndGet(), token, folderPath);
                 }
             }
 
@@ -611,7 +615,7 @@ public class DownloadService extends Service {
         return unDownloadedFileList;
     }
 
-    private void downloadSingleSucscess(DownloadFileAsyn downloadFileAsyn, Ebook ebook, int fileCount,
+    private void downloadSingleSucscess(DownloadFileAsyn downloadFileAsyn, String href, Ebook ebook, int fileCount,
                                         String token, String folderPath) {
         synchronized (DownloadService.class) {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
@@ -624,7 +628,8 @@ public class DownloadService extends Service {
                     || !isOnline(this)) {
                 Log.d(TAG, "downloadSingleSucscess: " + " progressPercent = " + progressPercent +
                         " downloadFileAsyn is Stop = " + (downloadFileAsyn != null && downloadFileAsyn.isStop()) +
-                        " isCancelDownloading = " + isCancelDownloading + " isOnline = " + !isOnline(this));
+                        " isCancelDownloading = " + isCancelDownloading + " isOnline = " + !isOnline(this)
+                        + "; href = " + href);
                 return;
             }
 

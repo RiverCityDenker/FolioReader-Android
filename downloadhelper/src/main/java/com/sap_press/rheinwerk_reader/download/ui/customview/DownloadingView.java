@@ -199,7 +199,6 @@ public abstract class DownloadingView extends RelativeLayout {
         if (event.getEbook().getId() != getEbook().getId()) return;
         mEbook.setDownloadFailed(event.getEbook().isDownloadFailed());
         if (!mEbook.isDownloadFailed()) {
-            Log.d(TAG, "onResetDownloadBookEvent: >>>reset to default");
             resetProgressBar();
             final int progress = mProgressBar.getProgress();
             if (progress == 0) {

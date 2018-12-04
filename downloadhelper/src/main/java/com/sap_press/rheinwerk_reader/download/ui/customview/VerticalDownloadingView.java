@@ -97,6 +97,7 @@ public class VerticalDownloadingView extends DownloadingView {
                     mImageView.setImageDrawable(mDefaultDownloadIcon);
                     mImageView.setColorFilter(mDefaultColor);
                 }
+                resetProgressBar();
             }
             tvBookSize.setText(String.format("%d%%", progress));
             showHideContent(true);
