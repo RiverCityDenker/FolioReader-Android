@@ -61,7 +61,7 @@ public class HorizontalDownloadingView extends DownloadingView {
         } else if (progress < 0) {
             showViewNomal();
         } else if (progress == 0) {
-            if (mEbook.isDownloadFailed() || isDownloadFailed) {
+            if (isDownloadFailed) {
                 onPaused(progress);
                 tvBookSize.setText(String.format("%d%%", progress));
                 showHideContent(true);
@@ -70,7 +70,7 @@ public class HorizontalDownloadingView extends DownloadingView {
                 showHideWaitingProgressBar(true);
             }
         } else {
-            if (mEbook.isDownloadFailed() || isDownloadFailed) {
+            if (isDownloadFailed) {
                 onPaused(progress);
             } else {
                 if (progress >= 45) {
@@ -87,7 +87,7 @@ public class HorizontalDownloadingView extends DownloadingView {
             showHideContent(true);
         }
 
-        showHideWaitingProgressBar(progress == 0 && !mEbook.isDownloadFailed() && !isDownloadFailed);
+        showHideWaitingProgressBar(progress == 0 && !isDownloadFailed);
         mProgressBar.setProgress(progress);
     }
 
