@@ -65,7 +65,7 @@ public class DownloadManager {
                 baseUrl, appVersion, FILE_PATH_DEFAULT);
     }
 
-    private void updateBookDownloadTime(Ebook ebook) {
+    private synchronized void updateBookDownloadTime(Ebook ebook) {
         ebook.setDownloadTimeStamp(Util.getCurrentTimeStamp());
         dataManager.updateEbook(ebook);
     }

@@ -91,9 +91,6 @@ public class DownloadDataManager {
             else
                 ebook.resetApartInfo();
             LibraryTable.updateEbook(ebook);
-            if (isDownloading) {
-                Thread.sleep(6000);
-            }
             return ebook;
         });
     }
