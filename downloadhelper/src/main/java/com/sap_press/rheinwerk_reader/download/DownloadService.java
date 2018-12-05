@@ -464,6 +464,13 @@ public class DownloadService extends Service {
             long timeDownload = TimeUnit.SECONDS.toSeconds(Util.getCurrentTimeStamp() - dataManager.getTimestampDownload(ebook.getTitle()));
             googleAnalyticManager.sendEvent(AnalyticViewName.dowload_load_time, AnalyticViewName.download_duration, ebook.getTitle(), timeDownload);
             Log.d(TAG, "downloadContentSuccess: OFFLINE READING -> download All Files");
+
+            //when downloadContentSuccess we need to set progress == 1 to update UI quickly
+            if (ebook.getDownloadProgress() == 0) {
+                ebook.setDownloadProgress(1);
+                dataManager.updateEbook(ebook);
+                EventBus.getDefault().post(new DownloadingEvent(ebook));
+            }
             downloadAllFiles(epub, apiInfo.getmToken(), ebook);
         }
     }
@@ -620,7 +627,7 @@ public class DownloadService extends Service {
         synchronized (DownloadService.class) {
             final int downloadedPercent = LibraryTable.getDownloadProgressEbook(ebook.getId());
 
-            int progressPercent = fileCount * DOWNLOAD_COMPLETED / ebook.getTotal();
+            int progressPercent = fileCount > 0 && fileCount * DOWNLOAD_COMPLETED / ebook.getTotal() == 0 ? 1 : fileCount * DOWNLOAD_COMPLETED / ebook.getTotal();
             if (progressPercent > 100
                     || downloadedPercent < 0
                     || (downloadFileAsyn != null && downloadFileAsyn.isStop())
