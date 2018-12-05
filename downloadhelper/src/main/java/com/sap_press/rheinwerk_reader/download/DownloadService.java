@@ -183,7 +183,6 @@ public class DownloadService extends Service {
         Log.d(TAG, "onDestroy: >>>");
         EventBus.getDefault().unregister(this);
         stopForeground(true);
-        //this.stopSelf();
         super.onDestroy();
     }
 
@@ -220,6 +219,8 @@ public class DownloadService extends Service {
         else
             ebook.resetApartInfo();
         dataManager.updateEbook(ebook);
+        Log.e(TAG, "resetEbookAndUpdate: >>>EbookId = " + ebook.getId() + " progress = " + ebook.getDownloadProgress());
+        EventBus.getDefault().post(new DownloadingEvent(ebook));
         return ebook;
     }
 
@@ -248,6 +249,7 @@ public class DownloadService extends Service {
     private void downloadNextOrStop(boolean hasErrorInPreviousBook, int errorBookId) {
         synchronized (DownloadService.class) {
             isCancelDownloading = false;
+            Log.e(TAG, "downloadNextOrStop: >>>isCancelDownloading = " + isCancelDownloading);
             List<Ebook> ebookList = new ArrayList<>();
             if (mIsNetworkResume) {
                 ebookList = dataManager.getAllToResumeFromNetwork();
@@ -616,7 +618,7 @@ public class DownloadService extends Service {
                     || (downloadFileAsyn != null && downloadFileAsyn.isStop())
                     || isCancelDownloading
                     || !isOnline(this)) {
-                Log.d(TAG, "downloadSingleSucscess: " + " progressPercent = " + progressPercent +
+                Log.d(TAG, "downloadSingleSucscess: " + "ebookId = " + ebook.getId() + " progressPercent = " + progressPercent +
                         " downloadFileAsyn is Stop = " + (downloadFileAsyn != null && downloadFileAsyn.isStop()) +
                         " isCancelDownloading = " + isCancelDownloading + " isOnline = " + !isOnline(this)
                         + "; href = " + href);
@@ -624,6 +626,7 @@ public class DownloadService extends Service {
             }
 
             if (progressPercent >= downloadedPercent) {
+                Log.e(TAG, "downloadSingleSucscess: >>>" + "ebookId = " + ebook.getId() + " progressPercent = " + progressPercent + "; downloadedPercent = " + downloadedPercent);
                 ebook.setDownloadProgress(progressPercent);
                 dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
             }
@@ -656,7 +659,8 @@ public class DownloadService extends Service {
                         + "failedDownloadFiles size = " + failedDownloadFiles.size());
                 downloadFileList(otherFileList, token, ebook, folderPath);
             }
-            Log.d(TAG, "downloadSingleSucscess: >>> updateUI : " + ebook.getDownloadProgress());
+
+            Log.d(TAG, "downloadSingleSucscess: >>> updateUI : ebookId = " + ebook.getId() + " progress = " + ebook.getDownloadProgress());
             EventBus.getDefault().post(new DownloadingEvent(ebook));
         }
     }
