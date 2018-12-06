@@ -726,7 +726,7 @@ public class FolioActivity
 
             @Override
             public void onPageSelected(int position) {
-                if (position != 0 && mSpineReferenceList != null && position != mSpineReferenceList.size() -1)
+                if (position != 0 && mSpineReferenceList != null && position != mSpineReferenceList.size() - 1)
                     showLoading();
                 EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
                         mSpineReferenceList.get(mChapterPosition).href, false, true));
