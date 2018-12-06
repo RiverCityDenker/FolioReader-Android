@@ -52,6 +52,9 @@ public class HTTPDownloader {
         fos.write(buffer.toByteArray());
         fos.flush();
         fos.close();
+        buffer.close();
+        bis.close();
+        is.close();
 
         return connection.getHeaderField(X_CONTENT_KEY);
     }
