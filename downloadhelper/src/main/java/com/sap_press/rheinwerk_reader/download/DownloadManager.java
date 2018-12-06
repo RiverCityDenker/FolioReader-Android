@@ -65,13 +65,16 @@ public class DownloadManager {
                 baseUrl, appVersion, FILE_PATH_DEFAULT);
     }
 
-    private void updateBookDownloadTime(Ebook ebook) {
+    private synchronized void updateBookDownloadTime(Ebook ebook) {
         ebook.setDownloadTimeStamp(Util.getCurrentTimeStamp());
         dataManager.updateEbook(ebook);
     }
 
     private void updateBookResumeState(Ebook ebook) {
         ebook.setNeedResume(true);
+//      RE-801 : Update ebook to 0% in Database. This will update UI about progress of downloading.
+//      At this time, a spinner will be display on ebook's downloading view. When user pull to refresh the page,
+//      downloading view will become waiting.
         ebook.setDownloadFailed(false);
         ebook.setDownloadProgress(0);
         updateBookDownloadTime(ebook);

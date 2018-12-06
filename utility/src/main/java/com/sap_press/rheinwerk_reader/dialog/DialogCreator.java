@@ -272,8 +272,6 @@ public final class DialogCreator {
         SharedPreferences.Editor editor = prefs.edit();
         boolean isShowing = prefs.getBoolean("IsShowDownLoadFail", false);
         if (!isShowing) {
-            editor.putBoolean("IsShowDownLoadFail", true);
-            editor.apply();
             LayoutInflater inflater = LayoutInflater.from(context);
             final View vi = inflater.inflate(R.layout.dialog_pause_download, null);
             TextView tvMessage = vi.findViewById(R.id.tv_dialog_message);
@@ -291,6 +289,9 @@ public final class DialogCreator {
             AlertDialog dialog = builder.create();
             dialog.setCancelable(false);
             dialog.show();
+
+            editor.putBoolean("IsShowDownLoadFail", true);
+            editor.apply();
 
             btnAbort.setOnClickListener(view -> {
                 if (callback != null)

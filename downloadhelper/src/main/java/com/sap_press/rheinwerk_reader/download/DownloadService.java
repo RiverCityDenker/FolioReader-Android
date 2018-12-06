@@ -183,32 +183,33 @@ public class DownloadService extends Service {
         Log.d(TAG, "onDestroy: >>>");
         EventBus.getDefault().unregister(this);
         stopForeground(true);
-        //this.stopSelf();
         super.onDestroy();
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onCancelDownloadEvent(CancelDownloadEvent event) {
-        Log.d(TAG, "onCancelDownloadEvent: >>>" + event.getEbook().getId()
-                + "; currentEbookId = " + currentEbookId
-                + "; isFullDelete = " + event.isFullDelete());
-        if (currentEbookId == event.getEbook().getId()) {
-            isCancelDownloading = true;
-        }
-        if (event.getEbook() != null) {
+        synchronized (DownloadService.class) {
+            Log.d(TAG, "onCancelDownloadEvent: >>>" + event.getEbook().getId()
+                    + "; currentEbookId = " + currentEbookId
+                    + "; isFullDelete = " + event.isFullDelete());
             if (currentEbookId == event.getEbook().getId()) {
-                shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
-                resetEbookAndUpdate(event.getEbook(), event.isFullDelete());
-                downloadNextOrStop(false, 0);
-            } else {
-                Log.d(TAG, "onCancelDownloadEvent: >>>");
+                isCancelDownloading = true;
             }
-        } else {
-            Log.d(TAG, "onCancelDownloadEvent: >>>event.getEbook = null and SHUTDOWN");
-            Ebook ebook = LibraryTable.getEbook(currentEbookId);
-            ebook.setDownloadProgress(-1);
-            dataManager.updateEbook(ebook);
-            shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
+            if (event.getEbook() != null) {
+                if (currentEbookId == event.getEbook().getId()) {
+                    shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
+                    resetEbookAndUpdate(event.getEbook(), event.isFullDelete());
+                    downloadNextOrStop(false, 0);
+                } else {
+                    Log.d(TAG, "onCancelDownloadEvent: >>>");
+                }
+            } else {
+                Log.d(TAG, "onCancelDownloadEvent: >>>event.getEbook = null and SHUTDOWN");
+                Ebook ebook = LibraryTable.getEbook(currentEbookId);
+                ebook.setDownloadProgress(-1);
+                dataManager.updateEbook(ebook);
+                shutdownAndAwaitTermination(executor, SHORT_TIME_WAITING_SHUTDOWN);
+            }
         }
     }
 
@@ -218,6 +219,8 @@ public class DownloadService extends Service {
         else
             ebook.resetApartInfo();
         dataManager.updateEbook(ebook);
+        Log.e(TAG, "resetEbookAndUpdate: >>>EbookId = " + ebook.getId() + " progress = " + ebook.getDownloadProgress());
+        EventBus.getDefault().post(new DownloadingEvent(ebook));
         return ebook;
     }
 
@@ -244,42 +247,45 @@ public class DownloadService extends Service {
     }
 
     private void downloadNextOrStop(boolean hasErrorInPreviousBook, int errorBookId) {
-        isCancelDownloading = false;
-        List<Ebook> ebookList = new ArrayList<>();
-        if (mIsNetworkResume) {
-            ebookList = dataManager.getAllToResumeFromNetwork();
-            if (ebookList.isEmpty()) {
-                mIsNetworkResume = false;
-            } else {
-                for (Ebook ebook : ebookList) {
-                    updateDownloadStatusFailed(ebook, false);
+        synchronized (DownloadService.class) {
+            isCancelDownloading = false;
+            Log.e(TAG, "downloadNextOrStop: >>>isCancelDownloading = " + isCancelDownloading);
+            List<Ebook> ebookList = new ArrayList<>();
+            if (mIsNetworkResume) {
+                ebookList = dataManager.getAllToResumeFromNetwork();
+                if (ebookList.isEmpty()) {
+                    mIsNetworkResume = false;
+                } else {
+                    for (Ebook ebook : ebookList) {
+                        updateDownloadStatusFailed(ebook, false);
+                    }
                 }
             }
-        }
-        if (!mIsNetworkResume) {
-            ebookList = dataManager.getNeedDownloadBooks();
-        }
+            if (!mIsNetworkResume) {
+                ebookList = dataManager.getNeedDownloadBooks();
+            }
 
-        if (!ebookList.isEmpty()) {
-            Ebook currentEbook = ebookList.get(0);
-            if (hasErrorInPreviousBook) {
-                Log.d(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
-                currentEbook = getNextBook(errorBookId, ebookList);
-            }
-            Log.d(TAG, "downloadNextOrStop: >>>" + currentEbook.getId() + " : " + currentEbookId);
-            if (currentEbook == null || currentEbook.getId() == currentEbookId) {
-                return;
-            }
-            final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
-            if (availableSize > currentEbook.getFileSize()) {
-                updateDownloadStatusFailed(currentEbook, false);
-                startDownloadIfNotExist(DownloadService.this, currentEbook);
+            if (!ebookList.isEmpty()) {
+                Ebook currentEbook = ebookList.get(0);
+                if (hasErrorInPreviousBook) {
+                    Log.d(TAG, "downloadNextOrStop:hasErrorInPreviousBook ");
+                    currentEbook = getNextBook(errorBookId, ebookList);
+                }
+                Log.d(TAG, "downloadNextOrStop: >>>" + currentEbook.getId() + " : " + currentEbookId);
+                if (currentEbook == null || currentEbook.getId() == currentEbookId) {
+                    return;
+                }
+                final long availableSize = MemoryUtil.getAvailableInternalMemorySize();
+                if (availableSize > currentEbook.getFileSize()) {
+                    updateDownloadStatusFailed(currentEbook, false);
+                    startDownloadIfNotExist(DownloadService.this, currentEbook);
+                } else {
+                    DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
+                }
             } else {
-                DownloadUtil.stopDownloadServiceIfNeeded(this, NOT_ENOUGH_SPACE);
+                Log.d(TAG, "downloadNextOrStop: >>>ebookList is Empty -> stop Service");
+                this.stopSelf();
             }
-        } else {
-            Log.d(TAG, "downloadNextOrStop: >>>ebookList is Empty -> stop Service");
-            this.stopSelf();
         }
     }
 
@@ -430,22 +436,8 @@ public class DownloadService extends Service {
     void shutdownAndAwaitTermination(ExecutorService pool, int waitingTime) {
         Log.d(TAG, "shutdownAndAwaitTermination: >>>");
         if (pool != null) {
-            synchronized (DownloadService.class) {
-                pool.shutdown(); // Disable new tasks from being submitted
-                try {
-                    // Wait a while for existing tasks to terminate
-                    if (!pool.awaitTermination(waitingTime, TimeUnit.SECONDS)) {
-                        pool.shutdownNow(); // Cancel currently executing tasks
-                        // Wait a while for tasks to respond to being cancelled
-                        if (!pool.awaitTermination(1, TimeUnit.SECONDS)) ;
-                    }
-                } catch (InterruptedException ie) {
-                    // (Re-)Cancel if current thread also interrupted
-                    pool.shutdownNow();
-                    // Preserve interrupt status
-                    Thread.currentThread().interrupt();
-                }
-            }
+            pool.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -633,7 +625,7 @@ public class DownloadService extends Service {
                     || (downloadFileAsyn != null && downloadFileAsyn.isStop())
                     || isCancelDownloading
                     || !isOnline(this)) {
-                Log.d(TAG, "downloadSingleSucscess: " + " progressPercent = " + progressPercent +
+                Log.d(TAG, "downloadSingleSucscess: " + "ebookId = " + ebook.getId() + " progressPercent = " + progressPercent +
                         " downloadFileAsyn is Stop = " + (downloadFileAsyn != null && downloadFileAsyn.isStop()) +
                         " isCancelDownloading = " + isCancelDownloading + " isOnline = " + !isOnline(this)
                         + "; href = " + href);
@@ -641,6 +633,7 @@ public class DownloadService extends Service {
             }
 
             if (progressPercent >= downloadedPercent) {
+                Log.e(TAG, "downloadSingleSucscess: >>>" + "ebookId = " + ebook.getId() + " progressPercent = " + progressPercent + "; downloadedPercent = " + downloadedPercent);
                 ebook.setDownloadProgress(progressPercent);
                 dataManager.updateEbookDownloadedProgress(ebook, ebook.getDownloadProgress());
             }
@@ -673,7 +666,8 @@ public class DownloadService extends Service {
                         + "failedDownloadFiles size = " + failedDownloadFiles.size());
                 downloadFileList(otherFileList, token, ebook, folderPath);
             }
-            Log.d(TAG, "downloadSingleSucscess: >>> updateUI : " + ebook.getDownloadProgress());
+
+            Log.d(TAG, "downloadSingleSucscess: >>> updateUI : ebookId = " + ebook.getId() + " progress = " + ebook.getDownloadProgress());
             EventBus.getDefault().post(new DownloadingEvent(ebook));
         }
     }
